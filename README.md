@@ -1,29 +1,27 @@
-# Generador de Solicitud BBVA – GitHub Pages
+# Generador de Solicitud BBVA – GitHub Pages v1.1
 
-## Incluye
-- `index.html`
-- `styles.css`
-- `app.js`
-- `assets/SOLICITUD.pdf` (la solicitud que enviaste)
+## Corrección de esta versión
+- Detecta los campos AcroForm reales del PDF.
+- Si `assets/SOLICITUD.pdf` no existe, intenta también `./assets/SOLICITUD.pdf`, `SOLICITUD.pdf` y `./SOLICITUD.pdf`.
+- Muestra el error HTTP exacto cuando GitHub no encuentra el PDF.
+- Usa CDN de pdf-lib con respaldo entre jsDelivr y unpkg.
+- Incluye `.nojekyll`.
+- Mantiene los nombres internos de los campos.
+- Muestra los campos de texto detectados en el orden del PDF.
+- Marca automáticamente las casillas definidas y coloca `TIEMPO DE RESIDENCIA = 10 AÑOS`.
 
-## Reglas automáticas
-Al generar se marcan con X:
-`FAMILIAR`, `DEPENDIENTE`, `CORREO ELECTRÓNICO`, `Afiliar  Enviar`, `ELECTRÓNICO`, `No`, `No_2`, `No_3`, `No_4` y `CANAL DE VENTA  OFICINA`.
-
-También se escribe siempre:
-`TIEMPO DE RESIDENCIA = 10 AÑOS`.
-
-## Desplegables
-Convenio, tipo de operación, modalidad del seguro, tipo de documento, nivel de educación, estado civil y periodo de gracia.
-
-## Campos del PDF
-Los campos de texto se detectan usando el nombre interno AcroForm del PDF. No se cambian sus nombres.
-
-## Convenio
-El PDF actual no contiene un campo AcroForm llamado `CONVENIO`; por eso el convenio se usa como selector interno y para el nombre del archivo generado. Más adelante se puede añadir la lógica específica por convenio.
+## Estructura obligatoria
+```
+index.html
+styles.css
+app.js
+.nojekyll
+assets/
+  SOLICITUD.pdf
+```
 
 ## GitHub Pages
-Sube todo el contenido a un repositorio y activa:
-Settings → Pages → Deploy from a branch → rama principal → `/root`.
+Sube TODOS los archivos y la carpeta `assets` manteniendo la estructura. Luego:
+Settings → Pages → Deploy from a branch → main → / (root).
 
-La página usa `pdf-lib` desde jsDelivr, por lo que necesita Internet al abrirse.
+Si el Estado muestra `HTTP 404`, el PDF no está ubicado en `assets/SOLICITUD.pdf` en el repositorio.
