@@ -75,3 +75,6 @@ Se incorpora Carta de Compra de Deuda E0264 como PDF condicional. Aparece solo p
 Se reutilizan automáticamente NOMBRES Y APELLIDOS, DNI, DIRECCION, DISTRITO, CELULAR, EMAIL y FECHA.
 Se agregan 4 filas de PRÉSTAMOS/DISPOSICIÓN DE EFECTIVO, 4 filas de TARJETAS, entidades financieras provenientes del Excel CUADRO DE COMPRA DE DEUDA 2 y cálculos automáticos A, B y A+B.
 Para moneda US$ se muestra TC obligatorio. Se incorporan 2 filas opcionales de cuenta de depósito.
+
+
+CAMBIOS v4.13: Compra de deuda con filas dinámicas Agregar/Eliminar; se retiró Cuenta de depósito; totales A/B/A+B corregidos; TC solo para US$; periodo de gracia corregido por plantilla; FECHAS SIN SEGURO usa DDMMYYYY.

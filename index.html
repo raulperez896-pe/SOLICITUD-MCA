@@ -38,7 +38,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .compra-deuda-hidden{display:none!important}
 .compra-deuda-card{border:1px solid #d9e2ec;border-radius:8px;padding:12px;margin-top:12px;background:#fff}
 .compra-deuda-title{font-size:15px;font-weight:700;border-left:4px solid #1976d2;padding:8px 10px;background:#f1f5f9;color:#082b55;margin:8px 0}
-.debt-grid{display:grid;grid-template-columns:1.1fr 2fr 1.25fr 1.2fr 1.2fr 1fr;gap:8px;align-items:end}
+.debt-grid{display:grid;grid-template-columns:1.1fr 2fr 1.25fr 1.2fr 1.2fr 1fr auto;gap:8px;align-items:end}
 .debt-row{display:contents}
 .debt-grid label{min-width:0}
 .debt-grid .debt-head{font-size:11px;font-weight:700;color:#38516c}
@@ -47,7 +47,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .debt-usd{display:none}
 .debt-usd.show{display:block}
 .debt-type-note{font-size:11px;color:#61758a;margin:6px 0 10px}
-.debt-actions{display:flex;gap:8px;flex-wrap:wrap}
+.debt-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.debt-add{border:0;border-radius:6px;padding:8px 12px;background:#e8f1fb;color:#0b5cad;font-weight:700;cursor:pointer}.debt-remove{border:0;border-radius:6px;padding:7px 9px;background:#f3f4f6;color:#b42318;font-weight:700;cursor:pointer}.debt-row-item{display:contents}
 @media(max-width:950px){.debt-grid{grid-template-columns:1fr 1.5fr 1fr 1fr}.debt-grid .debt-head{display:none}.debt-row{display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr;gap:8px;margin-bottom:8px}.debt-row>*{min-width:0}}
 </style>
 </head>
@@ -111,10 +111,6 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
   <div class="debt-total"><span>TOTAL DEUDA A SUBROGAR (A) + (B) en soles:</span><input id="debtGrandTotal" readonly></div>
 
-  <div class="subsection">Cuenta de depósito — si corresponde</div>
-  <p class="hint">Completar únicamente cuando corresponda según la entidad financiera. La plantilla contempla hasta 2 cuentas.</p>
-  <div id="depositUI" class="debt-grid"></div>
-
   <div class="subsection">Aplicación de saldo, si corresponde</div>
   <div class="grid">
     <label><span>Aplicar saldo a</span>
@@ -123,7 +119,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
   </div>
 
   <div class="debt-actions">
-    <button type="button" id="generarCarta" class="primary">Generar Carta de Compra de Deuda</button>
+    <button type="button" id="addLoan" class="debt-add">+ Agregar préstamo / disposición de efectivo</button><button type="button" id="addCard" class="debt-add">+ Agregar tarjeta</button><button type="button" id="generarCarta" class="primary">Generar Carta de Compra de Deuda</button>
   </div>
 </div>
 
@@ -207,7 +203,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v4.8</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v4.13</footer>
 
 <script>
 /* Todo está embebido en este único HTML: convenios, logos y PDF. */
@@ -272,104 +268,59 @@ function toggleCompraDeuda(){
 function debtEntityOptions(list){
   return '<option value="">Seleccionar entidad...</option>'+list.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("");
 }
-function escapeHtml(v){
-  return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function makeDebtHeaders(containerId,kind){
+  const box=$(containerId);if(!box)return;box.innerHTML="";
+  const hs=document.createElement("div");hs.className="debt-row debt-head";
+  const heads=kind==="card"?["TIPO","ENTIDAD FINANCIERA","N° TARJETA","MONEDA","DEUDA","TC (**)",""]:["TIPO","ENTIDAD FINANCIERA","N° OBLIGACIÓN","MONEDA","DEUDA","TC (**)",""];
+  heads.forEach(h=>{const s=document.createElement("span");s.textContent=h;hs.appendChild(s)});box.appendChild(hs);
 }
-function makeDebtRows(containerId,count,kind){
-  const box=$(containerId); if(!box)return;
-  box.innerHTML="";
-  const entityList=kind==="card"?ENTIDADES_TARJETAS_DEUDA:ENTIDADES_COMPRA_DEUDA;
-  for(let i=1;i<=count;i++){
-    const row=document.createElement("div");row.className="debt-row";
-    const type=document.createElement("select");type.dataset.debtType=`${kind}${i}`;
-    type.innerHTML=kind==="card"
-      ? '<option value="TARJETAS">TARJETAS</option>'
-      : '<option value="">Tipo...</option><option value="PRESTAMOS">PRESTAMOS</option><option value="DISPOSICION DE EFECTIVO">DISPOSICION DE EFECTIVO</option>';
-    const ent=document.createElement("select");ent.dataset.debtEntity=`${kind}${i}`;ent.innerHTML=debtEntityOptions(entityList);
-    const num=document.createElement("input");num.type="text";num.dataset.debtNumber=`${kind}${i}`;num.placeholder=kind==="card"?"N° de Tarjeta":"N° de Préstamo Personal";
-    const currency=document.createElement("select");currency.dataset.debtCurrency=`${kind}${i}`;
-    currency.innerHTML='<option value="">Moneda...</option><option value="PEN">S/.</option><option value="USD">US$</option>';
-    const amount=document.createElement("input");amount.type="number";amount.step="0.01";amount.min="0";amount.dataset.debtAmount=`${kind}${i}`;amount.placeholder="Deuda";
-    const tc=document.createElement("input");tc.type="number";tc.step="0.0001";tc.min="0";tc.dataset.debtTC=`${kind}${i}`;tc.placeholder="TC";tc.className="debt-usd";
-    [type,ent,num,currency,amount,tc].forEach(x=>row.appendChild(x));
-    box.appendChild(row);
-    currency.addEventListener("change",()=>{tc.classList.toggle("show",currency.value==="USD");if(currency.value!=="USD")tc.value="";recalcDebtTotals()});
-    amount.addEventListener("input",recalcDebtTotals);tc.addEventListener("input",recalcDebtTotals);
-    [type,ent,num].forEach(x=>x.addEventListener("change",recalcDebtTotals));
-  }
+function addDebtRow(kind){
+  const box=$(kind==="card"?"cardsUI":"loansUI");if(!box)return;
+  const index=box.querySelectorAll(".debt-row-item").length+1;
+  const list=kind==="card"?ENTIDADES_TARJETAS_DEUDA:ENTIDADES_COMPRA_DEUDA;
+  const row=document.createElement("div");row.className="debt-row-item";
+  const type=document.createElement("select");type.dataset.debtType=`${kind}${index}`;type.innerHTML=kind==="card"?'<option value="TARJETAS">TARJETAS</option>':'<option value="">Tipo...</option><option value="PRESTAMOS">PRESTAMOS</option><option value="DISPOSICION DE EFECTIVO">DISPOSICION DE EFECTIVO</option>';
+  const ent=document.createElement("select");ent.dataset.debtEntity=`${kind}${index}`;ent.innerHTML=debtEntityOptions(list);
+  const num=document.createElement("input");num.dataset.debtNumber=`${kind}${index}`;num.placeholder=kind==="card"?"N° de Tarjeta":"N° de Préstamo Personal";
+  const cur=document.createElement("select");cur.dataset.debtCurrency=`${kind}${index}`;cur.innerHTML='<option value="">Moneda...</option><option value="PEN">S/.</option><option value="USD">US$</option>';
+  const amt=document.createElement("input");amt.type="number";amt.step="0.01";amt.min="0";amt.dataset.debtAmount=`${kind}${index}`;amt.placeholder="Deuda";
+  const tc=document.createElement("input");tc.type="number";tc.step="0.0001";tc.min="0";tc.dataset.debtTC=`${kind}${index}`;tc.placeholder="TC (**)";tc.className="debt-usd";
+  const rem=document.createElement("button");rem.type="button";rem.className="debt-remove";rem.textContent="Eliminar";
+  [type,ent,num,cur,amt,tc,rem].forEach(x=>row.appendChild(x));box.appendChild(row);
+  cur.addEventListener("change",()=>{tc.classList.toggle("show",cur.value==="USD");if(cur.value!=="USD")tc.value="";recalcDebtTotals()});
+  amt.addEventListener("input",recalcDebtTotals);tc.addEventListener("input",recalcDebtTotals);
+  [type,ent,num].forEach(x=>x.addEventListener("change",recalcDebtTotals));
+  rem.addEventListener("click",()=>{row.remove();renumberDebtRows(kind);recalcDebtTotals()});
 }
-function makeDebtHeaders(){
-  const headers=['TIPO','ENTIDAD FINANCIERA','N° OBLIGACIÓN','MONEDA','DEUDA','TC (**)' ];
-  ["loansUI","cardsUI","depositUI"].forEach(id=>{
-    const box=$(id);if(!box)return;
-    const hs=document.createElement("div");hs.className="debt-row debt-head";
-    headers.forEach(h=>{const s=document.createElement("span");s.textContent=h;hs.appendChild(s)});
-    box.prepend(hs);
+function renumberDebtRows(kind){
+  const box=$(kind==="card"?"cardsUI":"loansUI");if(!box)return;
+  [...box.querySelectorAll(".debt-row-item")].forEach((row,i)=>{
+    const idx=i+1;
+    ["debtType","debtEntity","debtNumber","debtCurrency","debtAmount","debtTC"].forEach(a=>{
+      const attr=a.replace(/[A-Z]/g,m=>"-"+m.toLowerCase());const el=row.querySelector(`[data-${attr}]`);if(el)el.dataset[a]=`${kind}${idx}`;
+    });
   });
 }
-function makeDepositRows(){
-  const box=$("depositUI"); if(!box)return;
-  box.innerHTML="";
-  for(let i=1;i<=2;i++){
-    const row=document.createElement("div");row.className="debt-row";
-    const type=document.createElement("select");type.dataset.depositCurrency=`${i}`;type.innerHTML='<option value="">Moneda...</option><option value="PEN">S/.</option><option value="USD">US$</option>';
-    const ent=document.createElement("input");ent.value="CUENTA DE DEPÓSITO";ent.readOnly=true;
-    const num=document.createElement("input");num.dataset.depositAccount=`${i}`;num.placeholder="N° de Cuenta";
-    const amount=document.createElement("input");amount.type="number";amount.step="0.01";amount.dataset.depositAmount=`${i}`;amount.placeholder="Deuda";
-    const tc=document.createElement("input");tc.type="number";tc.step="0.0001";tc.dataset.depositTC=`${i}`;tc.placeholder="TC";tc.className="debt-usd";
-    const blank=document.createElement("span");
-    row.append(type,ent,num,amount,tc,blank);box.appendChild(row);
-    type.addEventListener("change",()=>{tc.classList.toggle("show",type.value==="USD");if(type.value!=="USD")tc.value=""});
-  }
-}
 function initCompraDeudaUI(){
-  makeDebtRows("loansUI",4,"loan");
-  makeDebtRows("cardsUI",4,"card");
-  makeDepositRows();
-  makeDebtHeaders();
+  makeDebtHeaders("loansUI","loan");makeDebtHeaders("cardsUI","card");addDebtRow("loan");addDebtRow("card");
+  $("addLoan")?.addEventListener("click",()=>{addDebtRow("loan");recalcDebtTotals()});
+  $("addCard")?.addEventListener("click",()=>{addDebtRow("card");recalcDebtTotals()});
   toggleCompraDeuda();
 }
 function numVal(v){const n=parseFloat(String(v??"").replace(/,/g,""));return Number.isFinite(n)&&n>0?n:0}
-function rowSoles(currency,amount,tc){
-  const a=numVal(amount); if(!a)return 0;
-  if(currency==="USD") return numVal(tc)>0 ? a*numVal(tc) : 0;
-  return currency==="PEN" ? a : 0;
-}
+function rowSoles(currency,amount,tc){const a=numVal(amount);if(!a)return 0;if(currency==="USD")return numVal(tc)>0?a*numVal(tc):0;return currency==="PEN"?a:0}
 function recalcDebtTotals(){
   let a=0,b=0;
-  document.querySelectorAll("[data-debtCurrency]").forEach(sel=>{
-    const key=sel.dataset.debtCurrency;
-    const amt=document.querySelector(`[data-debtAmount="${key}"]`);
-    const tc=document.querySelector(`[data-debtTC="${key}"]`);
-    const soles=rowSoles(sel.value,amt?.value,tc?.value);
-    if(key.startsWith("loan"))a+=soles; else if(key.startsWith("card"))b+=soles;
+  document.querySelectorAll("[data-debt-currency]").forEach(sel=>{
+    const key=sel.dataset.debtCurrency,amt=document.querySelector(`[data-debt-amount="${key}"]`),tc=document.querySelector(`[data-debt-tc="${key}"]`);
+    const soles=rowSoles(sel.value,amt?.value,tc?.value);if(String(key).startsWith("loan"))a+=soles;else if(String(key).startsWith("card"))b+=soles;
   });
-  $("loanTotal").value=a.toFixed(2);
-  $("cardTotal").value=b.toFixed(2);
-  $("debtGrandTotal").value=(a+b).toFixed(2);
+  $("loanTotal").value=a.toFixed(2);$("cardTotal").value=b.toFixed(2);$("debtGrandTotal").value=(a+b).toFixed(2);
 }
-function debtRows(kind,count){
-  const rows=[];
-  for(let i=1;i<=count;i++){
-    const key=`${kind}${i}`;
-    const get=(attr)=>document.querySelector(`[data-${attr}="${key}"]`)?.value||"";
-    const currency=get("debtCurrency"), amount=get("debtAmount"), tc=get("debtTC");
-    if(get("debtEntity")||get("debtNumber")||amount){
-      rows.push({type:get("debtType"),entity:get("debtEntity"),number:get("debtNumber"),currency,amount,tc,soles:rowSoles(currency,amount,tc)});
-    }
-  }
-  return rows;
-}
-function depositRows(){
-  const rows=[];
-  for(let i=1;i<=2;i++){
-    const currency=document.querySelector(`[data-depositCurrency="${i}"]`)?.value||"";
-    const account=document.querySelector(`[data-depositAccount="${i}"]`)?.value||"";
-    const amount=document.querySelector(`[data-depositAmount="${i}"]`)?.value||"";
-    const tc=document.querySelector(`[data-depositTC="${i}"]`)?.value||"";
-    if(currency||account||amount)rows.push({currency,account,amount,tc,soles:rowSoles(currency,amount,tc)});
-  }
-  return rows;
+function debtRows(kind){
+  const box=$(kind==="card"?"cardsUI":"loansUI"),rows=[];if(!box)return rows;
+  box.querySelectorAll(".debt-row-item").forEach(row=>{const get=a=>row.querySelector(`[data-${a}]`)?.value||"";const currency=get("debt-currency"),amount=get("debt-amount"),tc=get("debt-tc");if(get("debt-entity")||get("debt-number")||amount)rows.push({type:get("debt-type"),entity:get("debt-entity"),number:get("debt-number"),currency,amount,tc,soles:rowSoles(currency,amount,tc)});});return rows;
 }
 function updateSeguroUI(){
   const tipo=$("tipoSeguro") ? $("tipoSeguro").value : "";
@@ -450,7 +401,7 @@ function populate(){
  CONVENIOS.forEach((c,i)=>{const o=document.createElement("option");o.value=i;o.textContent=c.convenio;s.appendChild(o)});
  status(`Lista de convenios cargada: ${CONVENIOS.length} convenios.`,"ok");
 }
-function grace(v){v=String(v||"").toLowerCase();return v.includes("2")?"2 MESES":v.includes("1")?"1 MES":""}
+function grace(v){v=String(v||"").toLowerCase();return v.includes("2")?"2 MESES":v.includes("1")?"1 mes":""}
 function setField(name,value){const v=value??"";const el=[...document.querySelectorAll("[data-field]")].find(x=>x.dataset.field===name);if(el)el.value=v;AUTO_VALUES[name]=v}
 
 function fillSelect(selectId,values,placeholder){
@@ -563,7 +514,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.12 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.13 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -706,11 +657,11 @@ async function generateCarta(){
   if(!isSubrogacion())throw Error("La Carta de Compra de Deuda solo corresponde a SUBROGADO o SUBROGADO + RENOVADO.");
   if(!PDFLibLoaded)throw Error("La librería PDF todavía no está disponible.");
   const v=values();
-  const loans=debtRows("loan",4),cards=debtRows("card",4),deposits=depositRows();
+  const loans=debtRows("loan"),cards=debtRows("card");
   const anyDebt=loans.length||cards.length;
   if(!anyDebt)throw Error("Ingresa al menos una deuda a subrogar.");
   for(const r of [...loans,...cards]){
-    if(!r.entity || !r.number || !r.currency || !r.amount)throw Error("Completa entidad, número de obligación, moneda y deuda en cada fila utilizada.");
+    if(!r.type || !r.entity || !r.number || !r.currency || !r.amount)throw Error("Completa tipo, entidad, número de obligación, moneda y deuda en cada fila utilizada.");
     if(r.currency==="USD" && !numVal(r.tc))throw Error("Para toda deuda en US$ debes ingresar el TC (**).");
   }
   const d=await PDFLib.PDFDocument.load(bytes64(CARTA_SUBROGACION64),{updateMetadata:false});
@@ -765,17 +716,6 @@ async function generateCarta(){
   const totalB=cards.reduce((s,r)=>s+r.soles,0);
   put("Deuda en SMONTO TOTAL DE DEUDA DE TARJETAS B en soles",totalB.toFixed(2));
   put("S",(totalA+totalB).toFixed(2));
-
-  // Cuenta de depósito, si se llenó.
-  for(let i=1;i<=2;i++){
-    const r=deposits[i-1];
-    put(`S${i}_3`,r?.currency==="PEN"?"X":"");
-    put(`U${i}`,r?.currency==="USD"?"X":"");
-    put(`N de Cuenta${i}`,r?.account||"");
-    put(`Deuda en US${i}_3`,r?.currency==="USD"?r.amount:"");
-    put(`TC ${i}_3`,r?.currency==="USD"?r.tc:"");
-    put(`Deuda en S${i}_3`,r?.currency==="PEN"?r.amount:(r?.soles?r.soles.toFixed(2):""));
-  }
 
   // Opción de aplicación del saldo.
   try{
@@ -861,7 +801,7 @@ async function generate(){
   group(f,CHECK_GROUPS.tipoDocumento,$("tipoDocumento").value);
   if($("educacion").value)group(f,CHECK_GROUPS.educacion,$("educacion").value);
   if($("estadoCivil").value)group(f,CHECK_GROUPS.estadoCivil,$("estadoCivil").value);
-  const g=grace(c.gracia);if(g)group(f,CHECK_GROUPS.gracia,g);
+  const g=grace(c.gracia);["1 mes","2 MESES","undefined_2","undefined"].forEach(n=>{try{if(fieldNames.has(n))f.getCheckBox(n).uncheck()}catch(_){} });if(g){const gf=g==="1 mes"?"1 mes":(fieldNames.has("2 MESES")?"2 MESES":(fieldNames.has("undefined_2")?"undefined_2":"undefined"));if(fieldNames.has(gf))try{f.getCheckBox(gf).check()}catch(_){} }
 
   const v=values();
   v["DEPARTAMENTO"]=$("domDepartamento").value||"";
@@ -900,7 +840,7 @@ async function generate(){
   if(!seguroCon){
     // Fecha de afiliación: la plantilla SIN SEGURO utiliza un único campo
     // FECHAS para las tres casillas DIA / MES / AÑO.
-    text(f,"FECHAS",`${AUTO_VALUES["DIA"]||""} ${AUTO_VALUES["MES"]||""} ${String(new Date().getFullYear())}`);
+    text(f,"FECHAS",`${AUTO_VALUES["DIA"]||String(new Date().getDate()).padStart(2,"0")}${AUTO_VALUES["MES"]||String(new Date().getMonth()+1).padStart(2,"0")}${String(new Date().getFullYear())}`);text(f,"DIA",AUTO_VALUES["DIA"]||"");text(f,"MES",AUTO_VALUES["MES"]||"");
     text(f,"FECHA DE",c.fechaPago||"");
 
     // DOMICILIO ACTUAL: estos son los nombres reales de los campos de la
@@ -1129,9 +1069,7 @@ function clearAll(){
  $("domDepartamento").value="";
  AUTO_VALUES={};
  document.querySelectorAll("[data-field^='DPS_']").forEach(i=>i.value="");
- document.querySelectorAll("#compraDeudaSection input").forEach(x=>{if(!x.readOnly)x.value=""});
- document.querySelectorAll("#compraDeudaSection select").forEach(x=>x.value="");
- recalcDebtTotals();toggleCompraDeuda();
+ makeDebtHeaders("loansUI","loan");makeDebtHeaders("cardsUI","card");addDebtRow("loan");addDebtRow("card");recalcDebtTotals();toggleCompraDeuda();
  applyToday();
  status(`Lista de convenios cargada: ${CONVENIOS.length} convenios.`,"ok");
 }
