@@ -77,4 +77,10 @@ Se agregan 4 filas de PRÉSTAMOS/DISPOSICIÓN DE EFECTIVO, 4 filas de TARJETAS, 
 Para moneda US$ se muestra TC obligatorio. Se incorporan 2 filas opcionales de cuenta de depósito.
 
 
-CAMBIOS v4.13: Compra de deuda con filas dinámicas Agregar/Eliminar; se retiró Cuenta de depósito; totales A/B/A+B corregidos; TC solo para US$; periodo de gracia corregido por plantilla; FECHAS SIN SEGURO usa DDMMYYYY.
+CAMBIOS v4.14: Compra de deuda con filas dinámicas Agregar/Eliminar; se retiró Cuenta de depósito; totales A/B/A+B corregidos; TC solo para US$; periodo de gracia corregido por plantilla; FECHAS SIN SEGURO usa DDMMYYYY.
+
+
+CAMBIOS v4.14:
+- Corregido el TC de deudas en US$: el total A/B convierte US$ a soles usando TC y ya no ignora el campo.
+- Carta de Compra de Deuda: se completan PROMOTOR y DNI SUPERVISORA y se dibuja directamente NOMBRE DEL SUPERVISOR y NOMBRE DEL PROMOTOR en página 3.
+- Solicitud SIN SEGURO: corregida la comparación del periodo de gracia para marcar 1 mes o 2 meses según el convenio.

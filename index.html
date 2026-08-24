@@ -285,7 +285,7 @@ function addDebtRow(kind){
   const num=document.createElement("input");num.dataset.debtNumber=`${kind}${index}`;num.placeholder=kind==="card"?"N° de Tarjeta":"N° de Préstamo Personal";
   const cur=document.createElement("select");cur.dataset.debtCurrency=`${kind}${index}`;cur.innerHTML='<option value="">Moneda...</option><option value="PEN">S/.</option><option value="USD">US$</option>';
   const amt=document.createElement("input");amt.type="number";amt.step="0.01";amt.min="0";amt.dataset.debtAmount=`${kind}${index}`;amt.placeholder="Deuda";
-  const tc=document.createElement("input");tc.type="number";tc.step="0.0001";tc.min="0";tc.dataset.debtTC=`${kind}${index}`;tc.placeholder="TC (**)";tc.className="debt-usd";
+  const tc=document.createElement("input");tc.type="number";tc.step="0.0001";tc.min="0";tc.dataset.debtTc=`${kind}${index}`;tc.placeholder="TC (**)";tc.className="debt-usd";
   const rem=document.createElement("button");rem.type="button";rem.className="debt-remove";rem.textContent="Eliminar";
   [type,ent,num,cur,amt,tc,rem].forEach(x=>row.appendChild(x));box.appendChild(row);
   cur.addEventListener("change",()=>{tc.classList.toggle("show",cur.value==="USD");if(cur.value!=="USD")tc.value="";recalcDebtTotals()});
@@ -297,7 +297,7 @@ function renumberDebtRows(kind){
   const box=$(kind==="card"?"cardsUI":"loansUI");if(!box)return;
   [...box.querySelectorAll(".debt-row-item")].forEach((row,i)=>{
     const idx=i+1;
-    ["debtType","debtEntity","debtNumber","debtCurrency","debtAmount","debtTC"].forEach(a=>{
+    ["debtType","debtEntity","debtNumber","debtCurrency","debtAmount","debtTc"].forEach(a=>{
       const attr=a.replace(/[A-Z]/g,m=>"-"+m.toLowerCase());const el=row.querySelector(`[data-${attr}]`);if(el)el.dataset[a]=`${kind}${idx}`;
     });
   });
@@ -312,12 +312,19 @@ function numVal(v){const n=parseFloat(String(v??"").replace(/,/g,""));return Num
 function rowSoles(currency,amount,tc){const a=numVal(amount);if(!a)return 0;if(currency==="USD")return numVal(tc)>0?a*numVal(tc):0;return currency==="PEN"?a:0}
 function recalcDebtTotals(){
   let a=0,b=0;
-  document.querySelectorAll("[data-debt-currency]").forEach(sel=>{
-    const key=sel.dataset.debtCurrency,amt=document.querySelector(`[data-debt-amount="${key}"]`),tc=document.querySelector(`[data-debt-tc="${key}"]`);
-    const soles=rowSoles(sel.value,amt?.value,tc?.value);if(String(key).startsWith("loan"))a+=soles;else if(String(key).startsWith("card"))b+=soles;
+  document.querySelectorAll(".debt-row-item").forEach(row=>{
+    const currency=row.querySelector('[data-debt-currency]')?.value||"";
+    const amount=row.querySelector('[data-debt-amount]')?.value||"";
+    const tc=row.querySelector('[data-debt-tc]')?.value||"";
+    const soles=rowSoles(currency,amount,tc);
+    const isCard=row.closest("#cardsUI")!==null;
+    if(isCard)b+=soles; else a+=soles;
   });
-  $("loanTotal").value=a.toFixed(2);$("cardTotal").value=b.toFixed(2);$("debtGrandTotal").value=(a+b).toFixed(2);
+  $("loanTotal").value=a.toFixed(2);
+  $("cardTotal").value=b.toFixed(2);
+  $("debtGrandTotal").value=(a+b).toFixed(2);
 }
+
 function debtRows(kind){
   const box=$(kind==="card"?"cardsUI":"loansUI"),rows=[];if(!box)return rows;
   box.querySelectorAll(".debt-row-item").forEach(row=>{const get=a=>row.querySelector(`[data-${a}]`)?.value||"";const currency=get("debt-currency"),amount=get("debt-amount"),tc=get("debt-tc");if(get("debt-entity")||get("debt-number")||amount)rows.push({type:get("debt-type"),entity:get("debt-entity"),number:get("debt-number"),currency,amount,tc,soles:rowSoles(currency,amount,tc)});});return rows;
@@ -732,6 +739,29 @@ async function generateCarta(){
 
   // Campos de banco/comercial ya establecidos en la plantilla.
   put("Canal de colocación","MASTER CENTER AMERICAS");
+  // La carta trae PROMOTOR y DNI SUPERVISORA como campos identificables.
+  // El nombre del supervisor está en un widget sin nombre en la plantilla;
+  // se dibuja directamente en su espacio para evitar que quede vacío.
+  put("PROMOTOR",v["PROMOTOR"]||"");
+  put("DNI SUPERVISORA",v["DNI SUPERVISORA"]||"");
+  try{
+    const cartaPage3=d.getPages()[2];
+    const cartaFont=font;
+    const supervisor=String(v["SUPERVISORA"]||"").trim();
+    const promoter=String(v["PROMOTOR"]||"").trim();
+    if(cartaPage3){
+      // Área izquierda del recuadro: NOMBRE DEL SUPERVISOR.
+      if(supervisor){
+        cartaPage3.drawText(supervisor,{x:224,y:379.5,size:7.2,font:cartaFont,color:PDFLib.rgb(0,0,0)});
+      }
+      // Área derecha: NOMBRE DEL PROMOTOR. Se dibuja encima del campo para
+      // asegurar que el texto sea visible incluso al aplanar.
+      if(promoter){
+        cartaPage3.drawText(promoter,{x:420,y:379.5,size:7.2,font:cartaFont,color:PDFLib.rgb(0,0,0)});
+      }
+      try{ f.getTextField("PROMOTOR").setText(""); }catch(_){ }
+    }
+  }catch(e){console.warn("No se pudieron dibujar supervisor/promotor:",e)}
 
   // Ajustar tamaño y apariencias para que las entidades y números no se corten.
   fields.forEach(field=>{
@@ -882,7 +912,7 @@ async function generate(){
     try{ f.getCheckBox("1 mes").uncheck(); }catch(e){}
     try{ f.getCheckBox("undefined_2").uncheck(); }catch(e){}
     try{ f.getCheckBox("Otro").uncheck(); }catch(e){}
-    if(g==="1 MES"){
+    if(g==="1 mes"){
       try{ f.getCheckBox("1 mes").check(); }catch(e){}
     }else if(g==="2 MESES"){
       try{ f.getCheckBox("undefined_2").check(); }catch(e){}
