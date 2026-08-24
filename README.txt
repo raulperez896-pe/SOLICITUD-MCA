@@ -1,17 +1,13 @@
-VERSION 3.5
+VERSION 3.6
 
-SOLUCIÓN DIRECTA PARA NOMBRES Y APELLIDOS - HOJA 6
+SOLUCIÓN DEL DOBLE NOMBRE EN HOJA 6
 
-El widget AcroForm de la hoja 6 mantiene una apariencia propia que no
-responde correctamente a setFontSize(). Por ello v3.5 no depende de ese
-widget para la parte visible del nombre:
-
-- Mantiene el llenado AcroForm original.
-- Mantiene los demás campos y su lógica.
-- Después de generar las apariencias, cubre únicamente el área del
-  nombre en la hoja 6.
-- Dibuja NOMBRES Y APELLIDOS directamente sobre la página con Helvetica.
-- Tamaño inicial 6.2 pt.
-- Si el nombre fuera excepcionalmente largo, reduce automáticamente.
-- El texto queda completo y no depende del tamaño de fuente del widget.
-- No se usa flatten().
+En v3.5 el nombre se dibujaba directamente sobre la página, pero el
+widget AcroForm original seguía visible. La v3.6:
+- Oculta únicamente el widget original de NOMBRES Y APELLIDOS de la hoja 6
+  mediante el flag Hidden.
+- Mantiene los demás widgets del mismo campo.
+- Dibuja una sola vez el nombre completo sobre la hoja 6.
+- Ajusta el tamaño automáticamente para el recuadro.
+- Mantiene el llenado y la compatibilidad de v3.5.
+- No usa flatten().

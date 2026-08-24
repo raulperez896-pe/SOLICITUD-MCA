@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v35">
+<meta name="generator-build" content="2026-08-24-v36">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -356,17 +356,34 @@ async function generate(){
   }
 
   // CORRECCIÓN HOJA 6:
-  // El widget AcroForm de NOMBRES Y APELLIDOS en la página 6 conserva
-  // una apariencia propia que no respeta setFontSize(). En vez de seguir
-  // luchando contra esa apariencia, cubrimos SOLO el área de texto del
-  // recuadro y dibujamos el nombre directamente sobre la página.
-  // Así el tamaño es real y el texto nunca se recorta.
+  // El widget original de NOMBRES Y APELLIDOS en la hoja 6 mantiene
+  // una apariencia grande propia. Lo ocultamos SOLO en esa hoja y
+  // dibujamos el nombre directamente sobre la página.
   try{
     const pages=d.getPages();
     const page6=pages[5];
     const fullName=String(v["NOMBRES Y APELLIDOS"]||"").trim();
 
     if(page6 && fullName){
+      const nameField=f.getTextField("NOMBRES Y APELLIDOS");
+      const widgets=nameField.getWidgets()||[];
+
+      // Según la plantilla: los widgets aparecen en las páginas 3,4,6,7,10.
+      // El tercer widget corresponde a la hoja 6.
+      if(widgets[2]){
+        try{
+          // Annotation flag 2 = Hidden. Esto elimina la apariencia AcroForm
+          // original sin afectar el resto de apariciones del mismo campo.
+          const dict=widgets[2].dict;
+          const key=PDFLib.PDFName.of("F");
+          const current=dict.get(key);
+          const currentFlags=current && current.numberValue !== undefined ? current.numberValue : 0;
+          dict.set(key,PDFLib.PDFNumber.of(currentFlags | 2));
+        }catch(e){
+          console.warn("No se pudo ocultar widget original de hoja 6:",e);
+        }
+      }
+
       const x=24.519;
       const y=364.019;
       const w=132.661;
