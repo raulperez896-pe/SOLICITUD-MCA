@@ -1,15 +1,16 @@
-VERSION 3.7
+VERSION 3.8
 
-CORRECCIÓN DEL NOMBRE DUPLICADO EN HOJA 6
+SOLUCIÓN DEFINITIVA DE NOMBRES Y APELLIDOS - HOJA 6
 
-El problema de v3.6 era que se asumía que widgets[2] correspondía a la
-hoja 6. El orden de widgets no debe asumirse.
+La v3.7 intentaba ocultar el widget mediante el flag Hidden, pero algunos
+visores PDF seguían renderizando su apariencia original.
 
-v3.7:
-- Identifica el widget original de NOMBRES Y APELLIDOS de la hoja 6 por
-  su rectángulo exacto: x=24.519, y=364.019, ancho=132.661, alto=16.708.
-- Oculta solamente ese widget.
-- Mantiene el nombre dibujado directamente sobre la página.
-- El nombre pequeño se conserva.
-- Las demás apariciones de NOMBRES Y APELLIDOS no se modifican.
+La v3.8:
+- Busca directamente en /Annots de la página 6.
+- Identifica el widget por su Rect exacto:
+  [24.519, 364.019, 157.180, 380.727].
+- Elimina SOLO esa anotación/widget de la página 6.
+- Mantiene las demás apariciones de NOMBRES Y APELLIDOS.
+- Dibuja directamente el nombre completo en el recuadro.
+- Ajusta automáticamente el tamaño para que entre.
 - No usa flatten().

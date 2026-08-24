@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v37">
+<meta name="generator-build" content="2026-08-24-v38">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -355,52 +355,50 @@ async function generate(){
     console.warn("No se pudieron ajustar apariencias:",e);
   }
 
-  // CORRECCIÓN HOJA 6:
-  // El widget original de NOMBRES Y APELLIDOS en la hoja 6 mantiene
-  // una apariencia grande propia. Lo ocultamos SOLO en esa hoja y
-  // dibujamos el nombre directamente sobre la página.
+  // CORRECCIÓN DEFINITIVA HOJA 6:
+  // En lugar de intentar ocultar el widget (que algunos visores siguen
+  // renderizando), eliminamos de la página 6 ÚNICAMENTE la anotación/widget
+  // cuyo rectángulo corresponde a NOMBRES Y APELLIDOS. Después dibujamos
+  // el nombre directamente sobre la página.
   try{
     const pages=d.getPages();
     const page6=pages[5];
     const fullName=String(v["NOMBRES Y APELLIDOS"]||"").trim();
 
     if(page6 && fullName){
-      const nameField=f.getTextField("NOMBRES Y APELLIDOS");
-      const widgets=nameField.getWidgets()||[];
+      const targetX=24.519, targetY=364.019;
+      const targetW=132.661, targetH=16.708;
 
-      // NO asumimos el orden de los widgets. En la plantilla el widget de
-      // hoja 6 tiene este rectángulo exacto. Buscamos por posición para no
-      // ocultar accidentalmente otra aparición del nombre.
-      const targetX=24.519, targetY=364.019, targetW=132.661, targetH=16.708;
-      let targetWidget=null;
+      try{
+        const annots=page6.node.lookup(PDFLib.PDFName.of("Annots"),PDFLib.PDFArray);
+        if(annots){
+          for(let i=annots.size()-1;i>=0;i--){
+            const ref=annots.get(i);
+            const annot=page6.node.context.lookup(ref);
+            if(!annot) continue;
 
-      widgets.forEach(widget=>{
-        try{
-          const r=widget.getRectangle();
-          const rx=Math.abs(Number(r.x)-targetX);
-          const ry=Math.abs(Number(r.y)-targetY);
-          const rw=Math.abs(Number(r.width)-targetW);
-          const rh=Math.abs(Number(r.height)-targetH);
-          if(rx<0.1 && ry<0.1 && rw<0.1 && rh<0.1){
-            targetWidget=widget;
+            const rect=annot.lookup(PDFLib.PDFName.of("Rect"),PDFLib.PDFArray);
+            if(!rect || rect.size()<4) continue;
+
+            const x=rect.get(0).numberValue;
+            const y=rect.get(1).numberValue;
+            const x2=rect.get(2).numberValue;
+            const y2=rect.get(3).numberValue;
+
+            const rx=Math.abs(x-targetX);
+            const ry=Math.abs(y-targetY);
+            const rw=Math.abs((x2-x)-targetW);
+            const rh=Math.abs((y2-y)-targetH);
+
+            if(rx<0.1 && ry<0.1 && rw<0.1 && rh<0.1){
+              annots.remove(i);
+              console.log("Widget original de NOMBRES eliminado de hoja 6");
+              break;
+            }
           }
-        }catch(_){}
-      });
-
-      if(targetWidget){
-        try{
-          // Ocultar solamente el widget original de la hoja 6.
-          const dict=targetWidget.dict;
-          const key=PDFLib.PDFName.of("F");
-          const current=dict.get(key);
-          const currentFlags=current && current.numberValue !== undefined
-            ? current.numberValue : 0;
-          dict.set(key,PDFLib.PDFNumber.of(currentFlags | 2));
-        }catch(e){
-          console.warn("No se pudo ocultar widget original de hoja 6:",e);
         }
-      }else{
-        console.warn("No se encontró el widget de NOMBRES de hoja 6 por rectángulo.");
+      }catch(e){
+        console.warn("No se pudo retirar el widget original de hoja 6:",e);
       }
 
       const x=24.519;
@@ -408,9 +406,8 @@ async function generate(){
       const w=132.661;
       const h=16.708;
       const padX=2.0;
-      const padY=1.5;
 
-      // Fondo blanco solamente dentro del recuadro del nombre.
+      // Fondo blanco para dejar limpio el recuadro.
       page6.drawRectangle({
         x:x+0.5,
         y:y+0.5,
@@ -420,20 +417,24 @@ async function generate(){
         opacity:1
       });
 
-      // Tamaño calculado directamente para ESTE espacio.
+      // Tamaño que entra en el recuadro.
       let size=6.2;
       const maxWidth=w-(padX*2);
-      const measured=FORM_FONT.widthOfTextAtSize(fullName,size);
+      let measured=FORM_FONT.widthOfTextAtSize(fullName,size);
       if(measured>maxWidth){
-        size=Math.max(4.2,size*(maxWidth/measured));
+        size=Math.max(3.8,size*(maxWidth/measured));
+        measured=FORM_FONT.widthOfTextAtSize(fullName,size);
       }
 
-      const textWidth=FORM_FONT.widthOfTextAtSize(fullName,size);
-      const textHeight=FORM_FONT.heightAtSize(size);
+      // Un margen adicional de seguridad.
+      while(measured>maxWidth && size>3.5){
+        size-=0.1;
+        measured=FORM_FONT.widthOfTextAtSize(fullName,size);
+      }
 
       page6.drawText(fullName,{
-        x:x+Math.max(padX,(w-textWidth)/2),
-        y:y+Math.max(padY,(h-textHeight)/2),
+        x:x+Math.max(padX,(w-measured)/2),
+        y:y+4.5,
         size:size,
         font:FORM_FONT,
         color:PDFLib.rgb(0,0,0)
