@@ -109,7 +109,7 @@ modalidad:["Individual Convencional","Mancomunado Convencional","Póliza endosad
 tipoDocumento:["TIPO DNI","TIPO C EXT"],educacion:["SUPERIOR","TECNICA","SECUNDARIA","UNIVERSITARIA"],
 estadoCivil:["SOLTERO","CASADOA","VIUDOA","DIVORCIADOA"],gracia:["1 mes","2 MESES","undefined"]
 };
-let pdfBytes=null, fieldNames=new Set(), PDFLibLoaded=false;
+let pdfBytes=null, fieldNames=new Set(), PDFLibLoaded=false, AUTO_VALUES={};
 
 const $=id=>document.getElementById(id);
 function status(t,c=""){ $("status").textContent=t;$("status").className="status "+c; }
@@ -136,7 +136,7 @@ function populate(){
  status(`Lista de convenios cargada: ${CONVENIOS.length} convenios.`,"ok");
 }
 function grace(v){v=String(v||"").toLowerCase();return v.includes("2")?"2 MESES":v.includes("1")?"1 MES":""}
-function setField(name,value){const el=[...document.querySelectorAll("[data-field]")].find(x=>x.dataset.field===name);if(el)el.value=value??""}
+function setField(name,value){const v=value??"";const el=[...document.querySelectorAll("[data-field]")].find(x=>x.dataset.field===name);if(el)el.value=v;AUTO_VALUES[name]=v}
 
 function fillSelect(selectId,values,placeholder){
  const s=$(selectId);
@@ -185,17 +185,51 @@ function conventionChange(){
  $("info").classList.remove("hidden");
  $("info").textContent=`${c.convenio} · RUC ${c.ruc} · Gracia ${g||"No definida"} · Fecha de pago ${c.fechaPago} · Giro ${c.giro}`;
 }
-function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadScript(src, timeout=30000){
+ return new Promise((resolve,reject)=>{
+  if(window.PDFLib){resolve();return}
+  const s=document.createElement("script");
+  let finished=false;
+  const timer=setTimeout(()=>{
+   if(finished)return;
+   finished=true;s.remove();
+   reject(new Error("Tiempo agotado: "+src));
+  },timeout);
+  s.src=src;s.async=true;
+  s.onload=()=>{
+   if(finished)return;
+   finished=true;clearTimeout(timer);
+   if(window.PDFLib)resolve();
+   else reject(new Error("El archivo cargó pero PDFLib no quedó disponible."));
+  };
+  s.onerror=()=>{
+   if(finished)return;
+   finished=true;clearTimeout(timer);s.remove();
+   reject(new Error("No se pudo cargar "+src));
+  };
+  document.head.appendChild(s);
+ });
+}
 async function loadPDFLib(){
  if(window.PDFLib){PDFLibLoaded=true;return}
- try{await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js")}
- catch(e){await loadScript("https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js")}
- if(!window.PDFLib)throw Error("No se pudo cargar la librería PDF.");
- PDFLibLoaded=true;
+ const sources=[
+  "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js",
+  "https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"
+ ];
+ const errors=[];
+ for(const src of sources){
+  try{
+   await loadScript(src);
+   if(window.PDFLib){PDFLibLoaded=true;return}
+  }catch(e){errors.push(e.message)}
+ }
+ PDFLibLoaded=false;
+ throw new Error("No se pudo cargar la librería PDF desde los servidores disponibles. Revisa Internet o si tu red bloquea CDN.");
 }
 async function prepare(){
  try{
-  setupLogos();renderFields();populate();setupGeography();applyToday();
+  setupLogos();renderFields();populate();setupGeography();applyToday();status("Cargando motor PDF...");
   pdfBytes=bytes64(PDF64);
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
@@ -205,7 +239,7 @@ async function prepare(){
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
 function text(f,n,v){if(!fieldNames.has(n))return;try{f.getTextField(n).setText(v??"")}catch(e){}}
 function group(f,names,selected){names.forEach(n=>{if(fieldNames.has(n))checkbox(f,n,n===selected)})}
-function values(){const o={};document.querySelectorAll("[data-field]").forEach(i=>o[i.dataset.field]=i.value);return o}
+function values(){const o={...AUTO_VALUES};document.querySelectorAll("[data-field]").forEach(i=>o[i.dataset.field]=i.value);return o}
 async function generate(){
  try{
   const i=$("convenio").value;if(i==="")throw Error("Selecciona un convenio.");
@@ -218,6 +252,15 @@ async function generate(){
   if($("estadoCivil").value)group(f,CHECK_GROUPS.estadoCivil,$("estadoCivil").value);
   const g=grace(c.gracia);if(g)group(f,CHECK_GROUPS.gracia,g);
   const v=values();
+  // Domicilio actual seleccionado en cascada.
+  v["DEPARTAMENTO"]=$("domDepartamento").value||"";
+  v["PROVINCIA"]=$("domProvincia").value||"";
+  v["DISTRITO"]=$("domDistrito").value||"";
+  v["DIRECCION"]=(getFieldValue("DIRECCION")||"").trim();
+  text(f,"DEPARTAMENTO",v["DEPARTAMENTO"]);
+  text(f,"PROVINCIA",v["PROVINCIA"]);
+  text(f,"DISTRITO",v["DISTRITO"]);
+  text(f,"DIRECCION",v["DIRECCION"]);
   // NOMBRES Y APELLIDOS se genera automáticamente:
   // PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO
   // separados por un espacio. No se muestra como campo editable.
@@ -242,6 +285,7 @@ function clearAll(){
  $("domProvincia").innerHTML='<option value="">Seleccionar provincia...</option>';$("domProvincia").disabled=true;
  $("domDistrito").innerHTML='<option value="">Seleccionar distrito...</option>';$("domDistrito").disabled=true;
  $("domDepartamento").value="";
+ AUTO_VALUES={};
  applyToday();
  status(`Lista de convenios cargada: ${CONVENIOS.length} convenios.`,"ok");
 }
