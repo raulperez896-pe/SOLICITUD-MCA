@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v30">
+<meta name="generator-build" content="2026-08-24-v31">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -244,17 +244,9 @@ async function prepare(){
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
 function text(f,n,v){
- try{
-  const key=String(n??"").trim().toUpperCase();
-  const realName=fieldMap.get(key)||n;
-  const tf=f.getTextField(realName);
-  const value=String(v??"");
-  tf.setText(value);
-  return true;
- }catch(e){
-  console.warn("Campo no encontrado o no editable:",n,e);
-  return false;
- }
+ if(!fieldNames.has(n))return;
+ try{f.getTextField(n).setText(String(v??""))}
+ catch(e){console.warn("No se pudo escribir:",n,e)}
 }
 function group(f,names,selected){names.forEach(n=>{if(fieldNames.has(n))checkbox(f,n,n===selected)})}
 function values(){const o={...AUTO_VALUES};document.querySelectorAll("[data-field]").forEach(i=>o[i.dataset.field]=i.value);return o}
@@ -310,13 +302,50 @@ async function generate(){
   text(f,"DEPARTAMENTO TRABAJO",c.departamento);
   text(f,"TIEMPO DE RESIDENCIA","10 AÑOS");
 
-  // SEGUNDO: generar TODAS las apariencias juntas, después de haber escrito
-  // todos los valores. Esto evita que una apariencia individual sobrescriba
-  // el contenido de otra aparición del mismo campo.
+  // SEGUNDO: ajustar el tamaño de cada campo DESPUÉS de escribir todos
+  // los datos. Cada campo usa el recuadro más pequeño donde aparece.
   try{
-    f.updateFieldAppearances(FORM_FONT);
+    f.getFields().forEach(field=>{
+      try{
+        const value=field.getText ? (field.getText()||"") : "";
+        if(!value || !FORM_FONT) return;
+
+        const widgets=field.getWidgets ? (field.getWidgets()||[]) : [];
+        let minWidth=Infinity, minHeight=Infinity;
+
+        widgets.forEach(w=>{
+          const r=w.getRectangle();
+          const width=Math.abs(Number(r.width)||0);
+          const height=Math.abs(Number(r.height)||0);
+          if(width>0) minWidth=Math.min(minWidth,width);
+          if(height>0) minHeight=Math.min(minHeight,height);
+        });
+
+        if(!Number.isFinite(minWidth)) minWidth=120;
+        if(!Number.isFinite(minHeight)) minHeight=14;
+
+        // Búsqueda binaria del mayor tamaño que entra en el recuadro,
+        // dejando 8% de margen para que no se corte el último carácter.
+        let lo=5.5;
+        let hi=Math.min(11,Math.max(6,minHeight*0.68));
+
+        for(let k=0;k<25;k++){
+          const mid=(lo+hi)/2;
+          const measured=FORM_FONT.widthOfTextAtSize(value,mid);
+          if(measured<=minWidth*0.92) lo=mid;
+          else hi=mid;
+        }
+
+        const size=Math.min(11,Math.max(5.5,lo));
+        field.setFontSize(size);
+        field.setAlignment(PDFLib.TextAlignment.Left);
+        field.updateAppearances(FORM_FONT);
+      }catch(e){
+        console.warn("No se pudo ajustar tamaño:",e);
+      }
+    });
   }catch(e){
-    console.warn("No se pudieron actualizar apariencias:",e);
+    console.warn("No se pudieron ajustar los tamaños:",e);
   }
 
   // TERCERO: solo lectura, sin flatten().
