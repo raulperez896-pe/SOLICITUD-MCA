@@ -96,3 +96,6 @@ CAMBIO v4.17: Supervisor y promotor de la Carta de Subrogación se dibujan al fi
 
 
 CAMBIO v4.18: En la firma inferior de la Carta de Subrogación se elimina visualmente el texto fijo NOMBRE DEL SUPERVISOR y se dibuja el nombre real del supervisor ingresado en el formulario, con ajuste automático de tamaño para encajar en el espacio de la firma.
+
+
+CAMBIO v4.19: Corrección definitiva de la Carta de Subrogación. Los campos AcroForm se aplanan antes de dibujar Supervisor, Promotor, nombre del supervisor en la firma y DNI del supervisor. Se limpian las zonas originales para impedir textos duplicados o cruzados.
