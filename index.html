@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v43">
+<meta name="generator-build" content="2026-08-24-v45">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -34,7 +34,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .dps-q span{font-size:12px;line-height:1.35}
 .dps-q select,.dps-q input{width:100%}
 @media(max-width:850px){.dps-health{grid-template-columns:1fr}}
-.dps-title{margin-top:6px;font-size:15px;font-weight:700;border-left:4px solid #1976d2;padding:8px 10px;background:#f1f5f9;color:#082b55}.dps-title + .hint{margin-top:6px}</style>
+.dps-title{margin-top:6px;font-size:15px;font-weight:700;border-left:4px solid #1976d2;padding:8px 10px;background:#f1f5f9;color:#082b55}.dps-title + .hint{margin-top:6px}.dps-conditional-hidden{display:none!important}</style>
 </head>
 <body>
 <header class="topbar">
@@ -111,6 +111,13 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
   </label>
   <label><span>Talla</span><input type="text" data-field="TALLA" placeholder="Ej. 1.70"></label>
   <label><span>Peso</span><input type="text" data-field="PESO" placeholder="Ej. 70 kg"></label>
+  <label><span>Sexo</span>
+    <select data-field="SEXO">
+      <option value="">Seleccionar...</option>
+      <option value="M">M - MASCULINO</option>
+      <option value="F">F - FEMENINO</option>
+    </select>
+  </label>
 </div>
 
 <div class="subsection">Cuestionario DPS — Titular</div>
@@ -127,18 +134,18 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
   <label class="dps-q"><span>4. ¿Te encuentras embarazada?</span>
     <select data-field="DPS_Q4"><option value="">Seleccionar...</option><option value="SI">SÍ</option><option value="NO">NO</option></select>
   </label>
-  <label class="dps-q conditional"><span>Mes de gestación (si respondió SÍ)</span><input type="text" data-field="DPS_GESTACION" placeholder="Mes"></label>
+  <label class="dps-q conditional"><span>Mes de gestación (si respondió SÍ)</span><input type="text" data-field="DPS_GESTACION" data-condition="DPS_Q4:SI" placeholder="Mes"></label>
   <label class="dps-q"><span>5a. ¿Fumas?</span>
     <select data-field="DPS_Q5_FUMA"><option value="">Seleccionar...</option><option value="SI">SÍ</option><option value="NO">NO</option></select>
   </label>
-  <label class="dps-q conditional"><span>¿Cuántos cigarros al día consumes? (si respondió SÍ)</span><input type="text" data-field="DPS_CIGARROS" placeholder="Cantidad"></label>
+  <label class="dps-q conditional"><span>¿Cuántos cigarros al día consumes? (si respondió SÍ)</span><input type="text" data-field="DPS_CIGARROS" data-condition="DPS_Q5_FUMA:SI" placeholder="Cantidad"></label>
   <label class="dps-q"><span>5b. ¿Consumes bebidas alcohólicas diariamente?</span>
     <select data-field="DPS_Q5_ALCOHOL"><option value="">Seleccionar...</option><option value="SI">SÍ</option><option value="NO">NO</option></select>
   </label>
   <label class="dps-q"><span>6. ¿Realizas alguna actividad laboral o deportiva de riesgo?</span>
     <select data-field="DPS_Q6"><option value="">Seleccionar...</option><option value="SI">SÍ</option><option value="NO">NO</option></select>
   </label>
-  <label class="dps-q conditional"><span>¿Cuál? (si respondió SÍ)</span><input type="text" data-field="DPS_RIESGO" placeholder="Actividad de riesgo"></label>
+  <label class="dps-q conditional"><span>¿Cuál? (si respondió SÍ)</span><input type="text" data-field="DPS_RIESGO" data-condition="DPS_Q6:SI" placeholder="Actividad de riesgo"></label>
 </div>
 
 <div class="section-title">4. Datos finales</div><div id="final" class="grid"></div>
@@ -231,6 +238,20 @@ function renderFields(){
    lab.append(sp,inp);box.appendChild(lab);
   });
  }
+}
+function updateDpsConditionalFields(){
+ document.querySelectorAll("[data-condition]").forEach(el=>{
+   const condition=el.dataset.condition||"";
+   const parts=condition.split(":");
+   const source=parts[0], expected=(parts[1]||"").toUpperCase();
+   const input=document.querySelector('[data-field="'+source+'"]');
+   const show=input && String(input.value||"").toUpperCase()===expected;
+   const wrapper=el.closest(".dps-q")||el.parentElement;
+   if(wrapper){
+     wrapper.classList.toggle("dps-conditional-hidden",!show);
+   }
+   if(!show && el.value) el.value="";
+ });
 }
 function syncDpsBirthDate(){
  const main=document.querySelector('[data-field="FECHA DE NACIMIENTO"]');
@@ -428,6 +449,17 @@ async function generateDPS(){
   const mod=String($("modalidad").value||"");
   if(mod.includes("Devolución")) dpsDrawX(page,116.3,659.4);
   else if(mod.includes("Convencional")) dpsDrawX(page,83.3,659.6);
+
+  // Sexo del titular: marcar M o F.
+  const sexo=String(v["SEXO"]||"").toUpperCase();
+  if(sexo==="M" || sexo==="F"){
+    const fontSexo=await dps.embedFont(PDFLib.StandardFonts.Helvetica);
+    // El DPS usa casillas independientes M/F; se marca únicamente la elegida.
+    // Estas coordenadas corresponden al bloque Sexo de la plantilla DPS.
+    const sx=sexo==="M"?177.8:202.8;
+    const sy=604.0;
+    dpsDrawX(page,sx,sy);
+  }
 
   // Cuestionario del TITULAR. El cónyuge no se llena.
   const q1=v["DPS_Q1"],q2=v["DPS_Q2"],q3=v["DPS_Q3"],q4=v["DPS_Q4"];
@@ -697,3 +729,10 @@ prepare();
 </html>document.addEventListener("input",e=>{
  if(e.target && e.target.dataset && e.target.dataset.field==="FECHA DE NACIMIENTO") syncDpsBirthDate();
 });
+document.addEventListener("change",e=>{
+ if(e.target && e.target.dataset && /^DPS_Q/.test(e.target.dataset.field||"")){
+   updateDpsConditionalFields();
+ }
+});
+
+window.addEventListener("DOMContentLoaded",()=>{updateDpsConditionalFields();});

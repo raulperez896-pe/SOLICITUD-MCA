@@ -1,4 +1,4 @@
-VERSION 4.3
+VERSION 4.5
 
 SE INCORPORA DPS (DECLARACIÓN PERSONAL DE SEGUROS)
 
@@ -46,3 +46,11 @@ Los datos nuevos de DPS están en un apartado independiente '3. DPS — Declarac
 
 CAMBIO v4.3:
 FECHA DE NACIMIENTO vuelve a Datos a llenar como campo principal. En el apartado DPS solo se muestra como dato reutilizado automáticamente; no se crea una segunda captura. El generador DPS toma el valor del campo principal.
+
+
+CAMBIO v4.4:
+Se agregó SEXO dentro del apartado DPS, con selección M - MASCULINO o F - FEMENINO. Al generar el DPS se marca automáticamente la casilla correspondiente.
+
+
+CAMBIO v4.5:
+El cuestionario DPS ahora muestra las preguntas dependientes únicamente cuando la respuesta anterior es SÍ. Si se selecciona NO, la pregunta adicional se oculta y su valor se limpia. Actualmente: embarazo -> mes de gestación; fuma -> cigarros/día; actividad de riesgo -> cuál.
