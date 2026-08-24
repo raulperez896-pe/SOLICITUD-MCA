@@ -69,3 +69,9 @@ El campo NOMBRES Y APELLIDOS se construye exactamente como: PRIMER NOMBRE + SEGU
 
 CAMBIO v4.11:
 Corrección de NOMBRES Y APELLIDOS en hoja 6 para CON SEGURO y SIN SEGURO. Se retira el widget de formulario de esa casilla y se dibuja una sola vez dentro del recuadro, con tamaño dinámico y ajuste al ancho para evitar nombres recortados o duplicados.
+
+CAMBIO v4.12:
+Se incorpora Carta de Compra de Deuda E0264 como PDF condicional. Aparece solo para SUBROGADO y SUBROGADO + RENOVADO.
+Se reutilizan automáticamente NOMBRES Y APELLIDOS, DNI, DIRECCION, DISTRITO, CELULAR, EMAIL y FECHA.
+Se agregan 4 filas de PRÉSTAMOS/DISPOSICIÓN DE EFECTIVO, 4 filas de TARJETAS, entidades financieras provenientes del Excel CUADRO DE COMPRA DE DEUDA 2 y cálculos automáticos A, B y A+B.
+Para moneda US$ se muestra TC obligatorio. Se incorporan 2 filas opcionales de cuenta de depósito.
