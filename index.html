@@ -7,8 +7,9 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v25">
+<meta name="generator-build" content="2026-08-24-v26">
 <style>
+#info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
 .topbar{height:70px;background:var(--navy);padding:10px 24px;display:flex;align-items:center;justify-content:space-between}
@@ -186,7 +187,7 @@ function conventionChange(){
  setField("EMPRESA",c.convenio);setField("RUC",c.ruc);setField("GIRO",c.giro);
  setField("FECHA DE PAGO",c.fechaPago);setField("DIRECCION TRABAJO",c.direccion);
  setField("DISTRITO TRABAJO",c.distrito);setField("PROVINCIA TRABAJO",c.provincia);setField("DEPARTAMENTO TRABAJO",c.departamento);
- $("info").classList.remove("hidden");
+ $("info").classList.add("hidden");
  $("info").textContent=`${c.convenio} · RUC ${c.ruc} · Gracia ${g||"No definida"} · Fecha de pago ${c.fechaPago} · Giro ${c.giro}`;
 }
 function loadScript(src, timeout=30000){
@@ -246,45 +247,40 @@ function text(f,n,v){
  try{
   const tf=f.getTextField(n);
   const value=String(v??"");
-  tf.setText(value);
-
   const widgets=tf.getWidgets()||[];
-  if(value.length>0 && widgets.length && FORM_FONT){
-   const font=FORM_FONT;
-   const color=PDFLib.rgb(0,0,0);
 
-   tf.updateAppearances(font,(field,widget,usedFont)=>{
-    const rect=widget.getRectangle();
-    const width=Math.max(1,Math.abs(Number(rect.width)||0));
-    const height=Math.max(1,Math.abs(Number(rect.height)||0));
-
-    // Calculate the largest size that fits THIS widget.
-    let size=Math.min(10,Math.max(6,height*0.60));
-    let lo=4.5,hi=size;
-    for(let k=0;k<20;k++){
-      const mid=(lo+hi)/2;
-      const measured=usedFont.widthOfTextAtSize(value,mid);
-      if(measured<=width*0.90) lo=mid;
-      else hi=mid;
-    }
-    size=Math.min(10,Math.max(5.5,lo));
-
-    const textWidth=usedFont.widthOfTextAtSize(value,size);
-    const textHeight=usedFont.heightAtSize(size);
-
-    // Center vertically and leave a small left/right margin.
-    const x=Math.max(1.5,(width-textWidth)/2);
-    const y=Math.max(1.5,(height-textHeight)/2);
-
-    return PDFLib.drawText(value,{
-      x,
-      y,
-      size,
-      font:usedFont,
-      color
-    });
-   });
+  if(value.length===0){
+   tf.setText("");
+   try{tf.updateAppearances(FORM_FONT)}catch(_){}
+   return;
   }
+
+  // Usar el recuadro más pequeño de todas las apariciones del campo.
+  let minWidth=Infinity;
+  let minHeight=Infinity;
+  for(const w of widgets){
+   const r=w.getRectangle();
+   minWidth=Math.min(minWidth,Math.abs(Number(r.width)||0));
+   minHeight=Math.min(minHeight,Math.abs(Number(r.height)||0));
+  }
+
+  if(!Number.isFinite(minWidth))minWidth=120;
+  if(!Number.isFinite(minHeight))minHeight=14;
+
+  // Calcular el tamaño real con Helvetica. Dejamos 8% de margen.
+  let size=Math.min(10,Math.max(6,minHeight*0.60));
+  let lo=5,hi=size;
+  for(let k=0;k<22;k++){
+   const mid=(lo+hi)/2;
+   const measured=FORM_FONT.widthOfTextAtSize(value,mid);
+   if(measured<=minWidth*0.92)lo=mid;
+   else hi=mid;
+  }
+  size=Math.min(10,Math.max(5.5,lo));
+
+  try{tf.setFontSize(size)}catch(_){}
+  try{tf.setText(value)}catch(_){}
+  try{tf.updateAppearances(FORM_FONT)}catch(_){}
  }catch(e){
   console.warn("Campo PDF:",n,e);
  }
@@ -322,6 +318,16 @@ async function generate(){
   // PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO
   // separados por un espacio. No se muestra como campo editable.
   v["NOMBRES Y APELLIDOS"]=buildFullName();
+  // Fallback directo por controles visibles, para garantizar que el campo
+  // interno NOMBRES Y APELLIDOS nunca quede vacío si los cuatro nombres fueron digitados.
+  if(!v["NOMBRES Y APELLIDOS"]){
+    const vals={};
+    document.querySelectorAll("[data-field]").forEach(el=>vals[el.dataset.field]=String(el.value||"").trim());
+    v["NOMBRES Y APELLIDOS"]=[
+      vals["PRIMER NOMBRE"],vals["SEGUNDO NOMBRE"],
+      vals["APELLIDO PATERNO"],vals["APELLIDO MATERNO"]
+    ].filter(Boolean).join(" ");
+  }
   const plazoBase=parseInt(String(v["PLAZO"]||"").replace(/[^0-9]/g,""),10);
   const graciaMeses=parseInt(String(c.gracia||"").match(/\d+/)?.[0]||"0",10);
   if(Number.isFinite(plazoBase) && plazoBase>0) v["PLAZO"]=String(plazoBase+graciaMeses);
@@ -329,6 +335,8 @@ async function generate(){
   text(f,"EMPRESA",c.convenio);text(f,"RUC",c.ruc);text(f,"GIRO",c.giro);text(f,"FECHA DE PAGO",c.fechaPago);
   text(f,"DIRECCION TRABAJO",c.direccion);text(f,"DISTRITO TRABAJO",c.distrito);text(f,"PROVINCIA TRABAJO",c.provincia);text(f,"DEPARTAMENTO TRABAJO",c.departamento);text(f,"TIEMPO DE RESIDENCIA","10 AÑOS");
   
+  // Convertir todos los campos a contenido fijo: el PDF final NO será editable.
+  try{f.flatten({updateFieldAppearances:true})}catch(_){f.flatten()}
   const out=await d.save(),url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\dA-Za-z_-]/g,""),safe=c.convenio.replace(/[^\wáéíóúñÁÉÍÓÚÑ -]/g,"").replace(/\s+/g,"_");
   const a=document.createElement("a");a.href=url;a.download=`Solicitud_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();

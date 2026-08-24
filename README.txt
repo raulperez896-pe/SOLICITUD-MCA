@@ -1,17 +1,24 @@
-VERSION 2.5
+VERSION 2.6
 
-CORRECCIÓN DE TAMAÑO POR RECUADRO INDIVIDUAL
+CAMBIOS:
+1. Ajuste de tamaño de letra más estable:
+   - Usa el recuadro más pequeño del mismo campo.
+   - Mide el ancho real de Helvetica.
+   - Deja margen interior.
+   - Usa updateAppearances estándar para evitar campos que quedan en blanco.
 
-Ahora cada aparición del mismo campo calcula su tamaño de letra
-independientemente según SU PROPIO recuadro.
+2. NOMBRES Y APELLIDOS:
+   - Se genera automáticamente como:
+     PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
+   - Se agregó un fallback directo de los controles visibles.
 
-Ejemplo:
-- NOMBRES Y APELLIDOS en un recuadro grande: usa letra más grande.
-- NOMBRES Y APELLIDOS en un recuadro pequeño: reduce solo esa aparición.
-- DNI se ajusta según cada recuadro.
-- No se usa un tamaño único para todas las apariciones.
+3. INFORMACIÓN AUTOMÁTICA:
+   - La barra informativa del convenio queda oculta en la página.
+   - Los datos siguen utilizándose internamente y se colocan en el PDF.
 
-Se utiliza un appearance provider personalizado de pdf-lib para evitar que
-updateFieldAppearances vuelva a recalcular y sobrescriba el tamaño.
+4. PDF FINAL:
+   - Antes de guardar se ejecuta flatten().
+   - El PDF descargado queda como impresión fija y NO permite modificar
+     los campos AcroForm.
 
 Subir únicamente index.html a GitHub Pages.
