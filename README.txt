@@ -65,3 +65,7 @@ CAMBIO v4.7: CORRECCIÓN REAL DEL CUESTIONARIO CONDICIONAL. Los listeners ahora 
 
 CAMBIO v4.10:
 El campo NOMBRES Y APELLIDOS se construye exactamente como: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO, separados por un solo espacio.
+
+
+CAMBIO v4.11:
+Corrección de NOMBRES Y APELLIDOS en hoja 6 para CON SEGURO y SIN SEGURO. Se retira el widget de formulario de esa casilla y se dibuja una sola vez dentro del recuadro, con tamaño dinámico y ajuste al ancho para evitar nombres recortados o duplicados.

@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v410">
+<meta name="generator-build" content="2026-08-24-v411">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -394,7 +394,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.8 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.11 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -709,17 +709,24 @@ async function generate(){
     console.warn("No se pudieron ajustar apariencias:",e);
   }
 
-  // CORRECCIÓN DEFINITIVA HOJA 6 de la plantilla CON SEGURO.
-  // La plantilla SIN SEGURO conserva sus campos nativos repetidos.
-  if(seguroCon) try{
+  // CORRECCIÓN DEFINITIVA DE NOMBRES EN HOJA 6.
+  // Se elimina el widget editable de la casilla de nombres y se dibuja
+  // una sola vez dentro del recuadro, con tamaño dinámico para que
+  // SIEMPRE entre completo. Se aplica a CON SEGURO y SIN SEGURO.
+  try{
     const pages=d.getPages();
     const page6=pages[5];
     const fullName=String(v["NOMBRES Y APELLIDOS"]||"").trim();
 
     if(page6 && fullName){
-      const targetX=24.519, targetY=364.019;
-      const targetW=132.661, targetH=16.708;
+      const isSecure=seguroCon;
+      const target=isSecure
+        ? {x:24.519,y:364.019,w:132.661,h:16.708}
+        : {x:27.519,y:363.514,w:132.661,h:16.709};
 
+      // Retirar exclusivamente el widget de la hoja 6.
+      // Así evitamos que el PDF muestre simultáneamente el texto grande
+      // del AcroForm y nuestro texto reducido.
       try{
         const annots=page6.node.lookup(PDFLib.PDFName.of("Annots"),PDFLib.PDFArray);
         if(annots){
@@ -728,68 +735,75 @@ async function generate(){
             const annot=page6.node.context.lookup(ref);
             if(!annot) continue;
 
-            const rect=annot.lookup(PDFLib.PDFName.of("Rect"),PDFLib.PDFArray);
+            const rect=annot.get(PDFLib.PDFName.of("Rect"));
             if(!rect || rect.size()<4) continue;
 
             const x=rect.get(0).numberValue;
             const y=rect.get(1).numberValue;
             const x2=rect.get(2).numberValue;
             const y2=rect.get(3).numberValue;
+            const w=Math.abs(x2-x),h=Math.abs(y2-y);
 
-            const rx=Math.abs(x-targetX);
-            const ry=Math.abs(y-targetY);
-            const rw=Math.abs((x2-x)-targetW);
-            const rh=Math.abs((y2-y)-targetH);
+            const sameRect=Math.abs(x-target.x)<0.15 &&
+                            Math.abs(y-target.y)<0.15 &&
+                            Math.abs(w-target.w)<0.15 &&
+                            Math.abs(h-target.h)<0.15;
 
-            if(rx<0.1 && ry<0.1 && rw<0.1 && rh<0.1){
+            if(sameRect){
               annots.remove(i);
-              console.log("Widget original de NOMBRES eliminado de hoja 6");
               break;
             }
           }
         }
       }catch(e){
-        console.warn("No se pudo retirar el widget original de hoja 6:",e);
+        console.warn("No se pudo retirar widget hoja 6:",e);
       }
 
-      const x=24.519;
-      const y=364.019;
-      const w=132.661;
-      const h=16.708;
-      const padX=2.0;
-
-      // Fondo blanco para dejar limpio el recuadro.
+      // Cubrir únicamente el área interior del campo para eliminar
+      // cualquier resto de la apariencia anterior, sin tapar la línea
+      // inferior del formulario.
       page6.drawRectangle({
-        x:x+0.5,
-        y:y+0.5,
-        width:w-1,
-        height:h-1,
+        x:target.x+0.6,
+        y:target.y+2.0,
+        width:target.w-1.2,
+        height:target.h-3.0,
         color:PDFLib.rgb(1,1,1),
         opacity:1
       });
 
-      // Tamaño que entra en el recuadro.
-      let size=6.2;
-      const maxWidth=w-(padX*2);
+      // Ajuste automático de tamaño.
+      // El algoritmo reduce la letra hasta que TODO el nombre entra
+      // dentro del ancho disponible.
+      const maxWidth=target.w-4.0;
+      const maxHeight=target.h-3.5;
+      let size=Math.min(6.0,maxHeight*0.62);
       let measured=FORM_FONT.widthOfTextAtSize(fullName,size);
-      if(measured>maxWidth){
-        size=Math.max(3.8,size*(maxWidth/measured));
-        measured=FORM_FONT.widthOfTextAtSize(fullName,size);
-      }
 
-      // Un margen adicional de seguridad.
-      while(measured>maxWidth && size>3.5){
+      while(measured>maxWidth && size>3.2){
         size-=0.1;
         measured=FORM_FONT.widthOfTextAtSize(fullName,size);
       }
 
+      // Si aun así fuera necesario, un último cálculo proporcional.
+      if(measured>maxWidth){
+        size=Math.max(3.0,size*(maxWidth/measured));
+        measured=FORM_FONT.widthOfTextAtSize(fullName,size);
+      }
+
+      // Centrado vertical y alineación a la izquierda para facilitar lectura.
+      const textX=target.x+2.0;
+      const textY=target.y+((target.h-size)/2)-0.2;
+
       page6.drawText(fullName,{
-        x:x+Math.max(padX,(w-measured)/2),
-        y:y+4.5,
+        x:textX,
+        y:textY,
         size:size,
         font:FORM_FONT,
-        color:PDFLib.rgb(0,0,0)
+        color:PDFLib.rgb(0,0,0),
+        opacity:1
       });
+
+      console.log("Hoja 6 nombre dibujado:",fullName,"tamaño:",size);
     }
   }catch(e){
     console.warn("No se pudo corregir NOMBRES en hoja 6:",e);
