@@ -96,7 +96,7 @@ function applyToday(){
  const day=String(now.getDate()).padStart(2,"0");
  const month=String(now.getMonth()+1).padStart(2,"0");
  const year=String(now.getFullYear());
- setField("FECHA",`${day}/${month}/${year}`);
+ setField("FECHA",`${day}${month}${year}`);
  setField("DIA",day);
  setField("MES",month);
 }
@@ -243,20 +243,26 @@ function text(f,n,v){
   const tf=f.getTextField(n);
   const value=String(v??"");
   tf.setText(value);
-  const widgets=tf.getWidgets();
-  if(widgets && widgets.length){
-   const rect=widgets[0].getRectangle();
-   const width=Math.abs(Number(rect.width)||0);
-   const height=Math.abs(Number(rect.height)||0);
-   let size=Math.min(10,Math.max(6,height*0.62));
-   if(width>0 && value.length>0){
-    const factor=0.55;
-    size=Math.min(size,width/(Math.max(1,value.length)*factor));
+
+  // El mismo campo puede aparecer en varias páginas con recuadros
+  // de tamaños diferentes. Se calcula el tamaño necesario para TODOS.
+  const widgets=tf.getWidgets()||[];
+  let size=10;
+
+  if(value.length>0 && widgets.length){
+   const factor=0.55;
+   for(const w of widgets){
+    const rect=w.getRectangle();
+    const width=Math.abs(Number(rect.width)||0);
+    const height=Math.abs(Number(rect.height)||0);
+    if(height>0) size=Math.min(size,Math.max(6,height*0.62));
+    if(width>0) size=Math.min(size,width/(Math.max(1,value.length)*factor));
    }
    size=Math.min(10,Math.max(5.5,size));
    try{tf.setFontSize(size)}catch(_){}
   }
- }catch(e){}
+}
+catch(e){}
 }
 function group(f,names,selected){names.forEach(n=>{if(fieldNames.has(n))checkbox(f,n,n===selected)})}
 function values(){const o={...AUTO_VALUES};document.querySelectorAll("[data-field]").forEach(i=>o[i.dataset.field]=i.value);return o}
