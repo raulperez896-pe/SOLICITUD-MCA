@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Generador de Solicitud por Convenio</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <div class="brand">MASTER<span>CALCULADORA</span></div>
+    <div class="subtitle">Generador de Solicitud por Convenio</div>
+  </div>
+  <div class="version">v1.2</div>
+</header>
+
+<main class="container">
+<section class="card intro">
+  <h1>Solicitud de Préstamo por Convenio</h1>
+  <p>Selecciona las opciones y completa únicamente los datos que necesita la solicitud.</p>
+</section>
+
+<form id="formulario" class="card">
+  <div class="section-title">1. Selección inicial</div>
+  <div class="grid two">
+    <label>
+      <span>Convenio <b>*</b></span>
+      <select id="convenio" required>
+        <option value="">Seleccionar convenio...</option>
+        <option>PNP</option><option>ESSALUD</option><option>MARINA / MGP</option>
+        <option>ONP</option><option>UGEL</option><option>MINISTERIO DE JUSTICIA</option>
+        <option>CAJA AREQUIPA</option><option>CAJA CUSCO</option><option>OTRO</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Tipo de operación <b>*</b></span>
+      <select id="tipoOperacion" required>
+        <option value="">Seleccionar...</option>
+        <option value="NUEVO">NUEVO</option>
+        <option value="SUBROGADO">SUBROGADO</option>
+        <option value="RENOVADO">RENOVADO</option>
+        <option value="OTRO">OTRO</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Modalidad del seguro <b>*</b></span>
+      <select id="modalidad" required>
+        <option value="">Seleccionar...</option>
+        <option value="Individual Convencional">Individual Convencional</option>
+        <option value="Mancomunado Convencional">Mancomunado Convencional</option>
+        <option value="Póliza endosada">Póliza endosada</option>
+        <option value="Individual con Devolución">Individual con Devolución</option>
+        <option value="Mancomunado con Devolución">Mancomunado con Devolución</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Tipo de documento <b>*</b></span>
+      <select id="tipoDocumento" required>
+        <option value="TIPO DNI">DNI</option>
+        <option value="TIPO C EXT">C. EXT</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Nivel de educación</span>
+      <select id="educacion">
+        <option value="">Seleccionar...</option>
+        <option value="SUPERIOR">SUPERIOR</option>
+        <option value="TECNICA">TÉCNICA</option>
+        <option value="SECUNDARIA">SECUNDARIA</option>
+        <option value="UNIVERSITARIA">UNIVERSITARIA</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Estado civil</span>
+      <select id="estadoCivil">
+        <option value="">Seleccionar...</option>
+        <option value="SOLTERO">SOLTERO</option>
+        <option value="CASADOA">CASADO(A)</option>
+        <option value="VIUDOA">VIUDO(A)</option>
+        <option value="DIVORCIADOA">DIVORCIADO(A)</option>
+      </select>
+    </label>
+
+    <label>
+      <span>Periodo de gracia</span>
+      <select id="gracia">
+        <option value="">Seleccionar...</option>
+        <option value="1 mes">1 MES</option>
+        <option value="2 MESES">2 MESES</option>
+        <option value="undefined">OTRO</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="section-title">2. Datos a llenar</div>
+  <p class="hint">Estos campos se crean leyendo los nombres de los campos de texto habilitados dentro del PDF. Los valores automáticos no aparecen en pantalla.</p>
+  <div id="textFields" class="grid two"></div>
+
+  <div class="actions">
+    <button type="button" id="limpiar" class="secondary">Limpiar</button>
+    <button type="button" id="generar" class="primary">Generar PDF</button>
+  </div>
+</form>
+
+<section class="card status-card">
+  <div class="section-title">Estado</div>
+  <div id="status" class="status">Cargando plantilla...</div>
+</section>
+</main>
+
+<footer>MasterCalculadora · Generador de solicitud</footer>
+<script src="app.js"></script>
+</body>
+</html>
