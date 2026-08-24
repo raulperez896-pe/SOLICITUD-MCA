@@ -1,38 +1,41 @@
-# Generador de Solicitud BBVA v1.3
+# Generador de Solicitud BBVA v1.4
 
-Esta versión corrige dos problemas de las versiones anteriores:
+## Nueva automatización por convenio
 
-1. La plantilla PDF ya no se solicita mediante una ruta de GitHub Pages.
-   El PDF está integrado dentro de `app.js`, por lo que no depende de `assets/SOLICITUD.pdf`.
-2. Los datos a llenar se muestran directamente desde el inicio. No se espera a detectar el PDF para construir la interfaz.
+La base `BASE DE CONVENIOS CON GIRO(2).xlsx` fue incorporada al generador.
 
-## Archivos
+Registros únicos cargados: 234.
 
-- `index.html`
-- `styles.css`
-- `app.js`
-- `img/logo-mca.png`
-- `img/logo-bbva.png`
+Al seleccionar el convenio, la página carga automáticamente:
 
-El PDF está integrado en `app.js`.
+- PERIODO DE GRACIA: 1 MES o 2 MESES según la base.
+- FECHA DE PAGO.
+- RUC.
+- DIRECCION TRABAJO.
+- DISTRITO TRABAJO.
+- PROVINCIA TRABAJO.
+- DEPARTAMENTO TRABAJO.
+- EMPRESA = nombre del CONVENIO seleccionado.
+- GIRO = GIRO de la base.
 
-## Interfaz
+Estos valores se muestran en la interfaz y se vuelven a aplicar al PDF al momento de generarlo, evitando que el usuario los modifique accidentalmente.
 
-No se muestra la sección de campos automáticos.
+## PDF
 
-Se muestran:
-- Convenio
-- Tipo de operación
-- Modalidad del seguro
-- Tipo de documento
-- Nivel de educación
-- Estado civil
-- Periodo de gracia
-- Todos los campos de texto habilitados del PDF que deben ser llenados/editados
+La plantilla PDF está integrada en `app.js`, por lo que no es necesario subir `SOLICITUD.pdf` por separado.
 
-## Reglas automáticas al generar
+## Estructura
+
+- index.html
+- styles.css
+- app.js
+- img/logo-mca.png
+- img/logo-bbva.png
+
+## Automáticos del formulario
 
 Se marca con X:
+
 - FAMILIAR
 - DEPENDIENTE
 - CORREO ELECTRÓNICO
@@ -45,20 +48,9 @@ Se marca con X:
 - CANAL DE VENTA  OFICINA
 
 Se escribe:
+
 - TIEMPO DE RESIDENCIA = 10 AÑOS
-
-## Logos
-
-El encabezado usa los logos proporcionados:
-- MasterCalculadora
-- BBVA
-
-No se muestra número de versión.
 
 ## GitHub Pages
 
-Subir la estructura completa manteniendo la carpeta `img`.
-
-No es necesario subir un PDF aparte porque ya está integrado en `app.js`.
-
-La generación usa `pdf-lib` desde CDN. La página intenta primero cdnjs y luego unpkg.
+Subir todos los archivos manteniendo la carpeta `img`.
