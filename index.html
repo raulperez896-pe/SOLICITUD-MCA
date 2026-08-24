@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v38">
+<meta name="generator-build" content="2026-08-24-v40">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -46,7 +46,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <div class="section-title">1. Selección inicial</div>
 <div class="grid">
 <label class="full"><span>Convenio <b>*</b></span><select id="convenio" required><option value="">Cargando convenios...</option></select></label>
-<label><span>Tipo de operación <b>*</b></span><select id="tipoOperacion" required><option value="">Seleccionar...</option><option value="NUEVO">NUEVO</option><option value="SUBROGADO">SUBROGADO</option><option value="RENOVADO">RENOVADO</option><option value="OTRO">OTRO</option></select></label>
+<label><span>Tipo de operación <b>*</b></span><select id="tipoOperacion" required><option value="">Seleccionar...</option><option value="NUEVO">NUEVO</option><option value="SUBROGADO">SUBROGADO</option><option value="RENOVADO">RENOVADO</option><option value="OTRO">OTRO</option><option value="SUBROGADO_RENOVADO">SUBROGADO + RENOVADO</option></select></label>
 <label><span>Modalidad del seguro <b>*</b></span><select id="modalidad" required><option value="">Seleccionar...</option><option value="Individual Convencional">Individual Convencional</option><option value="Mancomunado Convencional">Mancomunado Convencional</option><option value="Póliza endosada">Póliza endosada</option><option value="Individual con Devolución">Individual con Devolución</option><option value="Mancomunado con Devolución">Mancomunado con Devolución</option></select></label>
 <label><span>Tipo de documento <b>*</b></span><select id="tipoDocumento" required><option value="TIPO DNI">DNI</option><option value="TIPO C EXT">C. EXT</option></select></label>
 <label><span>Nivel de educación</span><select id="educacion"><option value="">Seleccionar...</option><option value="SUPERIOR">SUPERIOR</option><option value="TECNICA">TÉCNICA</option><option value="SECUNDARIA">SECUNDARIA</option><option value="UNIVERSITARIA">UNIVERSITARIA</option></select></label>
@@ -92,7 +92,7 @@ personales:["DNI","FECHA DE NACIMIENTO","APELLIDO PATERNO","APELLIDO MATERNO","P
 laborales:["CARGO","FECHA DE INGRESO","INGRESO NETO"],
 operacion:["OFICINA","CUENTA ASOCIADA","MONTO","TASA","PLAZO","FECHA"],
 gestion:["JEFA DE NEGOCIO","PROMOTOR","DNI PROMOTOR","SUPERVISORA","DNI SUPERVISORA"],
-final:["CIUDAD","DIA","MES"]
+final:["CIUDAD"]
 };
 const DEFAULTS={"N DE DEPENDIENTES":"0","CIUDAD":"LIMA"};
 
@@ -109,7 +109,7 @@ function applyToday(){
 const FIXED_CHECKS=["FAMILIAR","DEPENDIENTE","CORREO ELECTRÓNICO","Afiliar  Enviar","ELECTRÓNICO","No","No_2","No_3","No_4","CANAL DE VENTA  OFICINA"];
 const FIXED_TEXT={"TIEMPO DE RESIDENCIA":"10 AÑOS"};
 const CHECK_GROUPS={
-tipoOperacion:["NUEVO","SUBROGADO","RENOVADO","OTRO"],
+tipoOperacion:["NUEVO","SUBROGADO","RENOVADO","OTRO","SUBROGADO_RENOVADO"],
 modalidad:["Individual Convencional","Mancomunado Convencional","Póliza endosada","Individual con Devolución","Mancomunado con Devolución"],
 tipoDocumento:["TIPO DNI","TIPO C EXT"],educacion:["SUPERIOR","TECNICA","SECUNDARIA","UNIVERSITARIA"],
 estadoCivil:["SOLTERO","CASADOA","VIUDOA","DIVORCIADOA"],gracia:["1 mes","2 MESES","undefined"]
@@ -263,7 +263,12 @@ async function generate(){
   const c=CONVENIOS[Number(i)],d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();
   FORM_FONT=await d.embedFont(PDFLib.StandardFonts.Helvetica);
   FIXED_CHECKS.forEach(n=>checkbox(f,n,true));
-  group(f,CHECK_GROUPS.tipoOperacion,$("tipoOperacion").value);
+  if($("tipoOperacion").value==="SUBROGADO_RENOVADO"){
+    checkbox(f,"SUBROGADO",true);
+    checkbox(f,"RENOVADO",true);
+  }else{
+    group(f,CHECK_GROUPS.tipoOperacion,$("tipoOperacion").value);
+  }
   group(f,CHECK_GROUPS.modalidad,$("modalidad").value);
   group(f,CHECK_GROUPS.tipoDocumento,$("tipoDocumento").value);
   if($("educacion").value)group(f,CHECK_GROUPS.educacion,$("educacion").value);
