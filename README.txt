@@ -1,15 +1,13 @@
-VERSION 3.1
+VERSION 3.2
 
-AJUSTE DE TAMAÑO PARA CAMPOS PEQUEÑOS
+CORRECCIÓN ESPECÍFICA DE CAMPOS PEQUEÑOS.
 
-1. Primero se escriben todos los datos.
-2. Luego se calcula el tamaño de letra de cada campo.
-3. Se usa el recuadro más pequeño donde aparece ese campo.
-4. Se mide el ancho real del texto con Helvetica.
-5. Se deja un margen interno del 8%.
-6. Los campos cortos mantienen una letra grande.
-7. Los campos largos se reducen solo lo necesario.
-8. No se utiliza flatten().
-
-La estructura de llenado de v3.0 se mantiene porque ya comprobaste que
-los datos sí llegan correctamente al PDF.
+- Se mantiene el llenado de datos comprobado en v3.0.
+- NOMBRES Y APELLIDOS ahora usa una apariencia individual por cada recuadro.
+- Cada aparición calcula su tamaño con el ancho REAL de su propio widget.
+- Para nombres largos puede bajar hasta 4.2 pt para garantizar que se vea
+  el nombre completo en la hoja 6.
+- Nombres de hasta 20 caracteres conservan al menos 5 pt.
+- Los demás campos mantienen ajuste automático estándar.
+- No se utiliza flatten().
+- El PDF queda en solo lectura como en v3.0/v3.1.

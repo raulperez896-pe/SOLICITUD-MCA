@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v31">
+<meta name="generator-build" content="2026-08-24-v32">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -302,50 +302,84 @@ async function generate(){
   text(f,"DEPARTAMENTO TRABAJO",c.departamento);
   text(f,"TIEMPO DE RESIDENCIA","10 AÑOS");
 
-  // SEGUNDO: ajustar el tamaño de cada campo DESPUÉS de escribir todos
-  // los datos. Cada campo usa el recuadro más pequeño donde aparece.
+  // SEGUNDO: ajustar las apariencias DESPUÉS de escribir todos los datos.
+  // Para campos normales usamos la apariencia estándar. Para NOMBRES Y APELLIDOS
+  // usamos una apariencia por recuadro, porque este campo aparece varias veces
+  // con tamaños diferentes y la hoja 6 tiene el espacio más reducido.
   try{
     f.getFields().forEach(field=>{
       try{
         const value=field.getText ? (field.getText()||"") : "";
         if(!value || !FORM_FONT) return;
 
-        const widgets=field.getWidgets ? (field.getWidgets()||[]) : [];
-        let minWidth=Infinity, minHeight=Infinity;
+        const name=field.getName ? field.getName() : "";
 
-        widgets.forEach(w=>{
-          const r=w.getRectangle();
-          const width=Math.abs(Number(r.width)||0);
-          const height=Math.abs(Number(r.height)||0);
-          if(width>0) minWidth=Math.min(minWidth,width);
-          if(height>0) minHeight=Math.min(minHeight,height);
-        });
+        if(name==="NOMBRES Y APELLIDOS"){
+          const widgets=field.getWidgets ? (field.getWidgets()||[]) : [];
+          field.updateAppearances(FORM_FONT,(fieldRef,widget,font)=>{
+            const r=widget.getRectangle();
+            const width=Math.max(1,Math.abs(Number(r.width)||0));
+            const height=Math.max(1,Math.abs(Number(r.height)||0));
 
-        if(!Number.isFinite(minWidth)) minWidth=120;
-        if(!Number.isFinite(minHeight)) minHeight=14;
+            // Ajuste real para ESTE recuadro. Se permite bajar de 5.5 pt
+            // solamente cuando el nombre es largo.
+            let lo=4.2;
+            let hi=Math.min(9,Math.max(5.5,height*0.62));
 
-        // Búsqueda binaria del mayor tamaño que entra en el recuadro,
-        // dejando 8% de margen para que no se corte el último carácter.
-        let lo=5.5;
-        let hi=Math.min(11,Math.max(6,minHeight*0.68));
+            for(let k=0;k<26;k++){
+              const mid=(lo+hi)/2;
+              const measured=font.widthOfTextAtSize(value,mid);
+              if(measured<=width*0.88) lo=mid;
+              else hi=mid;
+            }
 
-        for(let k=0;k<25;k++){
-          const mid=(lo+hi)/2;
-          const measured=FORM_FONT.widthOfTextAtSize(value,mid);
-          if(measured<=minWidth*0.92) lo=mid;
-          else hi=mid;
+            let size=Math.min(9,Math.max(4.2,lo));
+
+            // Para nombres de longitud normal evitamos que queden
+            // innecesariamente pequeños.
+            if(value.length<=20) size=Math.max(5.0,size);
+
+            return PDFLib.drawText(value,{
+              x:Math.max(1.5,(width-font.widthOfTextAtSize(value,size))/2),
+              y:Math.max(1.5,(height-font.heightAtSize(size))/2),
+              size,
+              font,
+              color:PDFLib.rgb(0,0,0)
+            });
+          });
+        }else{
+          const widgets=field.getWidgets ? (field.getWidgets()||[]) : [];
+          let minWidth=Infinity,minHeight=Infinity;
+          widgets.forEach(w=>{
+            const r=w.getRectangle();
+            const width=Math.abs(Number(r.width)||0);
+            const height=Math.abs(Number(r.height)||0);
+            if(width>0)minWidth=Math.min(minWidth,width);
+            if(height>0)minHeight=Math.min(minHeight,height);
+          });
+
+          if(!Number.isFinite(minWidth))minWidth=120;
+          if(!Number.isFinite(minHeight))minHeight=14;
+
+          let lo=5.0,hi=Math.min(11,Math.max(6,minHeight*0.68));
+          for(let k=0;k<25;k++){
+            const mid=(lo+hi)/2;
+            const measured=FORM_FONT.widthOfTextAtSize(value,mid);
+            if(measured<=minWidth*0.92)lo=mid;
+            else hi=mid;
+          }
+
+          const size=Math.min(11,Math.max(5.0,lo));
+          field.setFontSize(size);
+          field.setAlignment(PDFLib.TextAlignment.Left);
+          field.updateAppearances(FORM_FONT);
         }
-
-        const size=Math.min(11,Math.max(5.5,lo));
-        field.setFontSize(size);
-        field.setAlignment(PDFLib.TextAlignment.Left);
-        field.updateAppearances(FORM_FONT);
       }catch(e){
-        console.warn("No se pudo ajustar tamaño:",e);
+        console.warn("No se pudo ajustar apariencia:",e);
       }
     });
   }catch(e){
-    console.warn("No se pudieron ajustar los tamaños:",e);
+    console.warn("No se pudieron ajustar apariencias:",e);
   }
 
   // TERCERO: solo lectura, sin flatten().
