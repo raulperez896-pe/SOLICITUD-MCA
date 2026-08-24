@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v27">
+<meta name="generator-build" content="2026-08-24-v28">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -338,14 +338,9 @@ async function generate(){
   text(f,"DIRECCION TRABAJO",c.direccion);text(f,"DISTRITO TRABAJO",c.distrito);text(f,"PROVINCIA TRABAJO",c.provincia);text(f,"DEPARTAMENTO TRABAJO",c.departamento);text(f,"TIEMPO DE RESIDENCIA","10 AÑOS");
   
   // Convertir todos los campos a contenido fijo: el PDF final NO será editable.
-  try{f.flatten({updateFieldAppearances:true})}catch(_){f.flatten()}
-  // Convertir el formulario en una impresión fija: el PDF final NO será editable.
   try{
-    f.flatten({updateFieldAppearances:false});
-  }catch(_){
-    try{f.flatten()}catch(e){console.warn("No se pudo aplanar el formulario:",e)}
-  }
-  const out=await d.save(),url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
+  }catch(e){console.warn("No se pudo activar solo lectura:",e)}
+  const out=await d.save({useObjectStreams:false}),url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\dA-Za-z_-]/g,""),safe=c.convenio.replace(/[^\wáéíóúñÁÉÍÓÚÑ -]/g,"").replace(/\s+/g,"_");
   const a=document.createElement("a");a.href=url;a.download=`Solicitud_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);status("PDF generado correctamente.","ok");
