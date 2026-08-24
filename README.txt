@@ -1,13 +1,5 @@
-VERSION 2.0
-Corrección de Domicilio actual.
-
-Los desplegables ahora se envían explícitamente al PDF:
-- Departamento -> DEPARTAMENTO
-- Provincia -> PROVINCIA
-- Distrito -> DISTRITO
-- Dirección -> DIRECCION
-
-La selección se mantiene aunque no exista un input de texto visible para
-Departamento/Provincia/Distrito.
-
+VERSION 2.1
+Ajuste automático del texto en los recuadros del PDF.
+El tamaño de cada dato se adapta al ancho/alto real del campo AcroForm.
+Los textos largos se reducen para evitar que se corten o salgan del recuadro.
 Subir únicamente index.html a GitHub Pages.

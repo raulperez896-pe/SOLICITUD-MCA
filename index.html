@@ -237,7 +237,27 @@ async function prepare(){
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
-function text(f,n,v){if(!fieldNames.has(n))return;try{f.getTextField(n).setText(v??"")}catch(e){}}
+function text(f,n,v){
+ if(!fieldNames.has(n))return;
+ try{
+  const tf=f.getTextField(n);
+  const value=String(v??"");
+  tf.setText(value);
+  const widgets=tf.getWidgets();
+  if(widgets && widgets.length){
+   const rect=widgets[0].getRectangle();
+   const width=Math.abs(Number(rect.width)||0);
+   const height=Math.abs(Number(rect.height)||0);
+   let size=Math.min(10,Math.max(6,height*0.62));
+   if(width>0 && value.length>0){
+    const factor=0.55;
+    size=Math.min(size,width/(Math.max(1,value.length)*factor));
+   }
+   size=Math.min(10,Math.max(5.5,size));
+   try{tf.setFontSize(size)}catch(_){}
+  }
+ }catch(e){}
+}
 function group(f,names,selected){names.forEach(n=>{if(fieldNames.has(n))checkbox(f,n,n===selected)})}
 function values(){const o={...AUTO_VALUES};document.querySelectorAll("[data-field]").forEach(i=>o[i.dataset.field]=i.value);return o}
 async function generate(){
