@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v4.16">
+<meta name="generator-build" content="2026-08-24-v418">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -740,44 +740,7 @@ async function generateCarta(){
 
   // Campos de banco/comercial ya establecidos en la plantilla.
   put("Canal de colocación","MASTER CENTER AMERICAS");
-  // La plantilla tiene el supervisor como widget sin nombre y el promotor como
-  // campo PROMOTOR. Para evitar cruces con el texto fijo de la plantilla,
-  // limpiamos visualmente ambos espacios y dibujamos una sola vez cada nombre.
-  try{
-    const cartaPage3=d.getPages()[2];
-    const cartaFont=font;
-    const supervisor=String(v["SUPERVISORA"]||"").trim();
-    const promoter=String(v["PROMOTOR"]||"").trim();
-    const dniSupervisor=String(v["DNI SUPERVISORA"]||"").trim();
-    const black=PDFLib.rgb(0,0,0);
-    const white=PDFLib.rgb(1,1,1);
-    if(cartaPage3){
-      // Espacio exacto del supervisor (widget sin nombre): [221.76,369.96]-[407.803,395.16].
-      cartaPage3.drawRectangle({x:222,y:370,width:185.8,height:24.9,color:white});
-      // Espacio exacto del promotor: [417.634,369.884]-[587.955,394.687].
-      cartaPage3.drawRectangle({x:418,y:370,width:169.5,height:24.4,color:white});
-
-      const fitText=(txt,maxW,maxSize=8,minSize=5.2)=>{
-        let size=maxSize;
-        while(size>minSize && cartaFont.widthOfTextAtSize(txt,size)>maxW) size-=0.2;
-        return size;
-      };
-      if(supervisor){
-        const size=fitText(supervisor,176,8,5.2);
-        const tw=cartaFont.widthOfTextAtSize(supervisor,size);
-        cartaPage3.drawText(supervisor,{x:222+(185.8-tw)/2,y:379.0,size,font:cartaFont,color:black});
-      }
-      if(promoter){
-        const size=fitText(promoter,160,8,5.2);
-        const tw=cartaFont.widthOfTextAtSize(promoter,size);
-        cartaPage3.drawText(promoter,{x:418+(169.5-tw)/2,y:379.0,size,font:cartaFont,color:black});
-      }
-      // El campo PROMOTOR se vacía para que no vuelva a pintar encima del texto dibujado.
-      try{ f.getTextField("PROMOTOR").setText(""); }catch(_){ }
-      // DNI de la supervisora se conserva en su campo identificado.
-      put("DNI SUPERVISORA",dniSupervisor);
-    }
-  }catch(e){console.warn("No se pudieron dibujar supervisor/promotor:",e)}
+  // Supervisor/promotor se dibujan al final, después de actualizar las apariencias de los campos.
 
   // Ajustar tamaño y apariencias para que las entidades y números no se corten.
   fields.forEach(field=>{
@@ -796,6 +759,58 @@ async function generateCarta(){
       try{field.setFontSize(size);field.setAlignment(PDFLib.TextAlignment.Left);field.updateAppearances(font)}catch(_){}
     }catch(_){}
   });
+
+  // IMPORTANTE: dibujar supervisor y promotor DESPUÉS de actualizar las apariencias
+  // de los campos. La plantilla trae texto fijo/valores de widgets en esta zona;
+  // si se dibuja antes, los campos pueden volver a pintarse encima.
+  try{
+    const cartaPage3=d.getPages()[2];
+    const cartaFont=font;
+    const supervisor=String(v["SUPERVISORA"]||"").trim();
+    const promoter=String(v["PROMOTOR"]||"").trim();
+    if(cartaPage3){
+      const black=PDFLib.rgb(0,0,0);
+      const white=PDFLib.rgb(1,1,1);
+      // Borra únicamente el texto que ocupa las dos zonas de nombres,
+      // conservando bordes, etiquetas y la barra separadora.
+      cartaPage3.drawRectangle({x:222,y:370,width:185.8,height:24.9,color:white});
+      cartaPage3.drawRectangle({x:418,y:370,width:169.5,height:24.4,color:white});
+      const fitText=(txt,maxW,maxSize=8,minSize=4.8)=>{
+        let size=maxSize;
+        while(size>minSize && cartaFont.widthOfTextAtSize(txt,size)>maxW) size-=0.15;
+        return size;
+      };
+      if(supervisor){
+        const size=fitText(supervisor,176,8,4.8);
+        const tw=cartaFont.widthOfTextAtSize(supervisor,size);
+        cartaPage3.drawText(supervisor,{x:222+(185.8-tw)/2,y:379.0,size,font:cartaFont,color:black});
+      }
+      if(promoter){
+        const size=fitText(promoter,160,8,4.8);
+        const tw=cartaFont.widthOfTextAtSize(promoter,size);
+        cartaPage3.drawText(promoter,{x:418+(169.5-tw)/2,y:379.0,size,font:cartaFont,color:black});
+      }
+
+      // Firma del supervisor: reemplazar el texto fijo "NOMBRE DEL SUPERVISOR"
+      // de la plantilla y dibujar el nombre real ingresado en el formulario.
+      // Coordenadas de la firma inferior de la página 3.
+      if(supervisor){
+        cartaPage3.drawRectangle({
+          x:268, y:453.2, width:103, height:17.2,
+          color:white
+        });
+        const sigSize=fitText(supervisor,98,7.2,4.2);
+        const sigW=cartaFont.widthOfTextAtSize(supervisor,sigSize);
+        cartaPage3.drawText(supervisor,{
+          x:268+(103-sigW)/2,
+          y:458.2,
+          size:sigSize,
+          font:cartaFont,
+          color:black
+        });
+      }
+    }
+  }catch(e){console.warn("No se pudieron dibujar supervisor/promotor al final:",e)}
 
   // El documento final se deja solo lectura para evitar edición accidental.
   fields.forEach(field=>{try{field.enableReadOnly()}catch(_){}});

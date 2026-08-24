@@ -90,3 +90,9 @@ CAMBIO v4.15: Las filas de préstamos/disposición y tarjetas ahora son bloques 
 
 
 CAMBIO v4.16: Se corrigió la Carta de Subrogación en página 3. El nombre del supervisor y del promotor se limpian visualmente en sus recuadros y se dibujan una sola vez, centrados y con tamaño adaptativo. Se evita que el texto fijo/valor previo del PDF se cruce con los nombres. El DNI de la supervisora continúa usando su campo identificado.
+
+
+CAMBIO v4.17: Supervisor y promotor de la Carta de Subrogación se dibujan al final, después de actualizar apariencias de campos, para impedir que el texto fijo o los widgets de la plantilla se crucen con los datos. Se limpia visualmente solo la zona de nombres y se dibuja una sola vez cada dato.
+
+
+CAMBIO v4.18: En la firma inferior de la Carta de Subrogación se elimina visualmente el texto fijo NOMBRE DEL SUPERVISOR y se dibuja el nombre real del supervisor ingresado en el formulario, con ajuste automático de tamaño para encajar en el espacio de la firma.
