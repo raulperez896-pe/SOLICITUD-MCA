@@ -61,3 +61,7 @@ La Fecha de nacimiento se elimina de la pantalla del apartado DPS porque ya se c
 
 
 CAMBIO v4.7: CORRECCIÓN REAL DEL CUESTIONARIO CONDICIONAL. Los listeners ahora se ejecutan dentro del script antes de prepare(); se eliminó código que había quedado después de </html>. Las preguntas Mes de gestación, Cigarros/día y Actividad de riesgo permanecen ocultas hasta seleccionar SÍ.
+
+
+CAMBIO v4.10:
+El campo NOMBRES Y APELLIDOS se construye exactamente como: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO, separados por un solo espacio.
