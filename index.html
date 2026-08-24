@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v46">
+<meta name="generator-build" content="2026-08-24-v47">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -241,19 +241,18 @@ function renderFields(){
  }
 }
 function updateDpsConditionalFields(){
- document.querySelectorAll("[data-condition]").forEach(el=>{
-   const condition=el.dataset.condition||"";
-   const parts=condition.split(":");
-   const source=parts[0], expected=(parts[1]||"").toUpperCase();
-   const input=document.querySelector('[data-field="'+source+'"]');
-   const show=input && String(input.value||"").toUpperCase()===expected;
-   const wrapper=el.closest(".dps-q")||el.parentElement;
-   if(wrapper){
-     wrapper.classList.toggle("dps-conditional-hidden",!show);
-   }
-   if(!show && el.value) el.value="";
- });
+  document.querySelectorAll("[data-condition]").forEach(el=>{
+    const [source,expectedRaw]=(el.dataset.condition||"").split(":");
+    const expected=(expectedRaw||"").trim().toUpperCase();
+    const sourceInput=document.querySelector('[data-field="'+source+'"]');
+    const answer=sourceInput ? String(sourceInput.value||"").trim().toUpperCase() : "";
+    const show=answer===expected;
+    const wrapper=el.closest(".dps-q") || el.parentElement;
+    if(wrapper) wrapper.classList.toggle("dps-conditional-hidden",!show);
+    if(!show) el.value="";
+  });
 }
+
 function populate(){
  const s=$("convenio");s.innerHTML='<option value="">Seleccionar convenio...</option>';
  CONVENIOS.forEach((c,i)=>{const o=document.createElement("option");o.value=i;o.textContent=c.convenio;s.appendChild(o)});
@@ -719,13 +718,15 @@ function clearAll(){
  status(`Lista de convenios cargada: ${CONVENIOS.length} convenios.`,"ok");
 }
 $("convenio").addEventListener("change",conventionChange);$("generar").addEventListener("click",generate);$("generarDPS").addEventListener("click",generateDPS);$("limpiar").addEventListener("click",clearAll);
+
+  // DPS: mostrar preguntas dependientes únicamente cuando la respuesta sea SÍ.
+  document.addEventListener("change",e=>{
+    const field=e.target && e.target.dataset ? e.target.dataset.field : "";
+    if(/^DPS_Q/.test(field||"")) updateDpsConditionalFields();
+  });
+  updateDpsConditionalFields();
+
 prepare();
 </script>
 </body>
-</html>document.addEventListener("change",e=>{
- if(e.target && e.target.dataset && /^DPS_Q/.test(e.target.dataset.field||"")){
-   updateDpsConditionalFields();
- }
-});
-
-window.addEventListener("DOMContentLoaded",()=>{updateDpsConditionalFields();});
+</html>

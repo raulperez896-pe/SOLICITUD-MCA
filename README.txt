@@ -1,4 +1,4 @@
-VERSION 4.6
+VERSION 4.7
 
 SE INCORPORA DPS (DECLARACIÓN PERSONAL DE SEGUROS)
 
@@ -58,3 +58,6 @@ El cuestionario DPS ahora muestra las preguntas dependientes únicamente cuando 
 
 CAMBIO v4.6:
 La Fecha de nacimiento se elimina de la pantalla del apartado DPS porque ya se captura en Datos a llenar. El DPS la reutiliza automáticamente al generar el PDF. Regla aplicada: los datos repetidos no se muestran nuevamente; solo aparecen en pantalla los datos que realmente requieren captura para el DPS.
+
+
+CAMBIO v4.7: CORRECCIÓN REAL DEL CUESTIONARIO CONDICIONAL. Los listeners ahora se ejecutan dentro del script antes de prepare(); se eliminó código que había quedado después de </html>. Las preguntas Mes de gestación, Cigarros/día y Actividad de riesgo permanecen ocultas hasta seleccionar SÍ.
