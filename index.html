@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v45">
+<meta name="generator-build" content="2026-08-24-v46">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -82,8 +82,9 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <p class="hint">Estos datos corresponden exclusivamente al DPS. Los datos personales y del crédito que ya fueron registrados se reutilizan automáticamente. El cónyuge no interviene en esta operación y no se solicitarán sus datos.</p>
 
 <div class="subsection">Datos del titular para DPS</div>
+<p class="hint">Los datos que ya se ingresaron anteriormente y se reutilizan automáticamente en el DPS no se muestran nuevamente aquí.</p>
 <div class="grid">
-  <label><span>Fecha de nacimiento</span><input type="date" id="dpsFechaNacimiento" readonly></label>
+  
   <label><span>Nacionalidad</span>
     <select data-field="NACIONALIDAD">
       <option value="PERUANO" selected>PERUANO</option>
@@ -252,11 +253,6 @@ function updateDpsConditionalFields(){
    }
    if(!show && el.value) el.value="";
  });
-}
-function syncDpsBirthDate(){
- const main=document.querySelector('[data-field="FECHA DE NACIMIENTO"]');
- const dps=document.getElementById("dpsFechaNacimiento");
- if(main && dps) dps.value=main.value||"";
 }
 function populate(){
  const s=$("convenio");s.innerHTML='<option value="">Seleccionar convenio...</option>';
@@ -726,10 +722,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 </body>
-</html>document.addEventListener("input",e=>{
- if(e.target && e.target.dataset && e.target.dataset.field==="FECHA DE NACIMIENTO") syncDpsBirthDate();
-});
-document.addEventListener("change",e=>{
+</html>document.addEventListener("change",e=>{
  if(e.target && e.target.dataset && /^DPS_Q/.test(e.target.dataset.field||"")){
    updateDpsConditionalFields();
  }

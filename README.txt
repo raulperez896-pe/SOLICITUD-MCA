@@ -1,4 +1,4 @@
-VERSION 4.5
+VERSION 4.6
 
 SE INCORPORA DPS (DECLARACIÓN PERSONAL DE SEGUROS)
 
@@ -54,3 +54,7 @@ Se agregó SEXO dentro del apartado DPS, con selección M - MASCULINO o F - FEME
 
 CAMBIO v4.5:
 El cuestionario DPS ahora muestra las preguntas dependientes únicamente cuando la respuesta anterior es SÍ. Si se selecciona NO, la pregunta adicional se oculta y su valor se limpia. Actualmente: embarazo -> mes de gestación; fuma -> cigarros/día; actividad de riesgo -> cuál.
+
+
+CAMBIO v4.6:
+La Fecha de nacimiento se elimina de la pantalla del apartado DPS porque ya se captura en Datos a llenar. El DPS la reutiliza automáticamente al generar el PDF. Regla aplicada: los datos repetidos no se muestran nuevamente; solo aparecen en pantalla los datos que realmente requieren captura para el DPS.
