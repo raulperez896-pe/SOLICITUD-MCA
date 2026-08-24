@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v34">
+<meta name="generator-build" content="2026-08-24-v35">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -353,6 +353,58 @@ async function generate(){
     });
   }catch(e){
     console.warn("No se pudieron ajustar apariencias:",e);
+  }
+
+  // CORRECCIÓN HOJA 6:
+  // El widget AcroForm de NOMBRES Y APELLIDOS en la página 6 conserva
+  // una apariencia propia que no respeta setFontSize(). En vez de seguir
+  // luchando contra esa apariencia, cubrimos SOLO el área de texto del
+  // recuadro y dibujamos el nombre directamente sobre la página.
+  // Así el tamaño es real y el texto nunca se recorta.
+  try{
+    const pages=d.getPages();
+    const page6=pages[5];
+    const fullName=String(v["NOMBRES Y APELLIDOS"]||"").trim();
+
+    if(page6 && fullName){
+      const x=24.519;
+      const y=364.019;
+      const w=132.661;
+      const h=16.708;
+      const padX=2.0;
+      const padY=1.5;
+
+      // Fondo blanco solamente dentro del recuadro del nombre.
+      page6.drawRectangle({
+        x:x+0.5,
+        y:y+0.5,
+        width:w-1,
+        height:h-1,
+        color:PDFLib.rgb(1,1,1),
+        opacity:1
+      });
+
+      // Tamaño calculado directamente para ESTE espacio.
+      let size=6.2;
+      const maxWidth=w-(padX*2);
+      const measured=FORM_FONT.widthOfTextAtSize(fullName,size);
+      if(measured>maxWidth){
+        size=Math.max(4.2,size*(maxWidth/measured));
+      }
+
+      const textWidth=FORM_FONT.widthOfTextAtSize(fullName,size);
+      const textHeight=FORM_FONT.heightAtSize(size);
+
+      page6.drawText(fullName,{
+        x:x+Math.max(padX,(w-textWidth)/2),
+        y:y+Math.max(padY,(h-textHeight)/2),
+        size:size,
+        font:FORM_FONT,
+        color:PDFLib.rgb(0,0,0)
+      });
+    }
+  }catch(e){
+    console.warn("No se pudo corregir NOMBRES en hoja 6:",e);
   }
 
   // TERCERO: solo lectura, sin flatten().
