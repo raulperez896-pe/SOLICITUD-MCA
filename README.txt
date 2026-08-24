@@ -87,3 +87,6 @@ CAMBIOS v4.14:
 
 
 CAMBIO v4.15: Las filas de préstamos/disposición y tarjetas ahora son bloques independientes en CSS. Cada nueva obligación se inserta exactamente debajo de la anterior, manteniendo sus siete columnas alineadas. Se eliminó display:contents que mezclaba las filas.
+
+
+CAMBIO v4.16: Se corrigió la Carta de Subrogación en página 3. El nombre del supervisor y del promotor se limpian visualmente en sus recuadros y se dibujan una sola vez, centrados y con tamaño adaptativo. Se evita que el texto fijo/valor previo del PDF se cruce con los nombres. El DNI de la supervisora continúa usando su campo identificado.
