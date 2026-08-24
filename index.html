@@ -86,7 +86,7 @@ personales:["DNI","FECHA DE NACIMIENTO","APELLIDO PATERNO","APELLIDO MATERNO","P
 laborales:["CARGO","FECHA DE INGRESO","INGRESO NETO"],
 operacion:["OFICINA","CUENTA ASOCIADA","MONTO","TASA","PLAZO","FECHA"],
 gestion:["JEFA DE NEGOCIO","PROMOTOR","DNI PROMOTOR","SUPERVISORA","DNI SUPERVISORA"],
-final:["NOMBRES Y APELLIDOS","CIUDAD","DIA","MES"]
+final:["CIUDAD","DIA","MES"]
 };
 const DEFAULTS={"N DE DEPENDIENTES":"0","CIUDAD":"LIMA"};
 
@@ -162,6 +162,19 @@ function setupGeography(){
  $("domDistrito").addEventListener("change",()=>setField("DISTRITO",$("domDistrito").value));
 }
 
+
+function buildFullName(){
+ const first=(getFieldValue("PRIMER NOMBRE")||"").trim();
+ const second=(getFieldValue("SEGUNDO NOMBRE")||"").trim();
+ const paternal=(getFieldValue("APELLIDO PATERNO")||"").trim();
+ const maternal=(getFieldValue("APELLIDO MATERNO")||"").trim();
+ return [first,second,paternal,maternal].filter(Boolean).join(" ");
+}
+function getFieldValue(name){
+ const el=[...document.querySelectorAll("[data-field]")].find(x=>x.dataset.field===name);
+ return el ? el.value : "";
+}
+
 function conventionChange(){
  const i=$("convenio").value;if(i===""){$("gracia").value="";$("info").classList.add("hidden");return}
  const c=CONVENIOS[Number(i)],g=grace(c.gracia);$("gracia").value=g;
@@ -204,6 +217,10 @@ async function generate(){
   if($("estadoCivil").value)group(f,CHECK_GROUPS.estadoCivil,$("estadoCivil").value);
   const g=grace(c.gracia);if(g)group(f,CHECK_GROUPS.gracia,g);
   const v=values();
+  // NOMBRES Y APELLIDOS se genera automáticamente:
+  // PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO
+  // separados por un espacio. No se muestra como campo editable.
+  v["NOMBRES Y APELLIDOS"]=buildFullName();
   const plazoBase=parseInt(String(v["PLAZO"]||"").replace(/[^0-9]/g,""),10);
   const graciaMeses=parseInt(String(c.gracia||"").match(/\d+/)?.[0]||"0",10);
   if(Number.isFinite(plazoBase) && plazoBase>0) v["PLAZO"]=String(plazoBase+graciaMeses);
