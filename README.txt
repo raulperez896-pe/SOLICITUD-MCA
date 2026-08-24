@@ -1,20 +1,12 @@
-VERSION 1.5 - PAGINA DE UN SOLO ARCHIVO
+VERSION 1.6 - ARCHIVO ÚNICO
 
-SUBIR A GITHUB SOLAMENTE:
-index.html
-
-No necesita carpeta img, PDF ni Excel.
-Los 234 convenios, los dos logos y el PDF ya están integrados dentro del index.html.
-
-Al seleccionar un convenio se cargan:
-- Periodo de gracia
-- Fecha de pago
-- RUC
-- Empresa = nombre del convenio
-- Giro
-- Dirección trabajo
-- Distrito trabajo
-- Provincia trabajo
-- Departamento trabajo
-
-Publicar index.html como GitHub Pages desde main / root.
+Cambios:
+- Retirados NUMERO DE TRABAJO e INT TRABAJO.
+- FECHA = fecha actual de creación (DD/MM/AAAA).
+- DIA = día actual en números.
+- MES = mes actual en números (01-12).
+- Domicilio en cascada: Departamento -> Provincia -> Distrito.
+- Fuente geográfica: DISTRITOS PROVINCIA DEPARTAMENT.xls.
+- PLAZO se suma al periodo de gracia: 72 + 2 = 74 meses.
+- Convenios, logos y PDF permanecen integrados en un único index.html.
+- Combinaciones geográficas incorporadas: 1856.

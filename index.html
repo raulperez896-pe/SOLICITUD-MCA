@@ -54,7 +54,14 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <p class="hint">Los datos del convenio no se editan manualmente; se cargan al seleccionar el convenio.</p>
 
 <div class="subsection">Datos personales</div><div id="personales" class="grid"></div>
-<div class="subsection">Domicilio actual</div><div id="domicilio" class="grid"></div>
+<div class="subsection">Domicilio actual</div>
+<div class="grid">
+<label><span>Departamento <b>*</b></span><select id="domDepartamento"><option value="">Seleccionar departamento...</option></select></label>
+<label><span>Provincia <b>*</b></span><select id="domProvincia" disabled><option value="">Seleccionar provincia...</option></select></label>
+<label><span>Distrito <b>*</b></span><select id="domDistrito" disabled><option value="">Seleccionar distrito...</option></select></label>
+<label><span>Dirección</span><input type="text" data-field="DIRECCION" placeholder="DIRECCION"></label>
+<label><span>Celular</span><input type="text" data-field="CELULAR" placeholder="CELULAR"></label>
+</div>
 <div class="subsection">Datos laborales</div><div id="laborales" class="grid"></div>
 <div class="subsection">Datos de la operación</div><div id="operacion" class="grid"></div>
 <div class="subsection">Gestión comercial</div><div id="gestion" class="grid"></div>
@@ -76,13 +83,23 @@ const BBVA64="iVBORw0KGgoAAAANSUhEUgAACAAAAALHCAYAAAAaOqJyAAAQAElEQVR4AezdBbwtV3
 
 const GROUPS={
 personales:["DNI","FECHA DE NACIMIENTO","APELLIDO PATERNO","APELLIDO MATERNO","PRIMER NOMBRE","SEGUNDO NOMBRE","PROFESIÓN","N DE DEPENDIENTES","EMAIL"],
-domicilio:["DIRECCION","DISTRITO","DEPARTAMENTO","PROVINCIA","CELULAR"],
-laborales:["CARGO","FECHA DE INGRESO","INGRESO NETO","NUMERO DE TRABAJO","INT TRABAJO"],
+laborales:["CARGO","FECHA DE INGRESO","INGRESO NETO"],
 operacion:["OFICINA","CUENTA ASOCIADA","MONTO","TASA","PLAZO","FECHA"],
 gestion:["JEFA DE NEGOCIO","PROMOTOR","DNI PROMOTOR","SUPERVISORA","DNI SUPERVISORA"],
 final:["NOMBRES Y APELLIDOS","CIUDAD","DIA","MES"]
 };
 const DEFAULTS={"N DE DEPENDIENTES":"0","CIUDAD":"LIMA"};
+
+function applyToday(){
+ const now=new Date();
+ const day=String(now.getDate()).padStart(2,"0");
+ const month=String(now.getMonth()+1).padStart(2,"0");
+ const year=String(now.getFullYear());
+ setField("FECHA",`${day}/${month}/${year}`);
+ setField("DIA",day);
+ setField("MES",month);
+}
+
 const FIXED_CHECKS=["FAMILIAR","DEPENDIENTE","CORREO ELECTRÓNICO","Afiliar  Enviar","ELECTRÓNICO","No","No_2","No_3","No_4","CANAL DE VENTA  OFICINA"];
 const FIXED_TEXT={"TIEMPO DE RESIDENCIA":"10 AÑOS"};
 const CHECK_GROUPS={
@@ -119,6 +136,32 @@ function populate(){
 }
 function grace(v){v=String(v||"").toLowerCase();return v.includes("2")?"2 MESES":v.includes("1")?"1 MES":""}
 function setField(name,value){const el=[...document.querySelectorAll("[data-field]")].find(x=>x.dataset.field===name);if(el)el.value=value??""}
+
+function fillSelect(selectId,values,placeholder){
+ const s=$(selectId);
+ s.innerHTML=`<option value="">${placeholder}</option>`;
+ [...new Set(values)].sort((a,b)=>a.localeCompare(b,"es")).forEach(v=>{
+  const o=document.createElement("option");o.value=v;o.textContent=v;s.appendChild(o);
+ });
+ s.disabled=false;
+}
+function setupGeography(){
+ fillSelect("domDepartamento",GEO.map(x=>x.departamento),"Seleccionar departamento...");
+ $("domProvincia").disabled=true;$("domDistrito").disabled=true;
+ $("domDepartamento").addEventListener("change",()=>{
+  const d=$("domDepartamento").value;
+  fillSelect("domProvincia",GEO.filter(x=>x.departamento===d).map(x=>x.provincia),"Seleccionar provincia...");
+  $("domDistrito").innerHTML='<option value="">Seleccionar distrito...</option>';$("domDistrito").disabled=true;
+  setField("DEPARTAMENTO",d);setField("PROVINCIA","");setField("DISTRITO","");
+ });
+ $("domProvincia").addEventListener("change",()=>{
+  const d=$("domDepartamento").value,p=$("domProvincia").value;
+  fillSelect("domDistrito",GEO.filter(x=>x.departamento===d&&x.provincia===p).map(x=>x.distrito),"Seleccionar distrito...");
+  setField("PROVINCIA",p);setField("DISTRITO","");
+ });
+ $("domDistrito").addEventListener("change",()=>setField("DISTRITO",$("domDistrito").value));
+}
+
 function conventionChange(){
  const i=$("convenio").value;if(i===""){$("gracia").value="";$("info").classList.add("hidden");return}
  const c=CONVENIOS[Number(i)],g=grace(c.gracia);$("gracia").value=g;
@@ -138,7 +181,7 @@ async function loadPDFLib(){
 }
 async function prepare(){
  try{
-  setupLogos();renderFields();populate();
+  setupLogos();renderFields();populate();setupGeography();applyToday();
   pdfBytes=bytes64(PDF64);
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
@@ -154,13 +197,17 @@ async function generate(){
   const i=$("convenio").value;if(i==="")throw Error("Selecciona un convenio.");
   if(!$("tipoOperacion").value||!$("modalidad").value)throw Error("Selecciona Tipo de operación y Modalidad del seguro.");
   if(!PDFLibLoaded)throw Error("La librería PDF todavía no está disponible.");
-  const c=CONVENIOS[Number(i)],d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();
+  applyToday(); const c=CONVENIOS[Number(i)],d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();
   FIXED_CHECKS.forEach(n=>checkbox(f,n,true));text(f,"TIEMPO DE RESIDENCIA","10 AÑOS");
   group(f,CHECK_GROUPS.tipoOperacion,$("tipoOperacion").value);group(f,CHECK_GROUPS.modalidad,$("modalidad").value);group(f,CHECK_GROUPS.tipoDocumento,$("tipoDocumento").value);
   if($("educacion").value)group(f,CHECK_GROUPS.educacion,$("educacion").value);
   if($("estadoCivil").value)group(f,CHECK_GROUPS.estadoCivil,$("estadoCivil").value);
   const g=grace(c.gracia);if(g)group(f,CHECK_GROUPS.gracia,g);
-  const v=values();Object.entries(v).forEach(([n,x])=>text(f,n,x));
+  const v=values();
+  const plazoBase=parseInt(String(v["PLAZO"]||"").replace(/[^0-9]/g,""),10);
+  const graciaMeses=parseInt(String(c.gracia||"").match(/\d+/)?.[0]||"0",10);
+  if(Number.isFinite(plazoBase) && plazoBase>0) v["PLAZO"]=String(plazoBase+graciaMeses);
+  Object.entries(v).forEach(([n,x])=>text(f,n,x));
   text(f,"EMPRESA",c.convenio);text(f,"RUC",c.ruc);text(f,"GIRO",c.giro);text(f,"FECHA DE PAGO",c.fechaPago);
   text(f,"DIRECCION TRABAJO",c.direccion);text(f,"DISTRITO TRABAJO",c.distrito);text(f,"PROVINCIA TRABAJO",c.provincia);text(f,"DEPARTAMENTO TRABAJO",c.departamento);text(f,"TIEMPO DE RESIDENCIA","10 AÑOS");
   f.updateFieldAppearances();
@@ -170,7 +217,16 @@ async function generate(){
   setTimeout(()=>URL.revokeObjectURL(url),3000);status("PDF generado correctamente.","ok");
  }catch(e){console.error(e);status(e.message||"No se pudo generar el PDF.","error")}
 }
-function clearAll(){ $("form").reset();document.querySelectorAll("[data-field]").forEach(i=>i.value=DEFAULTS[i.dataset.field]||"");$("gracia").value="";$("info").classList.add("hidden");status(`Lista de convenios cargada: ${CONVENIOS.length} convenios.`,"ok") }
+function clearAll(){
+ $("form").reset();
+ document.querySelectorAll("[data-field]").forEach(i=>i.value=DEFAULTS[i.dataset.field]||"");
+ $("gracia").value="";$("info").classList.add("hidden");
+ $("domProvincia").innerHTML='<option value="">Seleccionar provincia...</option>';$("domProvincia").disabled=true;
+ $("domDistrito").innerHTML='<option value="">Seleccionar distrito...</option>';$("domDistrito").disabled=true;
+ $("domDepartamento").value="";
+ applyToday();
+ status(`Lista de convenios cargada: ${CONVENIOS.length} convenios.`,"ok");
+}
 $("convenio").addEventListener("change",conventionChange);$("generar").addEventListener("click",generate);$("limpiar").addEventListener("click",clearAll);
 prepare();
 </script>
