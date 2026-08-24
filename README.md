@@ -1,36 +1,38 @@
-# Generador de Solicitud BBVA v1.2
+# Generador de Solicitud BBVA v1.3
 
-## Estructura obligatoria
+Esta versión corrige dos problemas de las versiones anteriores:
 
-Subir estos archivos directamente a la raíz del repositorio:
+1. La plantilla PDF ya no se solicita mediante una ruta de GitHub Pages.
+   El PDF está integrado dentro de `app.js`, por lo que no depende de `assets/SOLICITUD.pdf`.
+2. Los datos a llenar se muestran directamente desde el inicio. No se espera a detectar el PDF para construir la interfaz.
 
-- index.html
-- styles.css
-- app.js
-- SOLICITUD.pdf
-- .nojekyll
+## Archivos
 
-## Cambio principal de v1.2
+- `index.html`
+- `styles.css`
+- `app.js`
+- `img/logo-mca.png`
+- `img/logo-bbva.png`
 
-La plantilla PDF se encuentra en la raíz y la página la busca con una URL relativa a GitHub Pages:
-
-`./SOLICITUD.pdf`
-
-Esto evita el problema de rutas que estaba produciendo el mensaje "No se pudo cargar assets/SOLICITUD.pdf".
+El PDF está integrado en `app.js`.
 
 ## Interfaz
 
-Se eliminó por completo la sección "Campos automáticos". El usuario solo ve:
+No se muestra la sección de campos automáticos.
 
-1. Selección inicial / desplegables.
-2. Datos a llenar.
+Se muestran:
+- Convenio
+- Tipo de operación
+- Modalidad del seguro
+- Tipo de documento
+- Nivel de educación
+- Estado civil
+- Periodo de gracia
+- Todos los campos de texto habilitados del PDF que deben ser llenados/editados
 
-Las casillas y valores automáticos se aplican únicamente al generar el PDF.
-
-## Automáticos
+## Reglas automáticas al generar
 
 Se marca con X:
-
 - FAMILIAR
 - DEPENDIENTE
 - CORREO ELECTRÓNICO
@@ -43,9 +45,20 @@ Se marca con X:
 - CANAL DE VENTA  OFICINA
 
 Se escribe:
-
 - TIEMPO DE RESIDENCIA = 10 AÑOS
 
-## Publicación
+## Logos
 
-En GitHub Pages, el repositorio debe quedar exactamente con SOLICITUD.pdf en la raíz.
+El encabezado usa los logos proporcionados:
+- MasterCalculadora
+- BBVA
+
+No se muestra número de versión.
+
+## GitHub Pages
+
+Subir la estructura completa manteniendo la carpeta `img`.
+
+No es necesario subir un PDF aparte porque ya está integrado en `app.js`.
+
+La generación usa `pdf-lib` desde CDN. La página intenta primero cdnjs y luego unpkg.
