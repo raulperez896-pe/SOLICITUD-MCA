@@ -84,3 +84,6 @@ CAMBIOS v4.14:
 - Corregido el TC de deudas en US$: el total A/B convierte US$ a soles usando TC y ya no ignora el campo.
 - Carta de Compra de Deuda: se completan PROMOTOR y DNI SUPERVISORA y se dibuja directamente NOMBRE DEL SUPERVISOR y NOMBRE DEL PROMOTOR en página 3.
 - Solicitud SIN SEGURO: corregida la comparación del periodo de gracia para marcar 1 mes o 2 meses según el convenio.
+
+
+CAMBIO v4.15: Las filas de préstamos/disposición y tarjetas ahora son bloques independientes en CSS. Cada nueva obligación se inserta exactamente debajo de la anterior, manteniendo sus siete columnas alineadas. Se eliminó display:contents que mezclaba las filas.

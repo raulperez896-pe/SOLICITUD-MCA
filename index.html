@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v411">
+<meta name="generator-build" content="2026-08-24-v415">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -38,17 +38,18 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .compra-deuda-hidden{display:none!important}
 .compra-deuda-card{border:1px solid #d9e2ec;border-radius:8px;padding:12px;margin-top:12px;background:#fff}
 .compra-deuda-title{font-size:15px;font-weight:700;border-left:4px solid #1976d2;padding:8px 10px;background:#f1f5f9;color:#082b55;margin:8px 0}
-.debt-grid{display:grid;grid-template-columns:1.1fr 2fr 1.25fr 1.2fr 1.2fr 1fr auto;gap:8px;align-items:end}
-.debt-row{display:contents}
+.debt-grid{display:block;width:100%}
+.debt-row{display:grid;grid-template-columns:1.1fr 2fr 1.25fr 1.2fr 1.2fr 1fr auto;gap:8px;align-items:end;width:100%;margin-bottom:8px}
 .debt-grid label{min-width:0}
-.debt-grid .debt-head{font-size:11px;font-weight:700;color:#38516c}
+.debt-grid .debt-head{font-size:11px;font-weight:700;color:#38516c;margin-bottom:4px}
+.debt-row-item{display:grid;grid-template-columns:1.1fr 2fr 1.25fr 1.2fr 1.2fr 1fr auto;gap:8px;align-items:end;width:100%;margin-bottom:8px}
 .debt-total{display:flex;justify-content:flex-end;gap:10px;align-items:center;font-weight:700;margin-top:10px;padding-top:8px;border-top:1px solid #d9e2ec}
 .debt-total input{max-width:180px}
 .debt-usd{display:none}
 .debt-usd.show{display:block}
 .debt-type-note{font-size:11px;color:#61758a;margin:6px 0 10px}
-.debt-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.debt-add{border:0;border-radius:6px;padding:8px 12px;background:#e8f1fb;color:#0b5cad;font-weight:700;cursor:pointer}.debt-remove{border:0;border-radius:6px;padding:7px 9px;background:#f3f4f6;color:#b42318;font-weight:700;cursor:pointer}.debt-row-item{display:contents}
-@media(max-width:950px){.debt-grid{grid-template-columns:1fr 1.5fr 1fr 1fr}.debt-grid .debt-head{display:none}.debt-row{display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr;gap:8px;margin-bottom:8px}.debt-row>*{min-width:0}}
+.debt-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.debt-add{border:0;border-radius:6px;padding:8px 12px;background:#e8f1fb;color:#0b5cad;font-weight:700;cursor:pointer}.debt-remove{border:0;border-radius:6px;padding:7px 9px;background:#f3f4f6;color:#b42318;font-weight:700;cursor:pointer}
+@media(max-width:950px){.debt-grid .debt-head{display:none}.debt-row-item{grid-template-columns:1fr 1.5fr 1fr 1fr;gap:8px}.debt-row-item>*{min-width:0}.debt-row-item .debt-remove{grid-column:auto}.debt-row{display:none}}
 </style>
 </head>
 <body>
