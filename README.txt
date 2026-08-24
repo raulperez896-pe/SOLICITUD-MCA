@@ -1,24 +1,15 @@
-VERSION 2.6
+VERSION 2.7
 
-CAMBIOS:
-1. Ajuste de tamaño de letra más estable:
-   - Usa el recuadro más pequeño del mismo campo.
-   - Mide el ancho real de Helvetica.
-   - Deja margen interior.
-   - Usa updateAppearances estándar para evitar campos que quedan en blanco.
+CORRECCIÓN DE LLENADO + PDF FIJO
 
-2. NOMBRES Y APELLIDOS:
-   - Se genera automáticamente como:
-     PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
-   - Se agregó un fallback directo de los controles visibles.
-
-3. INFORMACIÓN AUTOMÁTICA:
-   - La barra informativa del convenio queda oculta en la página.
-   - Los datos siguen utilizándose internamente y se colocan en el PDF.
-
-4. PDF FINAL:
-   - Antes de guardar se ejecuta flatten().
-   - El PDF descargado queda como impresión fija y NO permite modificar
-     los campos AcroForm.
+- Se vuelve a un método estable para AcroForm:
+  setText -> setFontSize -> updateAppearances.
+- El tamaño se calcula usando el recuadro más pequeño de cada campo.
+- Se utiliza Helvetica embebida.
+- Se ejecuta flatten() DESPUÉS de llenar y actualizar las apariencias.
+- El PDF final NO es editable.
+- Se oculta la barra de información automática en la página.
+- Se mantienen convenios, datos automáticos, domicilio en cascada,
+  nombres y apellidos automáticos, fecha y periodo de gracia.
 
 Subir únicamente index.html a GitHub Pages.

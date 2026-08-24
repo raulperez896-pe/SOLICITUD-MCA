@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v26">
+<meta name="generator-build" content="2026-08-24-v27">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -249,40 +249,42 @@ function text(f,n,v){
   const value=String(v??"");
   const widgets=tf.getWidgets()||[];
 
-  if(value.length===0){
-   tf.setText("");
+  tf.setText(value);
+
+  if(value.length>0 && FORM_FONT){
+   // Un mismo campo puede aparecer varias veces. Usamos el recuadro
+   // más pequeño para garantizar que el contenido sea visible en todos.
+   let minWidth=Infinity, minHeight=Infinity;
+   for(const w of widgets){
+    const r=w.getRectangle();
+    const width=Math.abs(Number(r.width)||0);
+    const height=Math.abs(Number(r.height)||0);
+    if(width>0)minWidth=Math.min(minWidth,width);
+    if(height>0)minHeight=Math.min(minHeight,height);
+   }
+
+   if(!Number.isFinite(minWidth))minWidth=120;
+   if(!Number.isFinite(minHeight))minHeight=14;
+
+   // Buscar el mayor tamaño que cabe dentro del ancho real.
+   let size=Math.min(10,Math.max(6,minHeight*0.60));
+   let lo=5,hi=size;
+   for(let k=0;k<24;k++){
+    const mid=(lo+hi)/2;
+    const measured=FORM_FONT.widthOfTextAtSize(value,mid);
+    if(measured<=minWidth*0.90)lo=mid;
+    else hi=mid;
+   }
+   size=Math.min(10,Math.max(5.5,lo));
+
+   try{tf.setFontSize(size)}catch(_){}
+   try{tf.setAlignment(PDFLib.TextAlignment.Left)}catch(_){}
    try{tf.updateAppearances(FORM_FONT)}catch(_){}
-   return;
+  }else if(FORM_FONT){
+   try{tf.updateAppearances(FORM_FONT)}catch(_){}
   }
-
-  // Usar el recuadro más pequeño de todas las apariciones del campo.
-  let minWidth=Infinity;
-  let minHeight=Infinity;
-  for(const w of widgets){
-   const r=w.getRectangle();
-   minWidth=Math.min(minWidth,Math.abs(Number(r.width)||0));
-   minHeight=Math.min(minHeight,Math.abs(Number(r.height)||0));
-  }
-
-  if(!Number.isFinite(minWidth))minWidth=120;
-  if(!Number.isFinite(minHeight))minHeight=14;
-
-  // Calcular el tamaño real con Helvetica. Dejamos 8% de margen.
-  let size=Math.min(10,Math.max(6,minHeight*0.60));
-  let lo=5,hi=size;
-  for(let k=0;k<22;k++){
-   const mid=(lo+hi)/2;
-   const measured=FORM_FONT.widthOfTextAtSize(value,mid);
-   if(measured<=minWidth*0.92)lo=mid;
-   else hi=mid;
-  }
-  size=Math.min(10,Math.max(5.5,lo));
-
-  try{tf.setFontSize(size)}catch(_){}
-  try{tf.setText(value)}catch(_){}
-  try{tf.updateAppearances(FORM_FONT)}catch(_){}
  }catch(e){
-  console.warn("Campo PDF:",n,e);
+  console.warn("No se pudo llenar el campo PDF:",n,e);
  }
 }
 function group(f,names,selected){names.forEach(n=>{if(fieldNames.has(n))checkbox(f,n,n===selected)})}
@@ -337,6 +339,12 @@ async function generate(){
   
   // Convertir todos los campos a contenido fijo: el PDF final NO será editable.
   try{f.flatten({updateFieldAppearances:true})}catch(_){f.flatten()}
+  // Convertir el formulario en una impresión fija: el PDF final NO será editable.
+  try{
+    f.flatten({updateFieldAppearances:false});
+  }catch(_){
+    try{f.flatten()}catch(e){console.warn("No se pudo aplanar el formulario:",e)}
+  }
   const out=await d.save(),url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\dA-Za-z_-]/g,""),safe=c.convenio.replace(/[^\wáéíóúñÁÉÍÓÚÑ -]/g,"").replace(/\s+/g,"_");
   const a=document.createElement("a");a.href=url;a.download=`Solicitud_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();
