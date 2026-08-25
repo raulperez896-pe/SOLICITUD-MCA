@@ -858,7 +858,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.34 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.35 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1165,7 +1165,7 @@ async function generateDPS(){
   if(tipoDoc==="TIPO C EXT"){
     try{ form.getCheckBox("Otros").check(); }catch(_){}
     // Texto que identifica el tipo de documento, al costado de "Otros".
-    drawTextTop(page,"C. EXT",126.5,173.7,45,8,5);
+    drawFitTop(page,"C. EXT",126.5,173.7,45,8,5);
   }else{
     try{ form.getCheckBox("DNI").check(); }catch(_){}
   }
@@ -1807,7 +1807,7 @@ prepare();
 </script>
 
 <div class="version-footer">
-  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.34</strong>
+  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.35</strong>
 </div>
 
 </body>
