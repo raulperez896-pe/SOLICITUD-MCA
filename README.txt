@@ -99,3 +99,6 @@ CAMBIO v4.18: En la firma inferior de la Carta de Subrogación se elimina visual
 
 
 CAMBIO v4.19: Corrección definitiva de la Carta de Subrogación. Los campos AcroForm se aplanan antes de dibujar Supervisor, Promotor, nombre del supervisor en la firma y DNI del supervisor. Se limpian las zonas originales para impedir textos duplicados o cruzados.
+
+
+CAMBIO v4.20: La firma superior FIRMA DEL CLIENTE queda intacta. Supervisor y promotor solo se dibujan en el recuadro de datos del banco. En la firma inferior se reemplazan exclusivamente NOMBRE DEL SUPERVISOR y DNI SUPERVISOR por los datos reales del formulario, conservando la línea y el cargo.

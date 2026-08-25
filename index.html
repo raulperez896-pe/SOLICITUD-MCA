@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MasterCalculadora - Solicitud por Convenio</title>
-<meta name="generator-build" content="2026-08-24-v419">
+<meta name="generator-build" content="2026-08-25-v420">
 <style>
 #info{display:none!important;}
 :root{--navy:#072146;--blue:#1973b8;--bg:#f3f5f7;--card:#fff;--text:#1f2933;--muted:#69737d;--border:#d7dde3}
@@ -760,17 +760,11 @@ async function generateCarta(){
     }catch(_){}
   });
 
-  // Aplanar PRIMERO todos los campos del formulario.
-  // Esto evita que los textos/apariencias originales de Acrobat vuelvan a
-  // aparecer encima de los nombres que dibujamos manualmente.
-  try{
-    f.flatten();
-  }catch(flatErr){
-    console.warn("No se pudo aplanar la carta antes de dibujar los datos:",flatErr);
-  }
+  // Aplanar primero los campos de la Carta. La firma del cliente
+  // queda completamente intacta; los datos del supervisor se dibujan
+  // solamente en la zona inferior destinada al supervisor.
+  try{ f.flatten(); }catch(flatErr){ console.warn("No se pudo aplanar la carta:",flatErr); }
 
-  // Después del aplanado, los nombres se dibujan directamente sobre la página.
-  // De esta forma no pueden cruzarse con los campos AcroForm originales.
   try{
     const cartaPage3=d.getPages()[2];
     const cartaFont=font;
@@ -790,65 +784,51 @@ async function generateCarta(){
         if(!txt)return;
         const size=fitText(txt,w,maxSize,minSize);
         const tw=cartaFont.widthOfTextAtSize(txt,size);
-        cartaPage3.drawText(txt,{
-          x:x+(w-tw)/2,y,size,font:cartaFont,color:black
-        });
+        cartaPage3.drawText(txt,{x:x+(w-tw)/2,y,size,font:cartaFont,color:black});
       };
 
       // ============================================================
-      // 1) NOMBRE DEL SUPERVISOR / NOMBRE DEL PROMOTOR
-      //    Limpia completamente el contenido que traía la plantilla.
+      // PARTE SUPERIOR: SOLO SUPERVISOR / PROMOTOR EN EL RECUADRO
+      // La firma del cliente NO se toca.
       // ============================================================
-      cartaPage3.drawRectangle({
-        x:222,y:370,width:185.8,height:27,
-        color:white
-      });
-      cartaPage3.drawRectangle({
-        x:418,y:370,width:169.5,height:27,
-        color:white
-      });
-
+      cartaPage3.drawRectangle({x:222,y:370,width:185.8,height:27,color:white});
+      cartaPage3.drawRectangle({x:418,y:370,width:169.5,height:27,color:white});
       centered(supervisor,222,379.0,185.8,8,4.2);
       centered(promoter,418,379.0,169.5,8,4.2);
 
       // ============================================================
-      // 2) FIRMA DEL SUPERVISOR
-      //    La plantilla trae "NOMBRE DEL SUPERVISOR" y "DNI SUPERVISOR".
-      //    Se eliminan y se dibujan los datos reales.
+      // PARTE INFERIOR: FIRMA DEL SUPERVISOR
+      // Se conserva la línea y el cargo. Solo se reemplazan
+      // "NOMBRE DEL SUPERVISOR" y "DNI SUPERVISOR".
       // ============================================================
+      // Zona de texto inferior, debajo de la línea de firma.
       cartaPage3.drawRectangle({
-        x:272,y:454,width:101,height:25,
-        color:white
+        x:268,y:310,width:106,height:29,color:white
       });
 
-      centered(supervisor,272,461.0,101,7.2,4.0);
+      if(supervisor){
+        centered(supervisor,268,325.0,106,7.2,4.0);
+      }
 
-      // DNI debajo del nombre.
       if(dniSupervisor){
-        const dniSize=fitText("DNI: "+dniSupervisor,96,6.8,4.0);
         const dniText="DNI: "+dniSupervisor;
+        const dniSize=fitText(dniText,102,6.8,4.0);
         const dniW=cartaFont.widthOfTextAtSize(dniText,dniSize);
         cartaPage3.drawText(dniText,{
-          x:272+(101-dniW)/2,
-          y:454.5,
+          x:268+(106-dniW)/2,
+          y:316.0,
           size:dniSize,
           font:cartaFont,
           color:black
         });
       }
     }
-  }catch(e){
-    console.warn("No se pudieron dibujar los datos de supervisor/promotor:",e);
-  }
+  }catch(e){ console.warn("No se pudieron dibujar los datos de supervisor/promotor:",e); }
 
-  // El PDF ya está aplanado y los datos manuales fueron dibujados encima.
+  // PDF final no editable.
   let out;
-  try{
-    out=await d.save({useObjectStreams:false});
-  }catch(saveErr){
-    console.error("No se pudo guardar la carta:",saveErr);
-    throw saveErr;
-  }
+  try{ out=await d.save({useObjectStreams:false}); }
+  catch(saveErr){ console.error("No se pudo guardar la carta:",saveErr); throw saveErr; }
 
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\dA-Za-z_-]/g,"");
