@@ -102,3 +102,9 @@ CAMBIO v4.19: Corrección definitiva de la Carta de Subrogación. Los campos Acr
 
 
 CAMBIO v4.20: La firma superior FIRMA DEL CLIENTE queda intacta. Supervisor y promotor solo se dibujan en el recuadro de datos del banco. En la firma inferior se reemplazan exclusivamente NOMBRE DEL SUPERVISOR y DNI SUPERVISOR por los datos reales del formulario, conservando la línea y el cargo.
+
+
+CAMBIO v4.21: Se corrigieron las coordenadas de la firma inferior del supervisor. Se elimina únicamente NOMBRE DEL SUPERVISOR y DNI DEL SUPERVISOR en sus posiciones reales (y=456-477), sin tocar la FIRMA DEL CLIENTE ni la zona superior. El supervisor y promotor de la tabla superior se mantienen.
+
+
+CAMBIO v4.21: Se agregó un indicador visible de versión al final de la página: VERSIÓN 4.21. Este indicador debe actualizarse en cada nueva versión.
