@@ -858,7 +858,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.35 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.37 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1141,6 +1141,16 @@ async function generateDPS(){
   const dps=await PDFLib.PDFDocument.load(bytes64(DPS64),{updateMetadata:false});
   const form=dps.getForm();
   const page=dps.getPages()[0];
+  // Helper local para textos dibujados directamente sobre la plantilla DPS.
+  // No depende del helper del cuestionario adicional.
+  const dpsFont=await dps.embedFont(PDFLib.StandardFonts.Helvetica);
+  const drawDpsTextTop=(text,x,topY,maxWidth,maxSize=8,minSize=5)=>{
+    const t=String(text??"").trim();
+    if(!t)return;
+    const size=fitPdfText(dpsFont,t,maxWidth,maxSize,minSize);
+    const y=page.getHeight()-topY-size;
+    page.drawText(t,{x,y,size,font:dpsFont,color:PDFLib.rgb(0,0,0)});
+  };
 
   // LIMPIAR TODOS LOS CAMPOS DE LA PLANTILLA DPS antes de autocompletar.
   // Así no quedan datos de ejemplo ni marcas preexistentes.
@@ -1165,7 +1175,7 @@ async function generateDPS(){
   if(tipoDoc==="TIPO C EXT"){
     try{ form.getCheckBox("Otros").check(); }catch(_){}
     // Texto que identifica el tipo de documento, al costado de "Otros".
-    drawFitTop(page,"C. EXT",126.5,173.7,45,8,5);
+    drawDpsTextTop("C. EXT",126.5,173.7,45,8,5);
   }else{
     try{ form.getCheckBox("DNI").check(); }catch(_){}
   }
@@ -1389,11 +1399,8 @@ async function generateCarta(){
     }catch(_){}
   });
 
-  // Aplanar primero los campos de la Carta. La firma del cliente
-  // queda completamente intacta; los datos del supervisor se dibujan
-  // solamente en la zona inferior destinada al supervisor.
-  try{ f.flatten(); }catch(flatErr){ console.warn("No se pudo aplanar la carta:",flatErr); }
-
+  // Los campos se aplanarán al final, después de dibujar todos los
+  // datos del supervisor/promotor, para que el resultado sea una impresión fija.
   try{
     const cartaPage3=d.getPages()[2];
     const cartaFont=font;
@@ -1457,8 +1464,21 @@ async function generateCarta(){
     }
   }catch(e){ console.warn("No se pudieron dibujar los datos de supervisor/promotor:",e); }
 
-  // PDF final no editable.
+  // PDF final como impresión fija: aplanar DESPUÉS de colocar
+  // supervisor, promotor y todos los datos dibujados.
   let out;
+  try{
+    f.flatten();
+  }catch(flatErr){
+    console.warn("Flatten de Carta falló; aplicando solo lectura:",flatErr);
+    try{
+      f.getFields().forEach(field=>{try{field.enableReadOnly()}catch(_){}});
+      f.flatten();
+    }catch(flatErr2){
+      console.error("No se pudo aplanar la Carta:",flatErr2);
+      throw flatErr2;
+    }
+  }
   try{ out=await d.save({useObjectStreams:false}); }
   catch(saveErr){ console.error("No se pudo guardar la carta:",saveErr); throw saveErr; }
 
@@ -1761,12 +1781,20 @@ async function generate(){
     console.warn("No se pudo corregir NOMBRES en hoja 6:",e);
   }
 
-  // TERCERO: solo lectura, sin flatten().
+  // ÚLTIMO PASO: convertir TODAS las páginas de la Solicitud en una
+  // impresión fija. No se dejan campos editables en el PDF final.
   try{
-    f.getFields().forEach(field=>{
-      try{field.enableReadOnly()}catch(_){}
-    });
-  }catch(e){console.warn("Solo lectura:",e)}
+    f.flatten();
+  }catch(e){
+    console.warn("Flatten de Solicitud falló; aplicando solo lectura:",e);
+    try{
+      f.getFields().forEach(field=>{try{field.enableReadOnly()}catch(_){}});
+      f.flatten();
+    }catch(e2){
+      console.error("No se pudo aplanar la Solicitud:",e2);
+      throw e2;
+    }
+  }
 
   const out=await d.save({useObjectStreams:false}),url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\dA-Za-z_-]/g,""),safe=c.convenio.replace(/[^\wáéíóúñÁÉÍÓÚÑ -]/g,"").replace(/\s+/g,"_");
@@ -1807,7 +1835,7 @@ prepare();
 </script>
 
 <div class="version-footer">
-  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.35</strong>
+  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.37</strong>
 </div>
 
 </body>
