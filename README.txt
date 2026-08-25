@@ -1,12 +1,12 @@
-MCA - Generador de Solicitudes BBVA v4.47
+GENERADOR SOLICITUD BBVA – MCA – DXP v4.48
 
-Actualización: integración de plantillas DXP por convenio.
+CORRECCIÓN v4.48:
+- Se corrigió la carga de DXP en GitHub Pages.
+- Los PDF DXP ahora usan nombres simples, sin espacios, tildes ni paréntesis.
+- El sistema usa rutas relativas ./dxp/ compatibles con repositorios GitHub Pages.
 
-Uso:
-1. Abrir index.html en GitHub Pages.
-2. Seleccionar el convenio.
-3. En “Documentos DXP por convenio” aparecerá el DXP correspondiente.
-4. Generar DXP descarga un PDF con los campos disponibles autocompletados.
-
-Las plantillas originales suministradas están en /dxp. MIDAGRI no contiene campos AcroForm, por lo que se conserva como plantilla base.
-La generación dinámica utiliza pdf-lib desde CDN.
+IMPORTANTE PARA GITHUB:
+1. Reemplazar el index.html anterior por este index.html.
+2. Subir la carpeta dxp completa dentro del repositorio, al mismo nivel que index.html.
+3. No renombrar la carpeta dxp.
+4. Esperar unos segundos a que GitHub Pages publique los cambios.

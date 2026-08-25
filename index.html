@@ -1199,19 +1199,19 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
 
 
 const DXP_FILES={
- general:{label:"DXP CONVENIOS GENERAL",file:"DXP CONVENIOS GENERAL(2).pdf",match:[]},
- essalud_cd:{label:"DXP ESSALUD COMPRA DE DEUDA",file:"DXP ESSALUD COMPRA DE DEUDA(2).pdf",match:["ESSALUD"]},
- essalud_amp:{label:"DXP ESSALUD NUEVO / AMPLIACIÓN",file:"DXP ESSALUD NUEVO AMPLIACION(2).pdf",match:["ESSALUD"]},
- ejercito:{label:"DXP EJÉRCITO DEL PERÚ",file:"DXP EJERCITO DEL PERU(2).pdf",match:["EJERCITO","EJÉRCITO"]},
- marina:{label:"DXP MARINA DE GUERRA",file:"DXP MARINA DE GUERRA(2).pdf",match:["MARINA DE GUERRA"]},
- pnp:{label:"DXP PNP",file:"DXP PNP(2).pdf",match:["PNP","POLICIA NACIONAL","POLICÍA NACIONAL","FONBIEPOL"]},
- fap:{label:"DXP FUERZA AÉREA DEL PERÚ",file:"DXP FUERZA AREA DEL PERU(2).pdf",match:["FUERZA AEREA","FUERZA AÉREA","FAP"]},
- hospital:{label:"DXP HOSPITAL SAN BARTOLOMÉ",file:"DXP HOSPITAL SAN BARTOLOME(2).pdf",match:["HOSPITAL SAN BARTOLOME","HOSPITAL SAN BARTOLOMÉ"]},
- mp:{label:"DXP MINISTERIO PÚBLICO",file:"DXP MINISTERIO PUBLICO(2).pdf",match:["MINISTERIO PUBLICO","MINISTERIO PÚBLICO"]},
- pj:{label:"DXP PODER JUDICIAL",file:"DXP PODER JUDICIAL(2).pdf",match:["PODER JUDICIAL"]},
- reniec:{label:"DXP RENIEC",file:"DXP RENIEC(2).pdf",match:["RENIEC"]},
- subcafe:{label:"DXP SUB CAFAE SUR",file:"DXP SUB CAFAE SUR(2).pdf",match:["SUB CAFAE SUR","SUBCAFAE SUR"]},
- midagri:{label:"DXP MIDAGRI",file:"DXP MIDAGRI(1).pdf",match:["MIDAGRI","MINISTERIO DE DESARROLLO AGRARIO"]}
+ general:{label:"DXP CONVENIOS GENERAL",file:"convenios_general.pdf",match:[]},
+ essalud_cd:{label:"DXP ESSALUD COMPRA DE DEUDA",file:"essalud_compra_deuda.pdf",match:["ESSALUD"]},
+ essalud_amp:{label:"DXP ESSALUD NUEVO / AMPLIACIÓN",file:"essalud_nuevo_ampliacion.pdf",match:["ESSALUD"]},
+ ejercito:{label:"DXP EJÉRCITO DEL PERÚ",file:"ejercito_del_peru.pdf",match:["EJERCITO","EJÉRCITO"]},
+ marina:{label:"DXP MARINA DE GUERRA",file:"marina_de_guerra.pdf",match:["MARINA DE GUERRA"]},
+ pnp:{label:"DXP PNP",file:"pnp.pdf",match:["PNP","POLICIA NACIONAL","POLICÍA NACIONAL","FONBIEPOL"]},
+ fap:{label:"DXP FUERZA AÉREA DEL PERÚ",file:"fuerza_aerea_del_peru.pdf",match:["FUERZA AEREA","FUERZA AÉREA","FAP"]},
+ hospital:{label:"DXP HOSPITAL SAN BARTOLOMÉ",file:"hospital_san_bartolome.pdf",match:["HOSPITAL SAN BARTOLOME","HOSPITAL SAN BARTOLOMÉ"]},
+ mp:{label:"DXP MINISTERIO PÚBLICO",file:"ministerio_publico.pdf",match:["MINISTERIO PUBLICO","MINISTERIO PÚBLICO"]},
+ pj:{label:"DXP PODER JUDICIAL",file:"poder_judicial.pdf",match:["PODER JUDICIAL"]},
+ reniec:{label:"DXP RENIEC",file:"reniec.pdf",match:["RENIEC"]},
+ subcafe:{label:"DXP SUB CAFAE SUR",file:"sub_cafae_sur.pdf",match:["SUB CAFAE SUR","SUBCAFAE SUR"]},
+ midagri:{label:"DXP MIDAGRI",file:"midagri.pdf",match:["MIDAGRI","MINISTERIO DE DESARROLLO AGRARIO"]}
 };
 function dxpSelectedConvenio(){const i=$("convenio")?.value;return i!==undefined&&i!==""&&CONVENIOS[Number(i)]?String(CONVENIOS[Number(i)].convenio||""):""}
 function dxpMatches(name,entry){const u=String(name||"").toUpperCase();return entry.match.some(x=>u.includes(String(x).toUpperCase()))}
@@ -1219,7 +1219,7 @@ function renderDXPButtons(showAll=false){const box=$("dxpButtons"),st=$("dxpStat
 function dxpFieldAliases(){const v=values(),fullName=buildFullName(),date=new Date(),day=String(date.getDate()).padStart(2,"0"),month=String(date.getMonth()+1).padStart(2,"0"),year=date.getFullYear(),city=v["CIUDAD"]||"LIMA",c=dxpSelectedConvenio();return {"NOMBRE Y APELLIDOS":fullName,DNI:v.DNI||"",MONTO:v.MONTO||"",CUOTA:v.CUOTA||"",PLAZO:v.PLAZO||"","PLAZO ORIGINAL":v.PLAZO||"",TASA:v.TASA||"",EMPRESA:c||v.EMPRESA||"",INSTITUTO:v.EMPRESA||c||"",DEPENDENCIA:v.EMPRESA||c||"",EMAIL:v.EMAIL||"",CELULAR:v.CELULAR||"",DIRECCION1:v.DIRECCION||"",DISTRITO:v.DISTRITO||"",PROVINCIA:v.PROVINCIA||"",CARGO:v.CARGO||"",PROMOTOR:v.PROMOTOR||"",SUPERVISORA:v.SUPERVISORA||"","DNI SUPERVISORA":v["DNI SUPERVISORA"]||"",CIP:v.CIP||"",CODOFIN:v.CODOFIN||"",CIUDAD:city,"LUGAR Y FECHA":`${city}, ${day}/${month}/${year}`,FECHA1:`${day}/${month}/${year}`,FECHA:`${day}/${month}/${year}`,DIA:day,MES:month,"MES 2":month,RUC:v.RUC||"","NOMBRE DE LA UGEL":v.EMPRESA||c||"",MP:c||"",BANCO:"BBVA PERÚ"}}
 function dxpSet(form,names,value){if(value===undefined||value===null||value==="")return false;for(const n of names){try{form.getTextField(n).setText(String(value));return true}catch(_){}}return false}
 function dxpFillCommon(form,key){const a=dxpFieldAliases();Object.entries(a).forEach(([n,v])=>dxpSet(form,[n],v));dxpSet(form,["IMPORTE","MONTO DEL PRESTAMO","MONTO DEL PRÉSTAMO"],a.MONTO);dxpSet(form,["CUOTA MENSUAL","CUOTA APROBADA"],a.CUOTA);dxpSet(form,["FECHA DE INGRESO"],values()["FECHA DE INGRESO"]||"");if(key==="essalud_cd"){const debts=allDXPDebtRows().filter(r=>r.origin==="BOLETA").slice(0,5),rows=[["Text1548499","Text1548499.0","Text1548499.0.0"],["Text1548499.1","Text1548499.1.0","Text1548499.1.1"],["Text1548499.2","Text1548499.2.0","Text1548499.2.1"],["Text1548499.3","Text1548499.3.0","Text1548499.3.1"],["Text1548499.4","Text1548499.4.0","Text1548499.4.1"]];debts.forEach((d,i)=>{if(rows[i]){dxpSet(form,[rows[i][0]],d.entity||"");dxpSet(form,[rows[i][1]],d.soles?Number(d.soles).toFixed(2):"");dxpSet(form,[rows[i][2]],d.quota?Number(d.quota).toFixed(2):"")}})}if(key==="marina")dxpSet(form,["TOTAL"],totalDXPDebt().toFixed(2))}
-async function generateDXP(key){const e=DXP_FILES[key],st=$("dxpStatus");if(!e)return;try{if(st)st.textContent=`Generando ${e.label}...`;await loadPDFLib();const resp=await fetch("dxp/"+encodeURIComponent(e.file));if(!resp.ok)throw new Error(`No se encontró ${e.file} en la carpeta DXP.`);const bytes=new Uint8Array(await resp.arrayBuffer()),doc=await PDFLib.PDFDocument.load(bytes,{updateMetadata:false}),form=doc.getForm();dxpFillCommon(form,key);try{form.flatten()}catch(_){try{form.getFields().forEach(f=>f.enableReadOnly())}catch(__){}}const out=await doc.save({useObjectStreams:false}),blob=new Blob([out],{type:"application/pdf"}),a=document.createElement("a");const c=(dxpSelectedConvenio()||"CONVENIO").replace(/[^a-z0-9áéíóúüñ _-]/gi,"").replace(/\s+/g,"_");a.href=URL.createObjectURL(blob);a.download=`DXP_${e.label.replace(/[^a-z0-9áéíóúüñ _-]/gi,"").replace(/\s+/g,"_")}_${c}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);if(st)st.textContent=`✓ ${e.label} generado y descargado.`}catch(err){console.error("DXP:",err);if(st)st.textContent=`No se pudo generar automáticamente: ${err.message}`;try{window.open("dxp/"+encodeURIComponent(e.file),"_blank")}catch(_){}}}
+async function generateDXP(key){const e=DXP_FILES[key],st=$("dxpStatus");if(!e)return;try{if(st)st.textContent=`Generando ${e.label}...`;await loadPDFLib();const resp=await fetch("./dxp/"+e.file);if(!resp.ok)throw new Error(`No se encontró ${e.file} en la carpeta DXP.`);const bytes=new Uint8Array(await resp.arrayBuffer()),doc=await PDFLib.PDFDocument.load(bytes,{updateMetadata:false}),form=doc.getForm();dxpFillCommon(form,key);try{form.flatten()}catch(_){try{form.getFields().forEach(f=>f.enableReadOnly())}catch(__){}}const out=await doc.save({useObjectStreams:false}),blob=new Blob([out],{type:"application/pdf"}),a=document.createElement("a");const c=(dxpSelectedConvenio()||"CONVENIO").replace(/[^a-z0-9áéíóúüñ _-]/gi,"").replace(/\s+/g,"_");a.href=URL.createObjectURL(blob);a.download=`DXP_${e.label.replace(/[^a-z0-9áéíóúüñ _-]/gi,"").replace(/\s+/g,"_")}_${c}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);if(st)st.textContent=`✓ ${e.label} generado y descargado.`}catch(err){console.error("DXP:",err);if(st)st.textContent=`No se pudo generar automáticamente: ${err.message}`;try{window.open("./dxp/"+e.file,"_blank")}catch(_){}}}
 
 async function generateDPS(){
  try{
