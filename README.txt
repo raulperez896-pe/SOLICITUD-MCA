@@ -117,3 +117,6 @@ CAMBIO v4.23: El selector de Convenio se reemplazó por un buscador interno con 
 
 
 CAMBIO v4.24: El buscador de convenios filtra y muestra sugerencias EN TIEMPO REAL con cada letra escrita. Las coincidencias aparecen inmediatamente debajo del campo, sin esperar Enter, change ni click. Al seleccionar una sugerencia se cargan automáticamente los datos del convenio.
+
+
+CAMBIO v4.25: Se incorporaron los cuestionarios adicionales por convenio dentro de la generación del DPS. FONBIEPOL/PNP agrega el Cuestionario Servicio de Seguridad; Ejército del Perú, Marina de Guerra del Perú y Fuerza Aérea del Perú agregan SUSC-TR7 de FFAA. Los datos comunes se reutilizan automáticamente, Fuerza se selecciona con los tres nombres solicitados y se marca Ejército/Marina/Aviación en el PDF. Rango reutiliza CARGO. Los detalles y obligaciones ofrecen LABORES/ÁREA ADMINISTRATIVA o DETALLAR. Los documentos adicionales se anexan al PDF del DPS solo cuando corresponde y el PDF queda no editable.
