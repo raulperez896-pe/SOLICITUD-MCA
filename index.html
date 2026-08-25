@@ -858,7 +858,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.33 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.34 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1038,7 +1038,7 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
 
     // Fecha actual en "solicitud de fecha_____" y Lugar/Fecha final.
     // Se conserva la línea y la firma originales de la plantilla.
-    drawFitTop(p2,dateStr,488,184.5,38,7.5,5);
+    drawFitTop(p2,dateStr,510.5,184.5,30,7.5,5);
     drawFitTop(p2,`${city}, ${dateStr}`,151.5,288.2,161,8,5);
     return;
   }
@@ -1157,11 +1157,15 @@ async function generateDPS(){
   // DNI -> coloca el número de documento.
   // C. EXT -> marca "Otros" y en el campo N° coloca literalmente "C. EXT".
   const tipoDoc=String($("tipoDocumento").value||"").toUpperCase();
-  dpsText(form,"DNI",tipoDoc==="TIPO C EXT" ? "C. EXT" : (v["DNI"]||""));
+  dpsText(form,"DNI",v["DNI"]||"");
+  // Para C. EXT se conserva el N° con el documento ingresado y se
+  // añade "C. EXT" al costado de la opción Otros.
   try{ form.getCheckBox("DNI").uncheck(); }catch(_){}
   try{ form.getCheckBox("Otros").uncheck(); }catch(_){}
   if(tipoDoc==="TIPO C EXT"){
     try{ form.getCheckBox("Otros").check(); }catch(_){}
+    // Texto que identifica el tipo de documento, al costado de "Otros".
+    drawTextTop(page,"C. EXT",126.5,173.7,45,8,5);
   }else{
     try{ form.getCheckBox("DNI").check(); }catch(_){}
   }
@@ -1261,7 +1265,19 @@ async function generateDPS(){
   // El archivo final debe ser una impresión fija: después de completar
   // también los cuestionarios PNP/FFAA, aplanamos TODOS los formularios.
   // Esto evita que el segundo PDF pueda abrirse y modificarse.
-  try{dps.getForm().flatten();}catch(e){console.warn("No se pudo aplanar el PDF final:",e)}
+  try{
+    const finalForm=dps.getForm();
+    finalForm.flatten();
+  }catch(e){
+    console.warn("Flatten inicial falló; aplicando modo impresión:",e);
+    try{
+      const finalForm=dps.getForm();
+      finalForm.getFields().forEach(f=>{try{f.enableReadOnly();}catch(_){}});
+      finalForm.flatten();
+    }catch(e2){
+      console.error("No se pudo aplanar el PDF final:",e2);
+    }
+  }
   const out=await dps.save({useObjectStreams:false});
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\\dA-Za-z_-]/g,"");
@@ -1791,7 +1807,7 @@ prepare();
 </script>
 
 <div class="version-footer">
-  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.33</strong>
+  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.34</strong>
 </div>
 
 </body>

@@ -125,16 +125,16 @@ CAMBIO v4.25: Se incorporaron los cuestionarios adicionales por convenio dentro 
 CAMBIO v4.26: Corrección de campos condicionales DPS/PNP/FFAA. DETALLAR, tipo de vehículo, cilindrada, cárcel, incapacidad, detalles de actividades, obligaciones, región conflictiva y región en crisis aparecen inmediatamente según la respuesta. El cambio de convenio actualiza el cuestionario adicional sin recargar.
 
 
-CAMBIO v4.33: Se reforzó la lógica condicional en tiempo real. En PNP, al seleccionar SI en uso futuro de explosivos aparece inmediatamente Detalle explosivos futuros; también se reforzaron vehículo, moto, cárcel, tareas, función e incapacidad. Se mantienen los campos de detalle FFAA y se actualizan sin recargar la página.
+CAMBIO v4.34: Se reforzó la lógica condicional en tiempo real. En PNP, al seleccionar SI en uso futuro de explosivos aparece inmediatamente Detalle explosivos futuros; también se reforzaron vehículo, moto, cárcel, tareas, función e incapacidad. Se mantienen los campos de detalle FFAA y se actualizan sin recargar la página.
 
-CAMBIO v4.33: En PNP, '¿Es posible que en el futuro haga uso de explosivos?' solo registra SI/NO. No se solicita ni se muestra un campo de detalle para esta pregunta.
+CAMBIO v4.34: En PNP, '¿Es posible que en el futuro haga uso de explosivos?' solo registra SI/NO. No se solicita ni se muestra un campo de detalle para esta pregunta.
 
-CAMBIO v4.33: Confirmado y restaurado. En PNP, al marcar SÍ en '¿Es posible que en el futuro haga uso de explosivos?' aparece el campo 'Detalle explosivos futuros' para completar y el dato se conserva para el PDF.
+CAMBIO v4.34: Confirmado y restaurado. En PNP, al marcar SÍ en '¿Es posible que en el futuro haga uso de explosivos?' aparece el campo 'Detalle explosivos futuros' para completar y el dato se conserva para el PDF.
 
-CAMBIO v4.33: Se limpian todos los campos de las plantillas CON/SIN SEGURO y DPS antes de colocar datos, evitando que queden datos de ejemplo o marcas anteriores. Se corrigieron las coordenadas de las casillas M/F del DPS y se marca DNI de forma explícita. Los datos se escriben nuevamente sobre la plantilla limpia.
+CAMBIO v4.34: Se limpian todos los campos de las plantillas CON/SIN SEGURO y DPS antes de colocar datos, evitando que queden datos de ejemplo o marcas anteriores. Se corrigieron las coordenadas de las casillas M/F del DPS y se marca DNI de forma explícita. Los datos se escriben nuevamente sobre la plantilla limpia.
 
 
-VERSIÓN 4.33
+VERSIÓN 4.34
 - Corrección de casillas DPS: DNI/C. EXT, sexo M/F, moneda SOLES y tipo de desgravamen según modalidad.
 - Se limpian las casillas de ejemplo sin eliminar los bordes; únicamente se marca la opción seleccionada.
 - Cuestionario PNP y FFAA reconstruido sobre los PDFs limpios proporcionados por el usuario, respetando sus coordenadas originales.
@@ -142,10 +142,10 @@ VERSIÓN 4.33
 - PNP: detalle de explosivos futuros solo cuando la respuesta es SÍ.
 - Se evita duplicar LABORES ADMINISTRATIVAS.
 - El DPS se aplana al generar para que el PDF final no quede editable.
-- Versión visible 4.33 al final de la página.
+- Versión visible 4.34 al final de la página.
 
 
-VERSIÓN 4.33
+VERSIÓN 4.34
 - Fecha actual en la línea "solicitud de fecha" del cuestionario PNP.
 - Fecha actual en la línea "solicitud de fecha" del cuestionario FFAA.
 - El PDF final completo se aplana después de anexar PNP/FFAA: todas las hojas quedan impresas/fijas y no editables.
@@ -153,7 +153,13 @@ VERSIÓN 4.33
 - C. EXT: marca Otros y mantiene el número de documento en la línea de N°.
 
 
-VERSIÓN 4.33
+VERSIÓN 4.34
 - Corrección de C. EXT en DPS: al seleccionar C. EXT se marca "Otros".
 - En el campo N° ya no se coloca el número del documento; se coloca literalmente "C. EXT".
 - Para DNI se mantiene el comportamiento anterior: marca DNI y coloca el número de documento.
+
+
+VERSIÓN 4.34
+- C. EXT: marca Otros, conserva el número del documento en N° y agrega "C. EXT" al costado de Otros.
+- La fecha de la declaración PNP se coloca sobre la línea original de "solicitud de fecha" para que quede cuadrada.
+- Se refuerza el aplanado del PDF final: todos los campos se convierten en impresión fija; si el primer flatten falla, se fuerzan los campos a solo lectura y se vuelve a aplanar.
