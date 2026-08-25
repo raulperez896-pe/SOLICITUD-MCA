@@ -39,10 +39,10 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .compra-deuda-card{border:1px solid #d9e2ec;border-radius:8px;padding:12px;margin-top:12px;background:#fff}
 .compra-deuda-title{font-size:15px;font-weight:700;border-left:4px solid #1976d2;padding:8px 10px;background:#f1f5f9;color:#082b55;margin:8px 0}
 .debt-grid{display:block;width:100%}
-.debt-row{display:grid;grid-template-columns:1.1fr 2fr 1.25fr 1.2fr 1.2fr 1fr auto;gap:8px;align-items:end;width:100%;margin-bottom:8px}
+.debt-row{display:grid;grid-template-columns:1.15fr 1.05fr 1.8fr 1.2fr 1.05fr 1.05fr .9fr auto;gap:8px;align-items:end;width:100%;margin-bottom:8px}
 .debt-grid label{min-width:0}
 .debt-grid .debt-head{font-size:11px;font-weight:700;color:#38516c;margin-bottom:4px}
-.debt-row-item{display:grid;grid-template-columns:1.1fr 2fr 1.25fr 1.2fr 1.2fr 1fr auto;gap:8px;align-items:end;width:100%;margin-bottom:8px}
+.debt-row-item{display:grid;grid-template-columns:1.15fr 1.05fr 1.8fr 1.2fr 1.05fr 1.05fr .9fr auto;gap:8px;align-items:end;width:100%;margin-bottom:8px}
 .debt-total{display:flex;justify-content:flex-end;gap:10px;align-items:center;font-weight:700;margin-top:10px;padding-top:8px;border-top:1px solid #d9e2ec}
 .debt-total input{max-width:180px}
 .debt-usd{display:none}
@@ -164,7 +164,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
   <p class="hint">Este apartado aparece únicamente para <b>SUBROGADO</b> y <b>SUBROGADO + RENOVADO</b>. Los datos personales que ya ingresaste se reutilizan automáticamente.</p>
 
   <div class="subsection">Préstamos y disposición de efectivo</div>
-  <div class="debt-type-note">Selecciona <b>PRÉSTAMOS</b> o <b>DISPOSICIÓN DE EFECTIVO</b> para cada obligación. Si la moneda es US$, aparecerá el campo TC.</div>
+  <div class="debt-type-note">Clasifica cada obligación como <b>DEUDA DE BOLETA</b> o <b>DEUDA EXTERNA</b>. Solo las <b>DEUDAS DE BOLETA</b> se trasladarán a las DXP. Si la moneda es US$, aparecerá el campo TC.</div>
   <div id="loansUI" class="debt-grid"></div>
   <div class="debt-total"><span>MONTO TOTAL DE DEUDA DE PRÉSTAMOS (A) en soles:</span><input id="loanTotal" readonly></div>
 
@@ -174,6 +174,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
   <div class="debt-total"><span>MONTO TOTAL DE DEUDA DE TARJETAS (B) en soles:</span><input id="cardTotal" readonly></div>
 
   <div class="debt-total"><span>TOTAL DEUDA A SUBROGAR (A) + (B) en soles:</span><input id="debtGrandTotal" readonly></div>
+  <div class="debt-total"><span>TOTAL DE DEUDA DE BOLETA PARA DXP en soles:</span><input id="dxpDebtTotal" readonly></div>
 
   <div class="subsection">Aplicación de saldo, si corresponde</div>
   <div class="grid">
@@ -345,8 +346,8 @@ const BBVA64="iVBORw0KGgoAAAANSUhEUgAACAAAAALHCAYAAAAaOqJyAAAQAElEQVR4AezdBbwtV3
 
 const GROUPS={
 personales:["DNI","FECHA DE NACIMIENTO","APELLIDO PATERNO","APELLIDO MATERNO","PRIMER NOMBRE","SEGUNDO NOMBRE","PROFESIÓN","N DE DEPENDIENTES","EMAIL"],
-laborales:["CARGO","FECHA DE INGRESO","INGRESO NETO"],
-operacion:["OFICINA","CUENTA ASOCIADA","MONTO","TASA","PLAZO","FECHA"],
+laborales:["CARGO","FECHA DE INGRESO","REGIMEN LABORAL","INGRESO NETO"],
+operacion:["OFICINA","CUENTA ASOCIADA","MONTO","TASA","PLAZO","CUOTA","FECHA"],
 gestion:["JEFA DE NEGOCIO","PROMOTOR","DNI PROMOTOR","SUPERVISORA","DNI SUPERVISORA"],
 final:["CIUDAD"]
 };
@@ -396,7 +397,7 @@ function escapeHtml(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"
 function makeDebtHeaders(containerId,kind){
   const box=$(containerId);if(!box)return;box.innerHTML="";
   const hs=document.createElement("div");hs.className="debt-row debt-head";
-  const heads=kind==="card"?["TIPO","ENTIDAD FINANCIERA","N° TARJETA","MONEDA","DEUDA","TC (**)",""]:["TIPO","ENTIDAD FINANCIERA","N° OBLIGACIÓN","MONEDA","DEUDA","TC (**)",""];
+  const heads=kind==="card"?["ORIGEN","TIPO","ENTIDAD FINANCIERA","N° TARJETA","MONEDA","DEUDA","TC (**)",""]:["ORIGEN","TIPO","ENTIDAD FINANCIERA","N° OBLIGACIÓN","MONEDA","DEUDA","TC (**)",""];
   heads.forEach(h=>{const s=document.createElement("span");s.textContent=h;hs.appendChild(s)});box.appendChild(hs);
 }
 function addDebtRow(kind){
@@ -404,6 +405,7 @@ function addDebtRow(kind){
   const index=box.querySelectorAll(".debt-row-item").length+1;
   const list=kind==="card"?ENTIDADES_TARJETAS_DEUDA:ENTIDADES_COMPRA_DEUDA;
   const row=document.createElement("div");row.className="debt-row-item";
+  const origin=document.createElement("select");origin.dataset.debtOrigin=`${kind}${index}`;origin.innerHTML='<option value="">Origen...</option><option value="BOLETA">DEUDA DE BOLETA</option><option value="EXTERNA">DEUDA EXTERNA</option>';
   const type=document.createElement("select");type.dataset.debtType=`${kind}${index}`;type.innerHTML=kind==="card"?'<option value="TARJETAS">TARJETAS</option>':'<option value="">Tipo...</option><option value="PRESTAMOS">PRESTAMOS</option><option value="DISPOSICION DE EFECTIVO">DISPOSICION DE EFECTIVO</option>';
   const ent=document.createElement("select");ent.dataset.debtEntity=`${kind}${index}`;ent.innerHTML=debtEntityOptions(list);
   const num=document.createElement("input");num.dataset.debtNumber=`${kind}${index}`;num.placeholder=kind==="card"?"N° de Tarjeta":"N° de Préstamo Personal";
@@ -411,17 +413,17 @@ function addDebtRow(kind){
   const amt=document.createElement("input");amt.type="number";amt.step="0.01";amt.min="0";amt.dataset.debtAmount=`${kind}${index}`;amt.placeholder="Deuda";
   const tc=document.createElement("input");tc.type="number";tc.step="0.0001";tc.min="0";tc.dataset.debtTc=`${kind}${index}`;tc.placeholder="TC (**)";tc.className="debt-usd";
   const rem=document.createElement("button");rem.type="button";rem.className="debt-remove";rem.textContent="Eliminar";
-  [type,ent,num,cur,amt,tc,rem].forEach(x=>row.appendChild(x));box.appendChild(row);
+  [origin,type,ent,num,cur,amt,tc,rem].forEach(x=>row.appendChild(x));box.appendChild(row);
   cur.addEventListener("change",()=>{tc.classList.toggle("show",cur.value==="USD");if(cur.value!=="USD")tc.value="";recalcDebtTotals()});
   amt.addEventListener("input",recalcDebtTotals);tc.addEventListener("input",recalcDebtTotals);
-  [type,ent,num].forEach(x=>x.addEventListener("change",recalcDebtTotals));
+  [origin,type,ent,num].forEach(x=>x.addEventListener("change",recalcDebtTotals));
   rem.addEventListener("click",()=>{row.remove();renumberDebtRows(kind);recalcDebtTotals()});
 }
 function renumberDebtRows(kind){
   const box=$(kind==="card"?"cardsUI":"loansUI");if(!box)return;
   [...box.querySelectorAll(".debt-row-item")].forEach((row,i)=>{
     const idx=i+1;
-    ["debtType","debtEntity","debtNumber","debtCurrency","debtAmount","debtTc"].forEach(a=>{
+    ["debtOrigin","debtType","debtEntity","debtNumber","debtCurrency","debtAmount","debtTc"].forEach(a=>{
       const attr=a.replace(/[A-Z]/g,m=>"-"+m.toLowerCase());const el=row.querySelector(`[data-${attr}]`);if(el)el.dataset[a]=`${kind}${idx}`;
     });
   });
@@ -435,24 +437,36 @@ function initCompraDeudaUI(){
 function numVal(v){const n=parseFloat(String(v??"").replace(/,/g,""));return Number.isFinite(n)&&n>0?n:0}
 function rowSoles(currency,amount,tc){const a=numVal(amount);if(!a)return 0;if(currency==="USD")return numVal(tc)>0?a*numVal(tc):0;return currency==="PEN"?a:0}
 function recalcDebtTotals(){
-  let a=0,b=0;
+  let a=0,b=0,dxp=0;
   document.querySelectorAll(".debt-row-item").forEach(row=>{
     const currency=row.querySelector('[data-debt-currency]')?.value||"";
     const amount=row.querySelector('[data-debt-amount]')?.value||"";
     const tc=row.querySelector('[data-debt-tc]')?.value||"";
+    const origin=row.querySelector('[data-debt-origin]')?.value||"";
     const soles=rowSoles(currency,amount,tc);
     const isCard=row.closest("#cardsUI")!==null;
     if(isCard)b+=soles; else a+=soles;
+    if(origin==="BOLETA")dxp+=soles;
   });
   $("loanTotal").value=a.toFixed(2);
   $("cardTotal").value=b.toFixed(2);
   $("debtGrandTotal").value=(a+b).toFixed(2);
+  const dxpTotal=$("dxpDebtTotal"); if(dxpTotal)dxpTotal.value=dxp.toFixed(2);
 }
 
 function debtRows(kind){
   const box=$(kind==="card"?"cardsUI":"loansUI"),rows=[];if(!box)return rows;
-  box.querySelectorAll(".debt-row-item").forEach(row=>{const get=a=>row.querySelector(`[data-${a}]`)?.value||"";const currency=get("debt-currency"),amount=get("debt-amount"),tc=get("debt-tc");if(get("debt-entity")||get("debt-number")||amount)rows.push({type:get("debt-type"),entity:get("debt-entity"),number:get("debt-number"),currency,amount,tc,soles:rowSoles(currency,amount,tc)});});return rows;
+  box.querySelectorAll(".debt-row-item").forEach(row=>{const get=a=>row.querySelector(`[data-${a}]`)?.value||"";const origin=get("debt-origin"),currency=get("debt-currency"),amount=get("debt-amount"),tc=get("debt-tc");if(get("debt-entity")||get("debt-number")||amount)rows.push({origin,type:get("debt-type"),entity:get("debt-entity"),number:get("debt-number"),currency,amount,tc,soles:rowSoles(currency,amount,tc)});});return rows;
+}function debtRowsForDXP(kind){
+  return debtRows(kind).filter(r=>String(r.origin||"").toUpperCase()==="BOLETA");
 }
+function allDXPDebtRows(){
+  return [...debtRowsForDXP("loan"),...debtRowsForDXP("card")];
+}
+function totalDXPDebt(){
+  return allDXPDebtRows().reduce((sum,r)=>sum+numVal(r.soles),0);
+}
+
 function updateSeguroUI(){
   const tipo=$("tipoSeguro") ? $("tipoSeguro").value : "";
   const con=tipo==="CON SEGURO";
@@ -504,6 +518,10 @@ function renderFields(){
        const o=document.createElement("option");o.value=v;o.textContent=v;inp.appendChild(o);
      });
      inp.value=DEFAULTS[name]||"PERUANO";
+   }else if(name==="REGIMEN LABORAL"){
+     inp=document.createElement("select");
+     inp.dataset.field=name;
+     inp.innerHTML='<option value="">Seleccionar...</option><option value="PENSIONISTA">PENSIONISTA</option><option value="D. LEG. 276">D. LEG. 276</option><option value="D. LEG. 728">D. LEG. 728</option><option value="D. LEG. 1057">D. LEG. 1057</option>';
    }else{
      inp=document.createElement("input");
      inp.type=(name==="FECHA DE NACIMIENTO" ? "date" : "text");
@@ -858,7 +876,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.39 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.40 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1147,6 +1165,12 @@ async function generateDPS(){
   const now=new Date();
   const c=CONVENIOS[Number(i)];
   const v=values();
+  // Solo las DEUDAS DE BOLETA se entregan a las DXP.
+  // Las DEUDAS EXTERNAS permanecen disponibles en la operación,
+  // pero nunca se incluyen en los datos que alimentan las DXP.
+  const dxpDebtRows=[...debtRowsForDXP("loan"),...debtRowsForDXP("card")];
+  v["DXP_DEUDAS_BOLETA"]=dxpDebtRows;
+  v["DXP_TOTAL_CD"]=dxpDebtRows.reduce((s,r)=>s+numVal(r.soles),0);
   const dps=await PDFLib.PDFDocument.load(bytes64(DPS64),{updateMetadata:false});
   const form=dps.getForm();
   const page=dps.getPages()[0];
@@ -1317,7 +1341,7 @@ async function generateCarta(){
   const anyDebt=loans.length||cards.length;
   if(!anyDebt)throw Error("Ingresa al menos una deuda a subrogar.");
   for(const r of [...loans,...cards]){
-    if(!r.type || !r.entity || !r.number || !r.currency || !r.amount)throw Error("Completa tipo, entidad, número de obligación, moneda y deuda en cada fila utilizada.");
+    if(!r.origin || !r.type || !r.entity || !r.number || !r.currency || !r.amount)throw Error("Completa origen de deuda, tipo, entidad, número de obligación, moneda y deuda en cada fila utilizada.");
     if(r.currency==="USD" && !numVal(r.tc))throw Error("Para toda deuda en US$ debes ingresar el TC (**).");
   }
   const d=await PDFLib.PDFDocument.load(bytes64(CARTA_SUBROGACION64),{updateMetadata:false});
@@ -1844,7 +1868,7 @@ prepare();
 </script>
 
 <div class="version-footer">
-  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.39</strong>
+  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.40</strong>
 </div>
 
 </body>

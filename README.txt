@@ -125,16 +125,16 @@ CAMBIO v4.25: Se incorporaron los cuestionarios adicionales por convenio dentro 
 CAMBIO v4.26: Corrección de campos condicionales DPS/PNP/FFAA. DETALLAR, tipo de vehículo, cilindrada, cárcel, incapacidad, detalles de actividades, obligaciones, región conflictiva y región en crisis aparecen inmediatamente según la respuesta. El cambio de convenio actualiza el cuestionario adicional sin recargar.
 
 
-CAMBIO v4.39: Se reforzó la lógica condicional en tiempo real. En PNP, al seleccionar SI en uso futuro de explosivos aparece inmediatamente Detalle explosivos futuros; también se reforzaron vehículo, moto, cárcel, tareas, función e incapacidad. Se mantienen los campos de detalle FFAA y se actualizan sin recargar la página.
+CAMBIO v4.40: Se reforzó la lógica condicional en tiempo real. En PNP, al seleccionar SI en uso futuro de explosivos aparece inmediatamente Detalle explosivos futuros; también se reforzaron vehículo, moto, cárcel, tareas, función e incapacidad. Se mantienen los campos de detalle FFAA y se actualizan sin recargar la página.
 
-CAMBIO v4.39: En PNP, '¿Es posible que en el futuro haga uso de explosivos?' solo registra SI/NO. No se solicita ni se muestra un campo de detalle para esta pregunta.
+CAMBIO v4.40: En PNP, '¿Es posible que en el futuro haga uso de explosivos?' solo registra SI/NO. No se solicita ni se muestra un campo de detalle para esta pregunta.
 
-CAMBIO v4.39: Confirmado y restaurado. En PNP, al marcar SÍ en '¿Es posible que en el futuro haga uso de explosivos?' aparece el campo 'Detalle explosivos futuros' para completar y el dato se conserva para el PDF.
+CAMBIO v4.40: Confirmado y restaurado. En PNP, al marcar SÍ en '¿Es posible que en el futuro haga uso de explosivos?' aparece el campo 'Detalle explosivos futuros' para completar y el dato se conserva para el PDF.
 
-CAMBIO v4.39: Se limpian todos los campos de las plantillas CON/SIN SEGURO y DPS antes de colocar datos, evitando que queden datos de ejemplo o marcas anteriores. Se corrigieron las coordenadas de las casillas M/F del DPS y se marca DNI de forma explícita. Los datos se escriben nuevamente sobre la plantilla limpia.
+CAMBIO v4.40: Se limpian todos los campos de las plantillas CON/SIN SEGURO y DPS antes de colocar datos, evitando que queden datos de ejemplo o marcas anteriores. Se corrigieron las coordenadas de las casillas M/F del DPS y se marca DNI de forma explícita. Los datos se escriben nuevamente sobre la plantilla limpia.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - Corrección de casillas DPS: DNI/C. EXT, sexo M/F, moneda SOLES y tipo de desgravamen según modalidad.
 - Se limpian las casillas de ejemplo sin eliminar los bordes; únicamente se marca la opción seleccionada.
 - Cuestionario PNP y FFAA reconstruido sobre los PDFs limpios proporcionados por el usuario, respetando sus coordenadas originales.
@@ -142,10 +142,10 @@ VERSIÓN 4.39
 - PNP: detalle de explosivos futuros solo cuando la respuesta es SÍ.
 - Se evita duplicar LABORES ADMINISTRATIVAS.
 - El DPS se aplana al generar para que el PDF final no quede editable.
-- Versión visible 4.39 al final de la página.
+- Versión visible 4.40 al final de la página.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - Fecha actual en la línea "solicitud de fecha" del cuestionario PNP.
 - Fecha actual en la línea "solicitud de fecha" del cuestionario FFAA.
 - El PDF final completo se aplana después de anexar PNP/FFAA: todas las hojas quedan impresas/fijas y no editables.
@@ -153,30 +153,30 @@ VERSIÓN 4.39
 - C. EXT: marca Otros y mantiene el número de documento en la línea de N°.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - Corrección de C. EXT en DPS: al seleccionar C. EXT se marca "Otros".
 - En el campo N° ya no se coloca el número del documento; se coloca literalmente "C. EXT".
 - Para DNI se mantiene el comportamiento anterior: marca DNI y coloca el número de documento.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - C. EXT: marca Otros, conserva el número del documento en N° y agrega "C. EXT" al costado de Otros.
 - La fecha de la declaración PNP se coloca sobre la línea original de "solicitud de fecha" para que quede cuadrada.
 - Se refuerza el aplanado del PDF final: todos los campos se convierten en impresión fija; si el primer flatten falla, se fuerzan los campos a solo lectura y se vuelve a aplanar.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - Corrección del error "drawTextTop is not defined".
 - C. EXT utiliza el helper PDF existente drawFitTop.
 - Se mantiene: marca Otros, coloca "C. EXT" al costado y conserva el número de documento en N°.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - Corrección definitiva del error "drawFitTop is not defined".
 - C. EXT utiliza un helper local del generador DPS, independiente del cuestionario adicional.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - Corrección principal: la Solicitud PDF ya no queda como formulario editable.
 - El aplanado (flatten) se ejecuta DESPUÉS de colocar todos los datos y textos, justo antes de guardar el PDF.
 - La Carta de Compra de Deuda también se aplana al final, después de dibujar supervisor/promotor.
@@ -184,15 +184,27 @@ VERSIÓN 4.39
 - El resultado final contiene los datos colocados sobre la plantilla, pero sin campos editables.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - Se reemplazaron las plantillas adicionales PNP y FFAA por los nuevos PDFs proporcionados por el usuario.
 - Las dos plantillas nuevas tienen 2 páginas cada una y 0 campos/widgets PDF.
 - Al estar ya convertidas a impresión fija, se incorporan como hojas sin campos editables.
 - Se mantiene el aplanado de Solicitud, DPS y Carta al finalizar la generación.
 
 
-VERSIÓN 4.39
+VERSIÓN 4.40
 - Corrección visual de casilleros PNP/FFAA.
 - La plantilla nueva usa corchetes [ ]; ahora se cubre el par completo y se dibuja un único cuadro real.
 - La X queda centrada dentro del cuadro seleccionado.
 - Se evita que quede el corchete original visible debajo o al costado de la marca.
+
+
+VERSIÓN 4.40
+- Se agrega CUOTA a Datos de la operación.
+- Fecha de ingreso se mantiene como el único campo de fecha de ingreso.
+- Se agrega REGIMEN LABORAL como desplegable: PENSIONISTA, D. LEG. 276, D. LEG. 728, D. LEG. 1057.
+- No se agrega teléfono/anexo laboral.
+- Compra de deuda incorpora clasificación por ORIGEN: DEUDA DE BOLETA o DEUDA EXTERNA.
+- Las DXP reciben exclusivamente las DEUDAS DE BOLETA mediante DXP_DEUDAS_BOLETA y DXP_TOTAL_CD.
+- Las DEUDAS EXTERNAS no se incluyen en los datos de DXP.
+- Se mantiene la información de deuda externa dentro de la operación y en los totales generales.
+- Se ajustó el grid de compra de deuda para la nueva columna ORIGEN.
