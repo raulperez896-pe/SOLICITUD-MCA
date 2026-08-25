@@ -111,3 +111,6 @@ CAMBIO v4.21: Se agregó un indicador visible de versión al final de la página
 
 
 CAMBIO v4.22: Corrección de coordenadas PDF-lib de la firma inferior. La zona superior de FIRMA DEL CLIENTE queda intacta. Solo se cubren las etiquetas inferiores NOMBRE DEL SUPERVISOR y DNI DEL SUPERVISOR y se dibujan los valores reales.
+
+
+CAMBIO v4.23: El selector de Convenio se reemplazó por un buscador interno con sugerencias (datalist). El usuario escribe parte del convenio, selecciona una sugerencia y se carga automáticamente toda la información institucional asociada al convenio. Se conserva un select interno oculto para mantener compatibilidad con la lógica existente.
