@@ -108,3 +108,6 @@ CAMBIO v4.21: Se corrigieron las coordenadas de la firma inferior del supervisor
 
 
 CAMBIO v4.21: Se agregó un indicador visible de versión al final de la página: VERSIÓN 4.21. Este indicador debe actualizarse en cada nueva versión.
+
+
+CAMBIO v4.22: Corrección de coordenadas PDF-lib de la firma inferior. La zona superior de FIRMA DEL CLIENTE queda intacta. Solo se cubren las etiquetas inferiores NOMBRE DEL SUPERVISOR y DNI DEL SUPERVISOR y se dibujan los valores reales.
