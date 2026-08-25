@@ -125,8 +125,10 @@ CAMBIO v4.25: Se incorporaron los cuestionarios adicionales por convenio dentro 
 CAMBIO v4.26: Corrección de campos condicionales DPS/PNP/FFAA. DETALLAR, tipo de vehículo, cilindrada, cárcel, incapacidad, detalles de actividades, obligaciones, región conflictiva y región en crisis aparecen inmediatamente según la respuesta. El cambio de convenio actualiza el cuestionario adicional sin recargar.
 
 
-CAMBIO v4.29: Se reforzó la lógica condicional en tiempo real. En PNP, al seleccionar SI en uso futuro de explosivos aparece inmediatamente Detalle explosivos futuros; también se reforzaron vehículo, moto, cárcel, tareas, función e incapacidad. Se mantienen los campos de detalle FFAA y se actualizan sin recargar la página.
+CAMBIO v4.30: Se reforzó la lógica condicional en tiempo real. En PNP, al seleccionar SI en uso futuro de explosivos aparece inmediatamente Detalle explosivos futuros; también se reforzaron vehículo, moto, cárcel, tareas, función e incapacidad. Se mantienen los campos de detalle FFAA y se actualizan sin recargar la página.
 
-CAMBIO v4.29: En PNP, '¿Es posible que en el futuro haga uso de explosivos?' solo registra SI/NO. No se solicita ni se muestra un campo de detalle para esta pregunta.
+CAMBIO v4.30: En PNP, '¿Es posible que en el futuro haga uso de explosivos?' solo registra SI/NO. No se solicita ni se muestra un campo de detalle para esta pregunta.
 
-CAMBIO v4.29: Confirmado y restaurado. En PNP, al marcar SÍ en '¿Es posible que en el futuro haga uso de explosivos?' aparece el campo 'Detalle explosivos futuros' para completar y el dato se conserva para el PDF.
+CAMBIO v4.30: Confirmado y restaurado. En PNP, al marcar SÍ en '¿Es posible que en el futuro haga uso de explosivos?' aparece el campo 'Detalle explosivos futuros' para completar y el dato se conserva para el PDF.
+
+CAMBIO v4.30: Se limpian todos los campos de las plantillas CON/SIN SEGURO y DPS antes de colocar datos, evitando que queden datos de ejemplo o marcas anteriores. Se corrigieron las coordenadas de las casillas M/F del DPS y se marca DNI de forma explícita. Los datos se escriben nuevamente sobre la plantilla limpia.

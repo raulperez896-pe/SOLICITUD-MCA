@@ -858,7 +858,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.29 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.30 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1001,12 +1001,21 @@ async function generateDPS(){
   const dps=await PDFLib.PDFDocument.load(bytes64(DPS64),{updateMetadata:false});
   const form=dps.getForm();
   const page=dps.getPages()[0];
+
+  // LIMPIAR TODOS LOS CAMPOS DE LA PLANTILLA DPS antes de autocompletar.
+  // Así no quedan datos de ejemplo ni marcas preexistentes.
+  form.getFields().forEach(field=>{
+    try{ if(field.getText) field.setText(""); }catch(_){}
+    try{ if(field.getName) form.getCheckBox(field.getName()).uncheck(); }catch(_){}
+  });
   const fullNames=[v["PRIMER NOMBRE"],v["SEGUNDO NOMBRE"]].filter(Boolean).join(" ").trim();
   const birth=v["FECHA DE NACIMIENTO"]||"";
 
   dpsText(form,"APELLIDO PATERNO",v["APELLIDO PATERNO"]);
   dpsText(form,"APELLIDO MATERNO",v["APELLIDO MATERNO"]);
   dpsText(form,"DNI",v["DNI"]);
+  try{ form.getCheckBox("DNI").check(); }catch(_){}
+  try{ form.getCheckBox("Otros").uncheck(); }catch(_){}
   dpsText(form,"NOMBRES",fullNames);
   dpsText(form,"NACIONALIDAD",v["NACIONALIDAD"]||"PERUANO");
   dpsText(form,"CARGO",v["CARGO"]);
@@ -1044,16 +1053,13 @@ async function generateDPS(){
   if(mod.includes("Devolución")) dpsDrawX(page,116.3,659.4);
   else if(mod.includes("Convencional")) dpsDrawX(page,83.3,659.6);
 
-  // Sexo del titular: marcar M o F.
-  const sexo=String(v["SEXO"]||"").toUpperCase();
-  if(sexo==="M" || sexo==="F"){
-    const fontSexo=await dps.embedFont(PDFLib.StandardFonts.Helvetica);
-    // El DPS usa casillas independientes M/F; se marca únicamente la elegida.
-    // Estas coordenadas corresponden al bloque Sexo de la plantilla DPS.
-    const sx=sexo==="M"?177.8:202.8;
-    const sy=604.0;
-    dpsDrawX(page,sx,sy);
-  }
+  // Sexo del titular: marcar M o F en las casillas reales de la plantilla.
+  // La plantilla DPS ubica estas casillas en la fila "Sexo", antes de Nacionalidad.
+  const sexo=String(v["SEXO"]||"").trim().toUpperCase();
+  dpsClearBox(page,77.0,640.0,10,10);
+  dpsClearBox(page,113.0,640.0,10,10);
+  if(sexo==="M") dpsDrawX(page,79.0,642.0);
+  if(sexo==="F") dpsDrawX(page,115.0,642.0);
 
   // Cuestionario del TITULAR. El cónyuge no se llena.
   const q1=v["DPS_Q1"],q2=v["DPS_Q2"],q3=v["DPS_Q3"],q4=v["DPS_Q4"];
@@ -1295,6 +1301,20 @@ async function generate(){
   fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
   FORM_FONT=await d.embedFont(PDFLib.StandardFonts.Helvetica);
+
+  // LIMPIAR COMPLETAMENTE LA PLANTILLA ANTES DE ESCRIBIR.
+  // Evita que queden datos de ejemplo, X anteriores o valores de una plantilla
+  // previa. Después de limpiar se vuelven a colocar únicamente los datos
+  // definidos por la solicitud.
+  f.getFields().forEach(field=>{
+    try{
+      if(field.getText) field.setText("");
+    }catch(_){}
+    try{
+      if(field.getName && field.getName()) f.getCheckBox(field.getName()).uncheck();
+    }catch(_){}
+  });
+
   FIXED_CHECKS.forEach(n=>checkbox(f,n,true));
   if($("tipoOperacion").value==="SUBROGADO_RENOVADO"){
     checkbox(f,"SUBROGADO",true);
@@ -1598,7 +1618,7 @@ prepare();
 </script>
 
 <div class="version-footer">
-  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.29</strong>
+  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.30</strong>
 </div>
 
 </body>
