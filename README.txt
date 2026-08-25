@@ -114,3 +114,6 @@ CAMBIO v4.22: Corrección de coordenadas PDF-lib de la firma inferior. La zona s
 
 
 CAMBIO v4.23: El selector de Convenio se reemplazó por un buscador interno con sugerencias (datalist). El usuario escribe parte del convenio, selecciona una sugerencia y se carga automáticamente toda la información institucional asociada al convenio. Se conserva un select interno oculto para mantener compatibilidad con la lógica existente.
+
+
+CAMBIO v4.24: El buscador de convenios filtra y muestra sugerencias EN TIEMPO REAL con cada letra escrita. Las coincidencias aparecen inmediatamente debajo del campo, sin esperar Enter, change ni click. Al seleccionar una sugerencia se cargan automáticamente los datos del convenio.
