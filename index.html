@@ -327,7 +327,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v4.56</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v4.57</footer>
 
 <script>
 const APP_VERSION = '4.27';
@@ -893,7 +893,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.56 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.57 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1381,6 +1381,54 @@ async function generateDPS(){
     console.warn("No se pudieron retirar todas las anotaciones:",e);
   }
 
+  // ================================================================
+  // ÚLTIMO SEGURO DE DPS MATRIZ — PREGUNTA 6
+  // La marca se dibuja DESPUÉS de aplanar el formulario y sin depender
+  // del campo PDF. Así SI/NO siempre queda como una impresión.
+  // Coordenadas exactas de la plantilla DPS64:
+  // Q6 Sí: x=406.229 / top=545.005 / 9.811 x 9.460
+  // Q6 No: x=434.346 / top=544.917 / 9.810 x 9.460
+  // ================================================================
+  try{
+    const pg=dps.getPages()[0];
+    const H=pg.getHeight();
+    const q6answer=String(v.DPS_Q6||"")
+      .normalize("NFD").replace(/[\\u0300-\\u036f]/g,"")
+      .trim().toUpperCase();
+
+    const q6={
+      SI:{x:406.229, top:545.005, w:9.811, h:9.460},
+      NO:{x:434.346, top:544.917, w:9.810, h:9.460}
+    };
+
+    // Solo dibujar la opción elegida; no se pinta ningún fondo blanco,
+    // por lo que no se tapa ni se altera el recuadro original.
+    const b=q6[q6answer];
+    if(b){
+      const y=H-b.top-b.h;
+      const black=PDFLib.rgb(0,0,0);
+      pg.drawLine({
+        start:{x:b.x+1.4,y:y+1.4},
+        end:{x:b.x+b.w-1.4,y:y+b.h-1.4},
+        thickness:1.7,color:black
+      });
+      pg.drawLine({
+        start:{x:b.x+b.w-1.4,y:y+1.4},
+        end:{x:b.x+1.4,y:y+b.h-1.4},
+        thickness:1.7,color:black
+      });
+    }
+  }catch(e){
+    console.warn("No se pudo dibujar la marca final de DPS Q6:",e);
+  }
+
+  // Segunda y última limpieza de anotaciones: el resultado no debe
+  // conservar campos editables en la matriz ni en DPS adicionales.
+  try{
+    const annotsKey=PDFLib.PDFName.of("Annots");
+    dps.getPages().forEach(pg=>{try{pg.node.delete(annotsKey)}catch(_){}});
+  }catch(_){}
+
   // El resultado final se entrega como impresión fija.
   const out=await dps.save({useObjectStreams:false});
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
@@ -1798,7 +1846,7 @@ async function generate(){
 
   // CORRECCIÓN DE NOMBRE COMPLETO EN LAS HOJAS ESTÁTICAS.
   // Siempre usar: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
-  // v4.56: NO se dibuja nuevamente el nombre sobre estas páginas.
+  // v4.57: NO se dibuja nuevamente el nombre sobre estas páginas.
   // Las plantillas ya reciben el nombre completo mediante sus campos.
   // Dibujarlo encima generaba duplicación visual. Se conserva únicamente
   // el valor del campo y su apariencia original.
@@ -1903,7 +1951,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v4.56</strong>
+  Versión de la página: <strong>v4.57</strong>
 </div>
 </body>
 </html>
