@@ -327,7 +327,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v4.54</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v4.55</footer>
 
 <script>
 const APP_VERSION = '4.27';
@@ -893,7 +893,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.54 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.55 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1089,8 +1089,9 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
       {x:315.7,top:204.5,w:10.9,h:9.3},
       {x:371.4,top:204.4,w:10.9,h:9.4}
     ];
-    const force=String(v.FFAA_FUERZA||"").toUpperCase();
-    oneOf(p1,forceBoxes,["EJÉRCITO DEL PERÚ","MARINA DE GUERRA DEL PERÚ","FUERZA AÉREA DEL PERÚ","OTRO"],force);
+    const forceRaw=String(v.FFAA_FUERZA||"").trim().toUpperCase();
+    const force=forceRaw.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ");
+    oneOf(p1,forceBoxes,["EJERCITO DEL PERU","MARINA DE GUERRA DEL PERU","FUERZA AEREA DEL PERU","OTRO"],force);
     if(force==="OTRO")drawText(p1,v.FFAA_FUERZA_DETALLE,{x:433.4,top:201.1,w:90,h:10.7},7.5,4.5);
 
     // Rango = CARGO. Esta plantilla no tiene campo editable para el rango,
@@ -1312,6 +1313,46 @@ async function generateDPS(){
   }
 
 
+
+  // ================================================================
+  // DPS MATRIZ — CASILLEROS DEL TITULAR COMO IMPRESIÓN FIJA
+  // Se dibujan después del flatten para que nunca quede una marca de
+  // ejemplo de la plantilla y para garantizar SI -> SI / NO -> NO.
+  // ================================================================
+  try{
+    const pg=dps.getPages()[0];
+    const H=pg.getHeight();
+    const fixedPairs=[
+      [{x:406.5,top:364.4,w:9.8,h:9.5},{x:434.3,top:364.5,w:9.8,h:9.5},v.DPS_Q1],
+      [{x:406.4,top:431.7,w:9.8,h:9.5},{x:434.4,top:431.7,w:9.8,h:9.4},v.DPS_Q2],
+      [{x:406.5,top:451.5,w:9.8,h:9.4},{x:434.5,top:451.4,w:9.8,h:9.4},v.DPS_Q3],
+      [{x:406.5,top:470.5,w:9.8,h:9.4},{x:434.4,top:470.6,w:9.8,h:9.4},v.DPS_Q4],
+      [{x:406.5,top:504.4,w:9.8,h:9.5},{x:434.3,top:504.4,w:9.9,h:9.5},v.DPS_Q5_FUMA],
+      [{x:406.4,top:521.4,w:9.8,h:9.5},{x:434.4,top:521.5,w:9.8,h:9.5},v.DPS_Q5_ALCOHOL],
+      [{x:406.2,top:545.0,w:9.8,h:9.5},{x:434.3,top:544.9,w:9.9,h:9.5},v.DPS_Q6],
+      [{x:406.5,top:565.9,w:9.8,h:9.4},{x:434.5,top:565.9,w:9.8,h:9.4},v.DPS_Q6_FUTURO||v.DPS_Q7]
+    ];
+    fixedPairs.forEach(([yes,no,val])=>{
+      [yes,no].forEach(b=>{
+        const y=H-b.top-b.h;
+        pg.drawRectangle({
+          x:b.x+0.9,y:y+0.9,width:b.w-1.8,height:b.h-1.8,
+          color:PDFLib.rgb(1,1,1)
+        });
+      });
+      const s=String(val||"").trim().toUpperCase();
+      const b=s==="SI"?yes:s==="NO"?no:null;
+      if(!b)return;
+      const y=H-b.top-b.h;
+      pg.drawLine({start:{x:b.x+1.5,y:y+1.5},end:{x:b.x+b.w-1.5,y:y+b.h-1.5},thickness:1.0,color:PDFLib.rgb(0,0,0)});
+      pg.drawLine({start:{x:b.x+b.w-1.5,y:y+1.5},end:{x:b.x+1.5,y:y+b.h-1.5},thickness:1.0,color:PDFLib.rgb(0,0,0)});
+    });
+  }catch(e){
+    console.warn("No se pudieron fijar los casilleros de la DPS matriz:",e);
+  }
+
+  // El resultado final se entrega como impresión fija.
+  try{dps.getForm().getFields().forEach(f=>{try{f.enableReadOnly()}catch(_){} });}catch(_){}
 
   const out=await dps.save({useObjectStreams:false});
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
@@ -1729,7 +1770,7 @@ async function generate(){
 
   // CORRECCIÓN DE NOMBRE COMPLETO EN LAS HOJAS ESTÁTICAS.
   // Siempre usar: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
-  // v4.54: NO se dibuja nuevamente el nombre sobre estas páginas.
+  // v4.55: NO se dibuja nuevamente el nombre sobre estas páginas.
   // Las plantillas ya reciben el nombre completo mediante sus campos.
   // Dibujarlo encima generaba duplicación visual. Se conserva únicamente
   // el valor del campo y su apariencia original.
@@ -1834,7 +1875,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v4.54</strong>
+  Versión de la página: <strong>v4.55</strong>
 </div>
 </body>
 </html>
