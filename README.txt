@@ -1,7 +1,7 @@
 Generador Solicitud BBVA
-Versión de la página: v4.64
-DPS corregida:
-- Mes de gestación colocado sobre la línea al costado de la pregunta 4.
-- Cantidad de cigarros colocada dentro del recuadro correspondiente debajo de la opción Sí de la pregunta 5.
-- Actividad de riesgo mantiene su línea después de ¿Cuál?.
-- Se mantienen las correcciones de mapeo de Q6 y pregunta 1b.
+Versión de la página: v4.65
+DPS:
+- Mes de gestación colocado encima de la línea de la pregunta 4.
+- Cantidad de cigarros colocada dentro del recuadro debajo de SI de la pregunta 5.
+- Actividad de riesgo en la línea de ¿Cuál?.
+- Se mantiene el mapeo correcto de las preguntas y Q6.
