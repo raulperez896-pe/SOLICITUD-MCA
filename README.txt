@@ -1,11 +1,13 @@
 Generador Solicitud BBVA
-Versión de la página: v4.69
+Versión de la página: v4.70
 
-Corrección Carta Poder:
-- Recupera el nombre real del convenio desde CONVENIOS[índice].
-- ESSALUD -> plantilla ESSALUD (4 páginas por juego).
-- Marina de Guerra -> plantilla MGP (2 páginas por juego).
-- Ejército del Perú -> plantilla EJERCITO (2 páginas por juego).
-- FONBIEPOL - PNP -> plantilla PNP (2 páginas por juego).
-- Otros convenios -> plantilla general (1 página por juego).
-- Un juego por cada préstamo; las tarjetas no generan Carta Poder.
+CARTA PODER:
+- Se mantiene la selección automática de plantilla por convenio.
+- Los campos de texto de cada plantilla se ajustan automáticamente al ancho real
+  del recuadro para evitar cortes y superposiciones.
+- Nombre completo, entidad financiera, domicilio, dependencia, CIP y gestor
+  utilizan tamaño adaptativo según el campo.
+- Cada juego se aplana para quedar como impresión fija.
+- ESSALUD: bloque de autorizados omitido según la configuración acordada.
+- MGP: no se llenan cheque/efectivo ni importe; gestor fijo.
+- Un juego por cada préstamo; no se generan cartas por tarjetas.
