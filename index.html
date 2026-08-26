@@ -327,7 +327,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v4.13</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v4.50</footer>
 
 <script>
 const APP_VERSION = '4.27';
@@ -893,7 +893,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.49 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.50 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1061,7 +1061,7 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
     drawFitTop(p1,tareas,87,363.0,430,7.5,5);
 
     // 4° Función específica.
-    const fboxes=[[85.0,419.0],[264.8,419.0],[85.0,430.6],[264.8,430.6],[85.0,442.1]];
+    const fboxes=[[85.0,419.0],[264.8,419.0],[85.0,430.6],[264.8,431.8],[85.0,442.1]];
     const fopts=["VIGILANTE DE TRÁNSITO A PIE","MANTENIMIENTO DE ORDEN","RADIOPATRULLERO","ADMINISTRATIVO","OTRO"];
     chooseIndexOnly(p1,fboxes,fopts,v.PNP_FUNCION);
     if(String(v.PNP_FUNCION||'').toUpperCase()==='OTRO'){
@@ -1747,9 +1747,20 @@ async function generate(){
         const name=field.getName ? field.getName() : "";
 
         if(name==="NOMBRES Y APELLIDOS"){
-          // IMPORTANTE: setFontSize directo. No depende del provider
-          // por widget, que el visor puede ignorar.
-          field.setFontSize(4.2);
+          // Hoja 10 necesita un tamaño menor para no invadir DNI/RUC.
+          // Las demás hojas mantienen un tamaño controlado.
+          const widgets=field.getWidgets ? (field.getWidgets()||[]) : [];
+          let minWidth=Infinity;
+          widgets.forEach(w=>{
+            const r=w.getRectangle();
+            const width=Math.abs(Number(r.width)||0);
+            if(width>0)minWidth=Math.min(minWidth,width);
+          });
+          const isPage10=widgets.some(w=>{
+            try{return d.getPages()[9].getContentStream!==undefined && true}catch(_){return false}
+          });
+          const size = (minWidth<210)?5.8:4.2;
+          field.setFontSize(size);
           field.setAlignment(PDFLib.TextAlignment.Left);
           field.updateAppearances(FORM_FONT);
           return;
@@ -1790,7 +1801,7 @@ async function generate(){
 
   // CORRECCIÓN DE NOMBRE COMPLETO EN LAS HOJAS ESTÁTICAS.
   // Siempre usar: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
-  // v4.49: NO se dibuja nuevamente el nombre sobre estas páginas.
+  // v4.50: NO se dibuja nuevamente el nombre sobre estas páginas.
   // Las plantillas ya reciben el nombre completo mediante sus campos.
   // Dibujarlo encima generaba duplicación visual. Se conserva únicamente
   // el valor del campo y su apariencia original.
@@ -1819,9 +1830,15 @@ async function generate(){
       });
     };
 
-    // Hoja 6: "FIRMA(S) DEL (LOS) CLIENTES(S)".
-    // Campo original: x=24.52, y=461.16..477.87 => top=314.13.
-    drawNameOnPage(d.getPages()[5],24.52,314.0,132.66,15.0,7.0);
+    // Hoja 6: retirar el valor del campo editable y dibujar el nombre
+    // una sola vez en la línea correcta para evitar duplicaciones.
+    try{
+      const fName=fieldMap?.get("NOMBRES Y APELLIDOS");
+      if(fName && f.getFields().some(ff=>ff.getName()===fName)){
+        f.getTextField(fName).setText("");
+      }
+    }catch(_){}
+    drawNameOnPage(d.getPages()[5],24.52,314.0,132.66,15.0,5.8);
 
     // Hoja 7: "Firma / Nombre / DNI".
     // Campo original: x=88.53, y=439.82..458.33 => top=333.67.
@@ -1882,15 +1899,8 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 
 prepare();
 </script>
-
-<div class="version-footer">
-  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.48</strong>
-</div>
-
-
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v4.49</strong>
+  Versión de la página: <strong>v4.50</strong>
 </div>
-
 </body>
 </html>
