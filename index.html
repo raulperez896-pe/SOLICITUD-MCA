@@ -893,7 +893,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.45 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.46 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1021,9 +1021,9 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
 
     // 1° ¿Trabaja usted como?
     const workBoxes=[
-      [85,246.4],[229.6,246.4],[371.2,246.4],
-      [85,257.9],[229.6,257.9],[371.2,257.9],
-      [85,269.5],[229.6,269.5],[371.2,269.5],[85,281.0]
+      [85,244.4],[229.6,244.4],[371.2,244.4],
+      [85,255.9],[229.6,255.9],[371.2,255.9],
+      [85,267.5],[229.6,267.5],[371.2,267.5],[85,279.0]
     ];
     const workOpts=[
       "POLICÍA MUNICIPAL","POLICÍA NACIONAL","POLICÍA AUTÓNOMA",
@@ -1033,7 +1033,7 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
     chooseIndex(p1,workBoxes,workOpts,v.PNP_TRABAJO);
 
     // 2° Cárcel / prisión de alta seguridad.
-    choose(p1,[[380.8,304.0],[422.6,304.0]],v.PNP_CARCEL);
+    choose(p1,[[380.8,302.0],[422.6,302.0]],v.PNP_CARCEL);
     if(String(v.PNP_CARCEL||"").toUpperCase()==="SI"){
       drawFitTop(p1,v.PNP_TIPO_CARCEL,205,315.8,315,8,5);
     }
@@ -1054,7 +1054,7 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
     }
 
     // 5° Vehículo.
-    choose(p1,[[97.5,476.4],[174.8,476.4]],v.PNP_VEHICULO);
+    choose(p1,[[97.5,474.4],[174.8,474.4]],v.PNP_VEHICULO);
     const vboxes=[[85,522.5],[194,522.5],[85,534.1],[194,534.1]];
     const vopts=["AUTOMÓVIL","MOTO","AVIONETA","HELICÓPTERO"];
     chooseIndex(p1,vboxes,vopts,v.PNP_TIPO_VEHICULO);
@@ -1064,14 +1064,14 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
 
     // 6° y 7° Explosivos. El detalle de explosivos futuros solo aparece
     // cuando la respuesta es SÍ, tal como solicita el usuario.
-    choose(p1,[[380.8,588.0],[419.9,588.0]],v.PNP_EXPLOSIVOS);
-    choose(p1,[[380.8,611.1],[419.9,611.1]],v.PNP_EXPLOSIVOS_FUTURO);
+    choose(p1,[[380.8,586.0],[419.9,586.0]],v.PNP_EXPLOSIVOS);
+    choose(p1,[[380.8,609.1],[419.9,609.1]],v.PNP_EXPLOSIVOS_FUTURO);
     if(String(v.PNP_EXPLOSIVOS_FUTURO||"").toUpperCase()==="SI"){
       drawFitTop(p1,v.PNP_EXPLOSIVOS_DETALLE,87,634.4,430,8,5);
     }
 
     // 9° Arma.
-    choose(p1,[[97.5,668.5],[136.6,668.5]],v.PNP_ARMA);
+    choose(p1,[[97.5,666.5],[136.6,666.5]],v.PNP_ARMA);
 
     // 10° Incapacidad, página 2.
     choose(p2,[[97.5,80.7],[136.6,80.7]],v.PNP_INCAPACIDAD);
@@ -1774,106 +1774,47 @@ async function generate(){
     console.warn("No se pudieron ajustar apariencias:",e);
   }
 
-  // CORRECCIÓN DEFINITIVA DE NOMBRES EN HOJA 6.
-  // La plantilla tiene un campo AcroForm para NOMBRES Y APELLIDOS.
-  // Para evitar que el texto del formulario quede visible debajo/encima
-  // del texto dibujado, primero vaciamos el campo, retiramos su widget
-  // y finalmente dibujamos UNA SOLA vez el nombre sobre la línea original.
+  // CORRECCIÓN DE NOMBRE COMPLETO EN LAS HOJAS ESTÁTICAS.
+  // Siempre usar: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
+  // Estas páginas no dependen de campos AcroForm; el nombre se dibuja directamente
+  // sobre la línea original para que el PDF final quede impreso/fijo.
   try{
     const pages=d.getPages();
-    const page6=pages[5];
-    const fullName=String(v["NOMBRES Y APELLIDOS"]||"").trim();
+    const fullName=String(buildFullName()||v["NOMBRES Y APELLIDOS"]||"").trim();
 
-    if(page6){
-      const target=seguroCon
-        ? {x:24.519,y:364.019,w:132.661,h:16.708}
-        : {x:27.519,y:363.514,w:132.661,h:16.709};
-
-      // 1) Vaciar el valor del AcroForm para que flatten() no lo vuelva
-      // a pintar aunque el widget sea retirado.
-      try{
-        if(fieldNames.has("NOMBRES Y APELLIDOS")){
-          f.getTextField("NOMBRES Y APELLIDOS").setText("");
-        }
-      }catch(e){ console.warn("No se pudo vaciar NOMBRES Y APELLIDOS:",e); }
-
-      // 2) Retirar SOLO el widget de NOMBRES Y APELLIDOS.
-      try{
-        const annots=page6.node.lookup(PDFLib.PDFName.of("Annots"),PDFLib.PDFArray);
-        if(annots){
-          for(let i=annots.size()-1;i>=0;i--){
-            const ref=annots.get(i);
-            const annot=page6.node.context.lookup(ref);
-            if(!annot) continue;
-            const rect=annot.get(PDFLib.PDFName.of("Rect"));
-            if(!rect || rect.size()<4) continue;
-
-            const x=rect.get(0).numberValue;
-            const y=rect.get(1).numberValue;
-            const x2=rect.get(2).numberValue;
-            const y2=rect.get(3).numberValue;
-            const w=Math.abs(x2-x),h=Math.abs(y2-y);
-
-            const sameRect=Math.abs(x-target.x)<0.2 &&
-                            Math.abs(y-target.y)<0.2 &&
-                            Math.abs(w-target.w)<0.2 &&
-                            Math.abs(h-target.h)<0.2;
-
-            if(sameRect){
-              annots.remove(i);
-              break;
-            }
-          }
-        }
-      }catch(e){
-        console.warn("No se pudo retirar widget hoja 6:",e);
+    const drawStaticName=(pageNo,x,y,width,size=7)=>{
+      if(!fullName || !pages[pageNo-1]) return;
+      const pg=pages[pageNo-1];
+      let s=size;
+      let measured=FORM_FONT.widthOfTextAtSize(fullName,s);
+      while(measured>width && s>4){
+        s-=0.1;
+        measured=FORM_FONT.widthOfTextAtSize(fullName,s);
       }
+      if(measured>width) s=Math.max(3.5,s*(width/measured));
+      pg.drawText(fullName,{
+        x,y,size:s,font:FORM_FONT,color:PDFLib.rgb(0,0,0),opacity:1
+      });
+    };
 
-      if(fullName){
-        // 3) Limpiar solo el interior del campo. No tocar la línea azul.
-        page6.drawRectangle({
-          x:target.x+0.7,
-          y:target.y+2.0,
-          width:target.w-1.4,
-          height:target.h-3.0,
-          color:PDFLib.rgb(1,1,1),
-          opacity:1
-        });
+    // Hoja 3: "Nombres y Apellidos" del titular.
+    drawStaticName(3,83,563.5,215,7.2);
 
-        // 4) Ajustar automáticamente el tamaño para que el nombre completo
-        // entre en UNA sola línea, sin invadir DNI/RUC ni el texto "Nombre(s)".
-        const maxWidth=target.w-5.0;
-        const maxHeight=target.h-4.0;
-        let size=Math.min(7.0,maxHeight*0.62);
-        let measured=FORM_FONT.widthOfTextAtSize(fullName,size);
+    // Hoja 4: "Nombre" de la firma del cliente.
+    drawStaticName(4,64,569.5,225,7.2);
 
-        while(measured>maxWidth && size>3.0){
-          size-=0.1;
-          measured=FORM_FONT.widthOfTextAtSize(fullName,size);
-        }
-        if(measured>maxWidth){
-          size=Math.max(3.0,size*(maxWidth/measured));
-          measured=FORM_FONT.widthOfTextAtSize(fullName,size);
-        }
+    // Hoja 6: "Nombre(s)" en la sección de firmas.
+    drawStaticName(6,70,376.5,112,7.0);
 
-        // El texto queda centrado verticalmente dentro de la zona de nombres.
-        const textX=target.x+2.5;
-        const textY=target.y+((target.h-size)/2)-0.1;
+    // Hoja 7: "Nombre" del cliente.
+    drawStaticName(7,86,381.5,94,7.0);
 
-        page6.drawText(fullName,{
-          x:textX,
-          y:textY,
-          size,
-          font:FORM_FONT,
-          color:PDFLib.rgb(0,0,0),
-          opacity:1
-        });
+    // Hoja 10: "Nombre(s) / Razón Social" del cliente.
+    drawStaticName(10,44.5,421.5,192,7.0);
 
-        console.log("Hoja 6 nombre único dibujado:",fullName,"tamaño:",size);
-      }
-    }
+    console.log("NOMBRE COMPLETO dibujado en hojas 3, 4, 6, 7 y 10:",fullName);
   }catch(e){
-    console.warn("No se pudo corregir NOMBRES en hoja 6:",e);
+    console.warn("No se pudo dibujar el nombre completo en hojas estáticas:",e);
   }
 
   // ÚLTIMO PASO: convertir TODAS las páginas de la Solicitud en una
@@ -1930,7 +1871,7 @@ prepare();
 </script>
 
 <div class="version-footer">
-  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.45</strong>
+  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.46</strong>
 </div>
 
 </body>
