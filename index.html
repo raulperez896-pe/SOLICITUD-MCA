@@ -327,7 +327,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v4.55</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v4.56</footer>
 
 <script>
 const APP_VERSION = '4.27';
@@ -893,7 +893,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.55 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.56 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1295,6 +1295,18 @@ async function generateDPS(){
   // editables al finalizar.
   await appendConditionalQuestionnaire(dps,v,c,now);
 
+  // Capturar las coordenadas REALES de Q6 desde la plantilla antes del flatten.
+  // No se usan coordenadas aproximadas para esta casilla.
+  let q6YesRect=null, q6NoRect=null;
+  try{
+    const q6YesField=form.getCheckBox("Check Box27.6.0.0.0");
+    const q6NoField=form.getCheckBox("Check Box27.6.1");
+    const wy=q6YesField.getWidgets()[0].getRectangle();
+    const wn=q6NoField.getWidgets()[0].getRectangle();
+    q6YesRect={x:wy.x,y:wy.y,w:wy.width,h:wy.height};
+    q6NoRect={x:wn.x,y:wn.y,w:wn.width,h:wn.height};
+  }catch(e){ console.warn("No se pudieron leer los cuadros reales de Q6:",e); }
+
   // El archivo final debe ser una impresión fija: después de completar
   // también los cuestionarios PNP/FFAA, aplanamos TODOS los formularios.
   // Esto evita que el segundo PDF pueda abrirse y modificarse.
@@ -1322,6 +1334,9 @@ async function generateDPS(){
   try{
     const pg=dps.getPages()[0];
     const H=pg.getHeight();
+    const toTopRect=(r)=>r?({x:r.x,top:H-r.y-r.h,w:r.w,h:r.h}):null;
+    q6YesRect=toTopRect(q6YesRect);
+    q6NoRect=toTopRect(q6NoRect);
     const fixedPairs=[
       [{x:406.5,top:364.4,w:9.8,h:9.5},{x:434.3,top:364.5,w:9.8,h:9.5},v.DPS_Q1],
       [{x:406.4,top:431.7,w:9.8,h:9.5},{x:434.4,top:431.7,w:9.8,h:9.4},v.DPS_Q2],
@@ -1329,7 +1344,7 @@ async function generateDPS(){
       [{x:406.5,top:470.5,w:9.8,h:9.4},{x:434.4,top:470.6,w:9.8,h:9.4},v.DPS_Q4],
       [{x:406.5,top:504.4,w:9.8,h:9.5},{x:434.3,top:504.4,w:9.9,h:9.5},v.DPS_Q5_FUMA],
       [{x:406.4,top:521.4,w:9.8,h:9.5},{x:434.4,top:521.5,w:9.8,h:9.5},v.DPS_Q5_ALCOHOL],
-      [{x:406.2,top:545.0,w:9.8,h:9.5},{x:434.3,top:544.9,w:9.9,h:9.5},v.DPS_Q6],
+      [q6YesRect||{x:406.2,top:545.0,w:9.8,h:9.5},q6NoRect||{x:434.3,top:544.9,w:9.9,h:9.5},v.DPS_Q6],
       [{x:406.5,top:565.9,w:9.8,h:9.4},{x:434.5,top:565.9,w:9.8,h:9.4},v.DPS_Q6_FUTURO||v.DPS_Q7]
     ];
     fixedPairs.forEach(([yes,no,val])=>{
@@ -1351,9 +1366,22 @@ async function generateDPS(){
     console.warn("No se pudieron fijar los casilleros de la DPS matriz:",e);
   }
 
-  // El resultado final se entrega como impresión fija.
-  try{dps.getForm().getFields().forEach(f=>{try{f.enableReadOnly()}catch(_){} });}catch(_){}
+  // ================================================================
+  // IMPRESIÓN REAL: eliminar cualquier anotación/widget residual.
+  // Esto incluye los campos de las DPS adicionales PNP y FFAA que vienen
+  // dentro de sus plantillas originales. Los datos ya fueron dibujados
+  // sobre la hoja, por lo que quitar las anotaciones no elimina información.
+  // ================================================================
+  try{
+    const annotsKey=PDFLib.PDFName.of("Annots");
+    dps.getPages().forEach(pg=>{
+      try{ pg.node.delete(annotsKey); }catch(_){}
+    });
+  }catch(e){
+    console.warn("No se pudieron retirar todas las anotaciones:",e);
+  }
 
+  // El resultado final se entrega como impresión fija.
   const out=await dps.save({useObjectStreams:false});
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\\dA-Za-z_-]/g,"");
@@ -1770,7 +1798,7 @@ async function generate(){
 
   // CORRECCIÓN DE NOMBRE COMPLETO EN LAS HOJAS ESTÁTICAS.
   // Siempre usar: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
-  // v4.55: NO se dibuja nuevamente el nombre sobre estas páginas.
+  // v4.56: NO se dibuja nuevamente el nombre sobre estas páginas.
   // Las plantillas ya reciben el nombre completo mediante sus campos.
   // Dibujarlo encima generaba duplicación visual. Se conserva únicamente
   // el valor del campo y su apariencia original.
@@ -1875,7 +1903,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v4.55</strong>
+  Versión de la página: <strong>v4.56</strong>
 </div>
 </body>
 </html>
