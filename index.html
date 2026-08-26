@@ -893,7 +893,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.44 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.45 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -969,29 +969,30 @@ async function appendConditionalQuestionnaire(dps,v,c,now){
     const y=page.getHeight()-topY-size;
     page.drawText(t,{x,y,size,font,color:PDFLib.rgb(0,0,0)});
   };
-  const resetBoxTop=(page,x,topY,w=12.8,h=14)=>{
+  const resetBoxTop=(page,x,topY,w=9.2,h=9.6)=>{
     const H=page.getHeight();
-    // La plantilla nueva trae "[ ]" como texto. Cubrimos TODO el par
-    // de corchetes y dibujamos encima un único cuadro real.
+    // Cuadro reducido para no tapar letras ni líneas de la plantilla.
+    // Se conserva el borde original y solo se limpia/reconstruye el
+    // interior de la casilla.
     page.drawRectangle({
-      x:x-0.8, y:H-topY-h, width:w+1.6, height:h+1,
+      x:x-0.15, y:H-topY-h, width:w+0.3, height:h+0.3,
       color:PDFLib.rgb(1,1,1),
       borderColor:PDFLib.rgb(0,0,0),
-      borderWidth:0.8
+      borderWidth:0.7
     });
   };
   const markBoxTop=(page,x,topY)=>{
-    const H=page.getHeight(), y=H-topY-14;
-    // X centrada dentro del cuadro nuevo.
+    const H=page.getHeight(), y=H-topY-9.6;
+    // X pequeña y centrada dentro del cuadro.
     page.drawLine({
-      start:{x:x+2.0,y:y+2.0},
-      end:{x:x+10.0,y:y+12.0},
-      thickness:1.15,color:PDFLib.rgb(0,0,0)
+      start:{x:x+1.5,y:y+1.5},
+      end:{x:x+7.6,y:y+8.1},
+      thickness:1.0,color:PDFLib.rgb(0,0,0)
     });
     page.drawLine({
-      start:{x:x+10.0,y:y+2.0},
-      end:{x:x+2.0,y:y+12.0},
-      thickness:1.15,color:PDFLib.rgb(0,0,0)
+      start:{x:x+7.6,y:y+1.5},
+      end:{x:x+1.5,y:y+8.1},
+      thickness:1.0,color:PDFLib.rgb(0,0,0)
     });
   };
   const choose=(page,boxes,value)=>{
@@ -1303,6 +1304,38 @@ async function generateDPS(){
     else if(String(val||"").toUpperCase()==="NO"){try{form.getCheckBox(no).check();}catch(_){}}
   });
 
+  // CORRECCIÓN DPS — PREGUNTA 6:
+  // En esta plantilla los dos widgets de Q6 están anidados y algunos
+  // visores no actualizan correctamente su apariencia al aplanar.
+  // Se limpian SOLO los interiores de las dos casillas originales y se
+  // dibuja una X únicamente en la respuesta seleccionada.
+  try{
+    const q6=String(v["DPS_Q6"]||"").toUpperCase();
+    const q6Boxes=[
+      {x:406.229,y:287.481,w:9.811,h:9.460}, // Sí
+      {x:434.346,y:287.569,w:9.810,h:9.460}  // No
+    ];
+    q6Boxes.forEach(b=>{
+      page.drawRectangle({
+        x:b.x+0.8,y:b.y+0.8,width:b.w-1.6,height:b.h-1.6,
+        color:PDFLib.rgb(1,1,1)
+      });
+    });
+    const qb=q6==="SI"?q6Boxes[0]:q6==="NO"?q6Boxes[1]:null;
+    if(qb){
+      page.drawLine({
+        start:{x:qb.x+1.8,y:qb.y+1.8},
+        end:{x:qb.x+8.0,y:qb.y+7.6},
+        thickness:1.15,color:PDFLib.rgb(0,0,0)
+      });
+      page.drawLine({
+        start:{x:qb.x+8.0,y:qb.y+1.8},
+        end:{x:qb.x+1.8,y:qb.y+7.6},
+        thickness:1.15,color:PDFLib.rgb(0,0,0)
+      });
+    }
+  }catch(e){console.warn("No se pudo marcar Q6 del DPS:",e);}
+
   // Texto adicional que existe en el DPS cuando corresponde.
   const gest=v["DPS_GESTACION"]||"";
   if(String(q4).toUpperCase()==="SI" && gest){
@@ -1594,6 +1627,10 @@ async function generate(){
   v["DISTRITO"]=$("domDistrito").value||"";
   v["DIRECCION"]=(getFieldValue("DIRECCION")||"").trim();
 
+  // Nombre completo: SIEMPRE debe ser la concatenación
+  // PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
+  // Se fuerza nuevamente aquí para evitar que la plantilla reciba solo
+  // una parte del nombre.
   v["NOMBRES Y APELLIDOS"]=buildFullName();
   if(!v["NOMBRES Y APELLIDOS"]){
     const vals={};
@@ -1609,7 +1646,12 @@ async function generate(){
   if(Number.isFinite(plazoBase) && plazoBase>0) v["PLAZO"]=String(plazoBase+graciaMeses);
 
   // PRIMERO: escribir todos los valores.
+  // Forzar el campo de nombre completo antes del resto de los datos.
+  text(f,"NOMBRES Y APELLIDOS",v["NOMBRES Y APELLIDOS"]||"");
   Object.entries(v).forEach(([n,x])=>text(f,n,n==="FECHA DE NACIMIENTO"?formatBirthDate(x):x));
+  // Reforzar una segunda vez porque algunas plantillas comparten este
+  // nombre de campo con varios widgets.
+  text(f,"NOMBRES Y APELLIDOS",v["NOMBRES Y APELLIDOS"]||"");
   text(f,"EMPRESA",c.convenio);
   text(f,"RUC",c.ruc);
   text(f,"GIRO",c.giro);
@@ -1888,7 +1930,7 @@ prepare();
 </script>
 
 <div class="version-footer">
-  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.44</strong>
+  Generador de Solicitud por Convenio — <strong>VERSIÓN 4.45</strong>
 </div>
 
 </body>
