@@ -327,7 +327,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v4.52</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v4.53</footer>
 
 <script>
 const APP_VERSION = '4.27';
@@ -893,7 +893,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.52 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.53 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1804,7 +1804,7 @@ async function generate(){
 
   // CORRECCIÓN DE NOMBRE COMPLETO EN LAS HOJAS ESTÁTICAS.
   // Siempre usar: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
-  // v4.52: NO se dibuja nuevamente el nombre sobre estas páginas.
+  // v4.53: NO se dibuja nuevamente el nombre sobre estas páginas.
   // Las plantillas ya reciben el nombre completo mediante sus campos.
   // Dibujarlo encima generaba duplicación visual. Se conserva únicamente
   // el valor del campo y su apariencia original.
@@ -1827,27 +1827,45 @@ async function generate(){
     }
   }
 
-  // HOJA 6 — solo esta ubicación: cubrir el contenido del campo y dibujar
-  // el nombre completo debajo de "Nombre(s)", respetando la línea original.
+  // HOJA 6 — mismo tratamiento para CON SEGURO y SIN SEGURO:
+  // cubrir por completo la celda original de "NOMBRES Y APELLIDOS" y
+  // dibujar únicamente el nombre completo sobre la línea debajo de "Nombre(s)".
+  // Esto evita que el texto de la celda editable quede visible o duplicado.
   try{
     const p6=d.getPages()[5];
     const H6=p6.getHeight();
     const nm=String(v["NOMBRES Y APELLIDOS"]||buildFullName()||"").trim();
     const nf=await d.embedFont(PDFLib.StandardFonts.Helvetica);
-    const fx=24.519, fy=H6-477.871, fw=132.661, fh=16.708;
+
+    // Coordenadas reales de la plantilla CON SEGURO / SIN SEGURO.
+    // Se mantienen independientes porque la celda cambia ligeramente de posición.
+    const box = seguroCon
+      ? {x:24.519, y:H6-477.871, w:132.661, h:16.708}
+      : {x:27.520, y:H6-478.380, w:132.660, h:16.710};
+
+    // Cubrir TODO el campo editable original.
     p6.drawRectangle({
-      x:fx, y:fy, width:fw, height:fh,
+      x:box.x-0.8, y:box.y-0.8,
+      width:box.w+1.6, height:box.h+1.6,
       color:PDFLib.rgb(1,1,1)
     });
-    // Línea inferior original de la plantilla.
+
+    // Volver a dibujar la línea inferior de la plantilla.
     p6.drawLine({
-      start:{x:fx,y:fy+0.25}, end:{x:fx+fw,y:fy+0.25},
-      thickness:0.55, color:PDFLib.rgb(0.12,0.35,0.55)
+      start:{x:box.x,y:box.y+0.25},
+      end:{x:box.x+box.w,y:box.y+0.25},
+      thickness:0.55,
+      color:PDFLib.rgb(0.12,0.35,0.55)
     });
+
+    // Nombre completo centrado verticalmente dentro de la línea.
     if(nm){
-      const size=fitPdfText(nf,nm,fw-2,8.2,5.2);
+      const size=fitPdfText(nf,nm,box.w-2,8.2,5.2);
       p6.drawText(nm,{
-        x:fx+0.8, y:fy+3.2, size, font:nf,
+        x:box.x+0.8,
+        y:box.y+3.2,
+        size,
+        font:nf,
         color:PDFLib.rgb(0,0,0)
       });
     }
@@ -1891,7 +1909,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v4.52</strong>
+  Versión de la página: <strong>v4.53</strong>
 </div>
 </body>
 </html>
