@@ -5,9 +5,12 @@ Las solicitudes CON SEGURO y SIN SEGURO utilizan nuevamente las plantillas AcroF
 VERSIÓN 4.53
 - Corrección de identificación de versión: APP_VERSION, pie de página, estado de actualización y referencias de versión sincronizadas en 4.53.
 
-VERSIÓN 4.54
-- Carta de Compra de Deuda: se utiliza la plantilla limpia sin campos editables.
-- Datos de cliente, deudas, totales, supervisor y promotor se dibujan sobre la plantilla.
-- N°/MZ./LT. de la dirección laboral no se autocompleta.
-- Ajuste de nombres, entidades, montos, fecha, ciudad y firma del supervisor.
-- Se mantiene MODO CAMPOS para las solicitudes CON SEGURO y SIN SEGURO.
+VERSIÓN 4.55
+- Carta de Compra de Deuda: vuelve a plantilla AcroForm editable.
+- Se elimina únicamente el widget NOMBRE Y APELLIDOS y se dibuja el nombre centrado.
+- N°/MZ./LT. queda en blanco.
+- Se mantienen campos originales de entidades, deudas, totales, supervisor y promotor.
+
+
+ACTUALIZACION v4.56
+Plantillas CON SEGURO, SIN SEGURO y Carta de Compra de Deuda actualizadas. Se incluyen además en /plantillas/. Se conserva la lógica DXP y convenios.
