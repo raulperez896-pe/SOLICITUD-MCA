@@ -1,8 +1,11 @@
 Generador Solicitud BBVA
-Versión de la página: v4.71
+Versión de la página: v4.72
 
-Corrección Carta Poder:
-- Cada juego se aplana y luego se serializa/reabre antes de combinarlo.
-- Se eliminan anotaciones residuales para entregar un PDF fijo y legible.
-- Se mantienen las plantillas específicas por convenio.
+Corrección crítica Carta Poder:
+- Se elimina la combinación directa de páginas con copyPages.
+- Cada juego se aplana, se serializa y se vuelve a abrir.
+- Cada página se embebe como contenido gráfico en una página nueva del PDF final.
+- Esto evita referencias cruzadas de AcroForm/annotations que provocaban en Adobe:
+  "Error al procesar página. Problema al leer el documento (18)".
+- Se mantiene la selección de plantilla específica por convenio.
 - Un juego por cada préstamo.
