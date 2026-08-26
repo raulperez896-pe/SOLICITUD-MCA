@@ -327,7 +327,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v4.51</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v4.52</footer>
 
 <script>
 const APP_VERSION = '4.27';
@@ -893,7 +893,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.51 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.52 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -1318,37 +1318,6 @@ async function generateDPS(){
     else if(String(val||"").toUpperCase()==="NO"){try{form.getCheckBox(no).check();}catch(_){}}
   });
 
-  // CORRECCIÓN DPS — PREGUNTA 6:
-  // En esta plantilla los dos widgets de Q6 están anidados y algunos
-  // visores no actualizan correctamente su apariencia al aplanar.
-  // Se limpian SOLO los interiores de las dos casillas originales y se
-  // dibuja una X únicamente en la respuesta seleccionada.
-  try{
-    const q6=String(v["DPS_Q6"]||"").toUpperCase();
-    const q6Boxes=[
-      {x:406.229,y:287.481,w:9.811,h:9.460}, // Sí
-      {x:434.346,y:287.569,w:9.810,h:9.460}  // No
-    ];
-    q6Boxes.forEach(b=>{
-      page.drawRectangle({
-        x:b.x+0.8,y:b.y+0.8,width:b.w-1.6,height:b.h-1.6,
-        color:PDFLib.rgb(1,1,1)
-      });
-    });
-    const qb=q6==="SI"?q6Boxes[0]:q6==="NO"?q6Boxes[1]:null;
-    if(qb){
-      page.drawLine({
-        start:{x:qb.x+1.8,y:qb.y+1.8},
-        end:{x:qb.x+8.0,y:qb.y+7.6},
-        thickness:1.15,color:PDFLib.rgb(0,0,0)
-      });
-      page.drawLine({
-        start:{x:qb.x+8.0,y:qb.y+1.8},
-        end:{x:qb.x+1.8,y:qb.y+7.6},
-        thickness:1.15,color:PDFLib.rgb(0,0,0)
-      });
-    }
-  }catch(e){console.warn("No se pudo marcar Q6 del DPS:",e);}
 
   // Texto adicional que existe en el DPS cuando corresponde.
   const gest=v["DPS_GESTACION"]||"";
@@ -1385,6 +1354,40 @@ async function generateDPS(){
       console.error("No se pudo aplanar el PDF final:",e2);
     }
   }
+
+  // DPS — PREGUNTA 6: marcar sobre la impresión final.
+  // La nueva plantilla usa las casillas de la fila Q6:
+  // Sí = (406.23, 287.48) y No = (434.35, 287.57) en coordenadas PDF.
+  // Se limpia únicamente el interior y se coloca una X centrada.
+  try{
+    const q6=String(v["DPS_Q6"]||"").toUpperCase();
+    const H=dps.getPages()[0].getHeight();
+    const pg=dps.getPages()[0];
+    const q6Boxes=[
+      {x:406.23,y:287.48,w:9.81,h:9.46},
+      {x:434.35,y:287.57,w:9.81,h:9.46}
+    ];
+    q6Boxes.forEach(b=>{
+      pg.drawRectangle({
+        x:b.x+0.8,y:b.y+0.8,width:b.w-1.6,height:b.h-1.6,
+        color:PDFLib.rgb(1,1,1)
+      });
+    });
+    const qb=q6==="SI"?q6Boxes[0]:q6==="NO"?q6Boxes[1]:null;
+    if(qb){
+      pg.drawLine({
+        start:{x:qb.x+1.7,y:qb.y+1.7},
+        end:{x:qb.x+8.1,y:qb.y+7.7},
+        thickness:1.15,color:PDFLib.rgb(0,0,0)
+      });
+      pg.drawLine({
+        start:{x:qb.x+8.1,y:qb.y+1.7},
+        end:{x:qb.x+1.7,y:qb.y+7.7},
+        thickness:1.15,color:PDFLib.rgb(0,0,0)
+      });
+    }
+  }catch(e){ console.warn("No se pudo marcar Q6 del DPS:",e); }
+
   const out=await dps.save({useObjectStreams:false});
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\\dA-Za-z_-]/g,"");
@@ -1801,14 +1804,16 @@ async function generate(){
 
   // CORRECCIÓN DE NOMBRE COMPLETO EN LAS HOJAS ESTÁTICAS.
   // Siempre usar: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
-  // v4.51: NO se dibuja nuevamente el nombre sobre estas páginas.
+  // v4.52: NO se dibuja nuevamente el nombre sobre estas páginas.
   // Las plantillas ya reciben el nombre completo mediante sus campos.
   // Dibujarlo encima generaba duplicación visual. Se conserva únicamente
   // el valor del campo y su apariencia original.
 
 
-  // ÚLTIMO PASO: convertir TODAS las páginas de la Solicitud en una
-  // impresión fija. No se dejan campos editables en el PDF final.
+  // Los campos originales siguen siendo los que reciben el autollenado.
+  // Solo en la HOJA 6 se reemplaza visualmente el campo "NOMBRES Y APELLIDOS"
+  // de la sección de firmas por un dato dibujado sobre la línea que está
+  // debajo de "Nombre(s)". El resto de las hojas conserva su autollenado.
   try{
     f.flatten();
   }catch(e){
@@ -1821,6 +1826,32 @@ async function generate(){
       throw e2;
     }
   }
+
+  // HOJA 6 — solo esta ubicación: cubrir el contenido del campo y dibujar
+  // el nombre completo debajo de "Nombre(s)", respetando la línea original.
+  try{
+    const p6=d.getPages()[5];
+    const H6=p6.getHeight();
+    const nm=String(v["NOMBRES Y APELLIDOS"]||buildFullName()||"").trim();
+    const nf=await d.embedFont(PDFLib.StandardFonts.Helvetica);
+    const fx=24.519, fy=H6-477.871, fw=132.661, fh=16.708;
+    p6.drawRectangle({
+      x:fx, y:fy, width:fw, height:fh,
+      color:PDFLib.rgb(1,1,1)
+    });
+    // Línea inferior original de la plantilla.
+    p6.drawLine({
+      start:{x:fx,y:fy+0.25}, end:{x:fx+fw,y:fy+0.25},
+      thickness:0.55, color:PDFLib.rgb(0.12,0.35,0.55)
+    });
+    if(nm){
+      const size=fitPdfText(nf,nm,fw-2,8.2,5.2);
+      p6.drawText(nm,{
+        x:fx+0.8, y:fy+3.2, size, font:nf,
+        color:PDFLib.rgb(0,0,0)
+      });
+    }
+  }catch(e){ console.warn("No se pudo corregir nombre de hoja 6:",e); }
 
   const out=await d.save({useObjectStreams:false}),url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const dni=(v.DNI||"SIN_DNI").replace(/[^\dA-Za-z_-]/g,""),safe=c.convenio.replace(/[^\wáéíóúñÁÉÍÓÚÑ -]/g,"").replace(/\s+/g,"_");
@@ -1860,7 +1891,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v4.51</strong>
+  Versión de la página: <strong>v4.52</strong>
 </div>
 </body>
 </html>
