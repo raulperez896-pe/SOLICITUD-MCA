@@ -1,11 +1,13 @@
 Generador Solicitud BBVA
-Versión de la página: v4.85
+Versión de la página: v4.86
 
-Correcciones Carta Poder:
-- PNP hoja 2: las casillas de reducción son gráficos y ahora se borran y se
-  vuelve a dibujar exactamente la opción seleccionada.
-- ESSALUD: la segunda hoja deja en blanco las tres filas de NOMBRE de autorizados.
-- ESSALUD: la selección de reducción de cuota/plazo se redibuja sobre la marca
-  estática de la plantilla.
-- MGP: gestor fijo PEDRO ARISTIDES CASTAÑEDA BERROCAL / DNI 44202466, con Ñ explícita.
-- Mantiene las demás posiciones y la lógica de plantillas por convenio.
+Correcciones / nuevas entradas:
+- Gestor: PEDRO ARISTIDES CASTAÑEDA BERROCAL, usando Ñ explícita.
+- Nuevo bloque "Identificación institucional", visible según convenio:
+  Marina de Guerra del Perú -> CIP
+  Ejército del Perú -> TIN
+  Fuerza Aérea del Perú -> CIP
+  PNP -> TIN y CODOFIN
+- Los valores usan data-field y se integran con values() para quedar disponibles
+  en toda la lógica existente.
+- No se modifica el resto de la lógica de Cartas Poder.
