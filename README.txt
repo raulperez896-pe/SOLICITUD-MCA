@@ -1,10 +1,13 @@
 Generador Solicitud BBVA
-Versión de la página: v4.82
+Versión de la página: v4.83
 
 Carta Poder:
-- Coordenadas fijas verificadas por página y por plantilla a partir de los PDFs reales.
-- No se depende de pageIndex ni de referencias AcroForm para ubicar los datos.
-- Nombre, banco, DNI, celular, dirección, distrito, ciudad y fecha se dibujan en las
-  posiciones reales de cada hoja.
-- Reducción de cuota/plazo se dibuja en cada casillero físico correspondiente.
-- PDF final fijo y específico por convenio.
+- Coordenadas verificadas por página a partir de las plantillas reales.
+- No se dibujan rectángulos blancos sobre la plantilla.
+- Nombre cliente, banco, DNI, celular, domicilio, ciudad y fecha se dibujan
+  directamente en las posiciones físicas verificadas.
+- ESSALUD: las filas de autorizados permanecen en blanco.
+- MGP: en la segunda hoja se elimina el prefijo BANCO del nombre de la entidad
+  para evitar duplicarlo en el texto "Banco ...".
+- La reducción de cuota/plazo se marca exactamente en las casillas físicas.
+- PDF final fijo.
