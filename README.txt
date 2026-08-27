@@ -1,17 +1,12 @@
 Generador Solicitud BBVA
-Base estable: v4.86
-Parche: v4.86.3
+Base: v4.86 estable
+Parche: v4.86.4
 
-Cambios exclusivos:
-- Carta Poder: no se borra ni redibuja el nombre del gestor; se conserva el
-  valor correcto de la plantilla: PEDRO ARISTIDES CASTAÑEDA BERROCAL / DNI 44202466.
-- PNP hoja 2: las casillas de reducción son gráficas. Se conserva el cuadro
-  impreso y se dibuja la X solo dentro del cuadro seleccionado (cuota o plazo).
-- Campos institucionales siempre visibles en la pantalla según convenio:
-  Marina -> CIP
-  Ejército -> TIN
-  FAP -> CIP
-  PNP -> TIN + CODOFIN.
-- Los campos institucionales se guardan como data-field para reutilizarlos en
-  la generación de documentos.
-- No se agregan rectángulos blancos que tapen líneas o textos.
+Cambio exclusivo solicitado:
+- ESSALUD, hoja 4: se reemplaza únicamente el nombre dentro de la celda
+  NOMBRES Y APELLIDOS, dibujándolo completo y centrado como
+  PEDRO ARISTIDES CASTAÑEDA BERROCAL.
+- ESSALUD, hoja 4: se reemplazan únicamente los dos espacios/indicadores
+  de reducción, conservando el texto y líneas circundantes. Se dibuja [X]
+  solo en la opción seleccionada y [ ] en la otra.
+- No se modifica el resto de las hojas ni la estructura estable v4.86.
