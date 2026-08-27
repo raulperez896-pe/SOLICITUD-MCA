@@ -14,3 +14,5 @@ Parche v4.86.19 — TODAS las Cartas Poder:
   el documento (18)" que estaba afectando las Cartas Poder.
 - Solicitud y DPS no fueron modificadas.
 Versión: v4.86.19
+
+Actualización: EJÉRCITO y MARINA usan la carta de 3 páginas suministrada; ESSALUD limpia datos estáticos erróneos de hojas 2 y 3; gestor fijo para MARINA: PEDRO ARISTIDES CASTAÑEDA BERROCAL / DNI 44202466.
