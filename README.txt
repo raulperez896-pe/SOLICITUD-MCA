@@ -1,10 +1,10 @@
 Generador Solicitud BBVA
-Base: v4.86.13
+Base: v4.86.15
 
-Corrección v4.86.15:
-- Se mantiene la Carta Poder MGP con el gestor dibujado.
-- Se corrigió el error que podía producir PDFs ilegibles para Adobe Acrobat:
-  las imágenes de nombre y DNI ahora se incrustan en el documento fuente (src)
-  antes de copiar las páginas al PDF final.
-- No se utiliza un objeto de imagen perteneciente a finalDoc dentro de src.
-- No se modifican las demás plantillas ni la lógica.
+Corrección de PDF MGP v4.86.16:
+- Se mantiene el aplanado (flatten) de los campos.
+- Se elimina la manipulación manual posterior de /Annots.
+- Después de aplanar, las páginas se copian directamente con copyPages() al PDF
+  final, conservando una estructura PDF válida para Adobe Acrobat.
+- No se cambia la plantilla MGP ni los datos ya configurados.
+Versión: v4.86.16
