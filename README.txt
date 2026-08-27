@@ -1,18 +1,17 @@
 Generador Solicitud BBVA
-Base: v4.86 estable
-Parche: v4.86.2
+Base estable: v4.86
+Parche: v4.86.3
 
-Correcciones solicitadas:
-- Se elimina la lógica de borrar/dibujar sobre los cuadros de reducción que estaba
-  tapando letras. La reducción usa los casilleros reales del PDF: se desmarcan ambos
-  y se marca únicamente la opción seleccionada antes de aplanar.
-- No se repintan ni se cubren las líneas del documento para nombres, bancos o datos.
-- Se conserva la plantilla estable v4.86 y el gestor CASTAÑEDA.
-- Campos institucionales predictivos y guardados:
-  Marina de Guerra -> CIP
-  Ejército del Perú -> TIN
-  Fuerza Aérea del Perú -> CIP
-  PNP -> TIN + CODOFIN
-- Los identificadores se reutilizan en la Carta Poder cuando existe una posición
-  predefinida o en la línea de Otros datos de la plantilla, sin cubrir texto.
-- FAP usa la plantilla general de Carta Poder disponible en el ZIP.
+Cambios exclusivos:
+- Carta Poder: no se borra ni redibuja el nombre del gestor; se conserva el
+  valor correcto de la plantilla: PEDRO ARISTIDES CASTAÑEDA BERROCAL / DNI 44202466.
+- PNP hoja 2: las casillas de reducción son gráficas. Se conserva el cuadro
+  impreso y se dibuja la X solo dentro del cuadro seleccionado (cuota o plazo).
+- Campos institucionales siempre visibles en la pantalla según convenio:
+  Marina -> CIP
+  Ejército -> TIN
+  FAP -> CIP
+  PNP -> TIN + CODOFIN.
+- Los campos institucionales se guardan como data-field para reutilizarlos en
+  la generación de documentos.
+- No se agregan rectángulos blancos que tapen líneas o textos.
