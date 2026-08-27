@@ -1,12 +1,13 @@
 Generador Solicitud BBVA
-Base: v4.86.12
+Base: v4.86.13
 
-Corrección MGP:
-- Se dibujan los datos del gestor en la PRIMERA FILA DE DATOS de la tabla
-  "NOMBRES Y APELLIDOS | DNI" de la segunda hoja MGP.
+Ajuste MGP solicitado:
+- En la segunda hoja de Carta Poder MGP, la primera fila de datos de la tabla
+  "NOMBRES Y APELLIDOS | DNI" queda prellenada y NO editable.
 - Nombre: PEDRO ARISTIDES CASTAÑEDA BERROCAL
 - DNI: 44202466
-- Los dos datos se generan como imagen PNG para conservar correctamente la Ñ.
-- Los datos quedan centrados dentro de sus respectivas celdas.
-- No se modifica ninguna otra parte de la Carta Poder MGP ni del sistema.
-Versión: v4.86.13
+- El dato se dibuja directamente sobre la fila de la plantilla y se usa una fuente
+  con soporte para Ñ.
+- Se elimina el redibujado dinámico anterior para evitar duplicaciones.
+- No se modifica ninguna otra parte de la aplicación.
+Versión: v4.86.14
