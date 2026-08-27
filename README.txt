@@ -1,10 +1,12 @@
 Generador Solicitud BBVA
-Base: v4.86.15
+Base: v4.86.11 MGP estable
 
-Corrección de PDF MGP v4.86.16:
-- Se mantiene el aplanado (flatten) de los campos.
-- Se elimina la manipulación manual posterior de /Annots.
-- Después de aplanar, las páginas se copian directamente con copyPages() al PDF
-  final, conservando una estructura PDF válida para Adobe Acrobat.
-- No se cambia la plantilla MGP ni los datos ya configurados.
-Versión: v4.86.16
+Corrección v4.86.17:
+- Carta Poder MGP mantiene el aplanado.
+- Se eliminó para MGP el reconstruido de páginas mediante embedPage y la
+  manipulación manual de /Annots que estaban generando incompatibilidad con Acrobat.
+- Para un juego MGP se devuelve directamente el PDF ya guardado y aplanado.
+- Para varios juegos MGP se combinan PDFs ya guardados con copyPages().
+- El gestor se dibuja con fuente PDF nativa dentro de la primera fila:
+  PEDRO ARISTIDES CASTAÑEDA BERROCAL / 44202466.
+- No se modifican las demás plantillas.
