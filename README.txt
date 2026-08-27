@@ -1,11 +1,11 @@
 Generador Solicitud BBVA
-Versión de la página: v4.84
+Versión de la página: v4.85
 
-Carta Poder:
-- La marca de reducción se controla físicamente: se borran ambas casillas y se
-  redibuja solo la opción seleccionada.
-- No se colocan nombres en las filas de autorizados de ESSALUD.
-- No se usan rectángulos blancos que tapen información del documento.
-- MGP evita duplicar la palabra BANCO en la segunda hoja.
-- Gestor: PEDRO ARISTIDES CASTAÑEDA BERROCAL / DNI 44202466.
-- Nombre, banco, DNI y demás datos utilizan posiciones verificadas por plantilla.
+Correcciones Carta Poder:
+- PNP hoja 2: las casillas de reducción son gráficos y ahora se borran y se
+  vuelve a dibujar exactamente la opción seleccionada.
+- ESSALUD: la segunda hoja deja en blanco las tres filas de NOMBRE de autorizados.
+- ESSALUD: la selección de reducción de cuota/plazo se redibuja sobre la marca
+  estática de la plantilla.
+- MGP: gestor fijo PEDRO ARISTIDES CASTAÑEDA BERROCAL / DNI 44202466, con Ñ explícita.
+- Mantiene las demás posiciones y la lógica de plantillas por convenio.
