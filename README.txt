@@ -1,18 +1,13 @@
 Generador Solicitud BBVA
-Base estable: v4.86.17
+Base: v4.86.13
 
-Parche v4.86.19 — TODAS las Cartas Poder:
-- Se reemplazó únicamente el motor de generación de Carta Poder.
-- Todas las Cartas Poder (GENERAL, PNP, MGP, EJÉRCITO y ESSALUD) se construyen
-  sobre un PDF nuevo desde cero usando imágenes de las plantillas exactas.
-- No se usa AcroForm, flatten, /Annots ni embedPage para la Carta Poder final.
-- El PDF queda completamente fijo/no editable.
-- Se mantienen los datos dinámicos y posiciones de las plantillas.
-- MGP conserva el gestor dibujado como PEDRO ARISTIDES CASTAÑEDA BERROCAL / 44202466.
-- PNP/Ejército/FAP mantienen los identificadores institucionales configurados.
-- El objetivo principal es eliminar el error de Adobe Acrobat "Problema al leer
-  el documento (18)" que estaba afectando las Cartas Poder.
-- Solicitud y DPS no fueron modificadas.
-Versión: v4.86.19
-
-Actualización: EJÉRCITO y MARINA usan la carta de 3 páginas suministrada; ESSALUD limpia datos estáticos erróneos de hojas 2 y 3; gestor fijo para MARINA: PEDRO ARISTIDES CASTAÑEDA BERROCAL / DNI 44202466.
+Ajuste MGP solicitado:
+- En la segunda hoja de Carta Poder MGP, la primera fila de datos de la tabla
+  "NOMBRES Y APELLIDOS | DNI" queda prellenada y NO editable.
+- Nombre: PEDRO ARISTIDES CASTAÑEDA BERROCAL
+- DNI: 44202466
+- El dato se dibuja directamente sobre la fila de la plantilla y se usa una fuente
+  con soporte para Ñ.
+- Se elimina el redibujado dinámico anterior para evitar duplicaciones.
+- No se modifica ninguna otra parte de la aplicación.
+Versión: v4.86.14
