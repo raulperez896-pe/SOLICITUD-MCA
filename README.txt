@@ -1,12 +1,9 @@
-GENERADOR BBVA - v4.86.26
+GENERADOR BBVA - VERSION ZIP v4.86.28
 
-Cambio de esta versión:
-- Únicamente Cartas Poder: se preparan como documento de impresión A4 y se abren en la ventana nativa de impresión del navegador.
-- El usuario selecciona "Guardar como PDF" / "Microsoft Print to PDF".
-- Las Cartas Poder NO usan PDF.js ni generan directamente un PDF desde formularios AcroForm.
-- Solicitud, DPS y Carta de Compra de Deuda mantienen su funcionamiento original.
-- Se conservan los datos y la lógica de las Cartas Poder según la base proporcionada.
+Uso recomendado en GitHub Pages:
+1. Subir todo el contenido de esta carpeta al repositorio.
+2. Publicar la carpeta mediante GitHub Pages.
+3. Abrir index.html desde GitHub Pages.
 
-IMPORTANTE:
-- Para Cartas Poder, al abrir la ventana de impresión, elegir tamaño A4, escala 100% si aparece disponible y guardar como PDF.
-- El resultado es un PDF final de impresión, sin campos de formulario interactivos.
+Las Cartas Poder usan plantillas PNG locales para la vista de impresion del navegador.
+La Solicitud, DPS y Carta de Compra de Deuda mantienen su logica original.
