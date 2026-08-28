@@ -1,0 +1,3 @@
+VERSIÓN v4.92
+Base de Cartas Poder: archivos suministrados por el usuario en esta actualización.
+Ejército: 3 páginas; EsSalud: 4; Marina: 2; PNP: 2; General: 1.
