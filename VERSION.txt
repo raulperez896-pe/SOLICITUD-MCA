@@ -1,2 +1,1 @@
-Versión v4.97
-ESSALUD páginas 2 y 3: limpieza de datos preexistentes manteniendo líneas y etiquetas. Página 1 sin cambios.
+Versión v4.98 - Ajuste de posición del CELULAR únicamente en ESSALUD, hoja 3.
