@@ -1,3 +1,3 @@
-v4.94
-Corrección exclusiva de la fecha de ESSALUD para evitar líneas sobre el texto.
-Las demás Cartas Poder permanecen sin cambios.
+VERSIÓN v4.95
+Corrección exclusiva ESSALUD: se conservan las líneas del formato y se limpian únicamente los textos de ejemplo antes de estampar los datos reales.
+Las plantillas actuales de las Cartas Poder se mantienen sin reemplazarlas por versiones anteriores.

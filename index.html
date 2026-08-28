@@ -108,7 +108,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .additional-questionnaire{margin-top:12px}.additional-panel{border:1px solid #d8e0ea;border-radius:7px;padding:10px;margin-bottom:10px;background:#fbfdff}.additional-panel .subsection{margin-top:0}.seguro-condicional-hidden{display:none!important}
 </style>
 <meta name="application-version" content="4.61">
-<meta name="build-version" content="v4.94">
+<meta name="build-version" content="v4.95">
 </head>
 <body>
 <header class="topbar">
@@ -345,7 +345,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v4.94</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v4.95</footer>
 
 <script>
 const APP_VERSION = '4.94';
@@ -1214,7 +1214,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v4.94 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v4.95 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -2150,7 +2150,7 @@ async function generate(){
 
   // CORRECCIÓN DE NOMBRE COMPLETO EN LAS HOJAS ESTÁTICAS.
   // Siempre usar: PRIMER NOMBRE + SEGUNDO NOMBRE + APELLIDO PATERNO + APELLIDO MATERNO.
-  // v4.94: NO se dibuja nuevamente el nombre sobre estas páginas.
+  // v4.95: NO se dibuja nuevamente el nombre sobre estas páginas.
   // Las plantillas ya reciben el nombre completo mediante sus campos.
   // Dibujarlo encima generaba duplicación visual. Se conserva únicamente
   // el valor del campo y su apariencia original.
@@ -2316,23 +2316,42 @@ async function generateCartasPoder(){
         else if(f==="DEPENDENCIA") value=convenio;
         if(!value)return;
 
-        // v4.94: ESSALUD solamente - la línea de fecha del formato queda muy cerca
-        // del texto cuando se estampa con las coordenadas genéricas. Se limpia un
-        // área ligeramente mayor y se eleva/reduce el texto, sin tocar las demás
-        // plantillas.
+        // v4.95: ESSALUD - NO borrar las líneas del formato.
+        // Los datos se imprimen sobre el espacio de captura, como en una impresión
+        // normal, dejando visibles las líneas y evitando recortar caracteres.
         if(templateName==="ESSALUD" && pi===0 && (f==="CIUDAD" || f==="DIA" || f==="MES")){
-          const erasers={
-            CIUDAD:{x:298.5,y:759.8,w:72.5,h:18.6},
-            DIA:{x:372.1,y:759.8,w:27.8,h:18.6},
-            MES:{x:409.8,y:759.8,w:63.2,h:18.6}
+          const pos={
+            CIUDAD:{x:301.868,y:763.8,w:65.76,h:11.2},
+            DIA:{x:375.153,y:763.8,w:22.08,h:10.8},
+            MES:{x:410.818,y:763.8,w:60.24,h:10.8}
           };
-          const rr=erasers[f];
-          eraseRect(page,rr);
-          draw(page,value,{x:rr.x,y:rr.y+2.2,w:rr.w,h:rr.h-2.2},6.0,4.8,font);
+          draw(page,value,pos[f],6.0,4.7,font);
+          return;
+        }
+
+        // ESSALUD página 3: la plantilla actual trae textos de ejemplo impresos.
+        // Se cubre SOLO el texto (no la línea de captura) antes de colocar el dato real.
+        if(templateName==="ESSALUD" && pi===2 && (f==="NOMBRE Y APELLIDOS" || f==="DNI" || f==="CELULAR" || f==="DIRECCION1")){
+          const clean={
+            "NOMBRE Y APELLIDOS":{x:158.5,y:500.0,w:247.0,h:13.0},
+            "DNI":{x:81.0,y:471.5,w:86.0,h:12.5},
+            "CELULAR":{x:278.0,y:471.5,w:129.0,h:12.5},
+            "DIRECCION1":{x:107.5,y:443.5,w:300.0,h:12.5}
+          };
+          const cr=clean[f];
+          eraseRect(page,cr);
+          draw(page,value,{x:cr.x,y:cr.y,w:cr.w,h:cr.h},7.0,4.6,font);
           return;
         }
 
         if(!value)return;
+        if(templateName==="ESSALUD" && pi===0){
+          // La plantilla actual ya trae las líneas de captura; no las borres.
+          let max=6.7,min=3.8;if(/^Entidad Financiera/.test(f)){max=6.0;min=3.8}if(/^DNI/.test(f)){max=5.7;min=4.0}
+          draw(page,value,item,max,min,font);
+          return;
+        }
+        if(templateName==="ESSALUD" && pi===2 && (f==="NOMBRE Y APELLIDOS" || f==="DNI" || f==="CELULAR" || f==="DIRECCION1")) return;
         eraseRect(page,item);
         let max=7,min=4;if(/^NOMBRE/.test(f)){max=6.7;min=3.8}if(/^Entidad Financiera/.test(f)){max=6.0;min=3.8}if(/^DNI/.test(f)){max=5.7;min=4.0}draw(page,value,item,max,min,font);
       });
@@ -2368,7 +2387,7 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v4.94 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v4.95 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 function clearAll(){
@@ -2403,7 +2422,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v4.94</strong>
+  Versión de la página: <strong>v4.95</strong>
 </div>
-<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v4.94</div></body>
+<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v4.95</div></body>
 </html>
