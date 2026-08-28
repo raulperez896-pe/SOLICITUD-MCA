@@ -1,7 +1,0 @@
-VERSIÓN: v4.87
-
-CAMBIO PRINCIPAL:
-- Cartas Poder: el generador ya no incorpora las estructuras PDF/AcroForm de la plantilla original.
-- Las páginas de la Carta Poder se usan como fondo rasterizado y se construye un PDF nuevo, equivalente a imprimir y guardar como PDF.
-- Se mantiene el contenido visual de la plantilla y los campos se dibujan encima.
-- La versión visible en el pie de la página es v4.87 para confirmar que la actualización fue cargada.
