@@ -2263,7 +2263,7 @@ async function generateCartasPoder(){
       </style></head><body>
       <div class="toolbar"><div><strong>Cartas Poder:</strong> documento preparado para impresión.</div><button onclick="window.print()">Imprimir / Guardar como PDF</button></div>
       <div id="pages"></div>
-    <div style="text-align:center;font:600 12px Arial,sans-serif;color:#666;padding:12px 0 18px">VERSIÓN ZIP: v4.86.28</div></body></html>`);
+    <div style="text-align:center;font:600 12px Arial,sans-serif;color:#666;padding:12px 0 18px">VERSIÓN ZIP: v4.86.29</div></body></html>`);
     printWin.document.close();
 
     const selectedIndex=Number($("convenio")?.value);
@@ -2340,7 +2340,8 @@ async function generateCartasPoder(){
       const sheet=printWin.document.createElement("section");
       sheet.className="sheet";
       const img=printWin.document.createElement("img");
-      img.src=(CARTA_PRINT_ASSETS[assetRoot]&&CARTA_PRINT_ASSETS[assetRoot][`page-${pi+1}`])||"";
+      const assetPath=(CARTA_PRINT_ASSETS[assetRoot]&&CARTA_PRINT_ASSETS[assetRoot][`page-${pi+1}`])||"";
+      img.src=assetPath?new URL(assetPath,document.baseURI).href:"";
       img.alt="";
       sheet.appendChild(img);
 
@@ -2431,5 +2432,5 @@ prepare();
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
   Versión de la página: <strong>v4.86.28</strong>
 </div>
-<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v4.86.28</div><div style="text-align:center;font:600 12px Arial,sans-serif;color:#666;padding:12px 0 18px">VERSIÓN ZIP: v4.86.28</div></body>
+<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v4.86.28</div><div style="text-align:center;font:600 12px Arial,sans-serif;color:#666;padding:12px 0 18px">VERSIÓN ZIP: v4.86.29</div></body>
 </html>
