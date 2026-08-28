@@ -1,17 +1,10 @@
-Generador Solicitud BBVA
-Base: v4.86.13
+Generador BBVA - versión v4.86.33
 
-Ajuste MGP solicitado:
-- En la segunda hoja de Carta Poder MGP, la primera fila de datos de la tabla
-  "NOMBRES Y APELLIDOS | DNI" queda prellenada y NO editable.
-- Nombre: PEDRO ARISTIDES CASTAÑEDA BERROCAL
-- DNI: 44202466
-- El dato se dibuja directamente sobre la fila de la plantilla y se usa una fuente
-  con soporte para Ñ.
-- Se elimina el redibujado dinámico anterior para evitar duplicaciones.
-- No se modifica ninguna otra parte de la aplicación.
-Versión: v4.86.14
+Corrección principal:
+- La página ya NO carga PDF-Lib durante la inicialización.
+- El estado inicial debe pasar de “Inicializando...” a “Lista de convenios cargada...” incluso sin acceso a CDN.
+- PDF-Lib se carga únicamente cuando el usuario genera un PDF que lo necesita.
+- No se modifica la lógica de datos de Solicitud/DPS/CD.
+- La versión visible queda al final de la página.
 
-
-VERSIÓN ZIP: v4.86.32
-Cambio: las Cartas Poder se generan sobre páginas rasterizadas de las plantillas y se exportan a un PDF nuevo tipo impresión, sin conservar formularios/anotaciones problemáticas. Solicitud, DPS y Carta de Compra de Deuda permanecen sin cambios.
+Nota: para generar PDF en los módulos que requieren PDF-Lib, la aplicación todavía puede necesitar acceso al CDN configurado. Esta corrección evita que esa dependencia bloquee el arranque de toda la aplicación.
