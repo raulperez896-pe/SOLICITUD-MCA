@@ -1,14 +1,13 @@
-GENERADOR BBVA - v4.86.34
+Generador Solicitud BBVA
+Base: v4.86.13
 
-CAMBIO PRINCIPAL
-Las Cartas Poder ya no se construyen sobre los PDF AcroForm originales.
-Cada pagina de Carta Poder se genera desde un fondo rasterizado y se crea
-un PDF nuevo desde cero. Esto emula el resultado de una impresion/Guardar
-como PDF y evita transportar la estructura interna de formularios/XRef que
-provocaba el Error 18 de Adobe Acrobat.
-
-IMPORTANTE
-- Solicitud, DPS y Carta de Compra de Deuda: no se modifico su logica.
-- Cartas Poder: salida fija, sin AcroForm ni anotaciones.
-- Marina: se mantiene con 2 paginas por banco.
-- Version visible al final de la pagina: v4.86.34.
+Ajuste MGP solicitado:
+- En la segunda hoja de Carta Poder MGP, la primera fila de datos de la tabla
+  "NOMBRES Y APELLIDOS | DNI" queda prellenada y NO editable.
+- Nombre: PEDRO ARISTIDES CASTAÑEDA BERROCAL
+- DNI: 44202466
+- El dato se dibuja directamente sobre la fila de la plantilla y se usa una fuente
+  con soporte para Ñ.
+- Se elimina el redibujado dinámico anterior para evitar duplicaciones.
+- No se modifica ninguna otra parte de la aplicación.
+Versión: v4.86.14
