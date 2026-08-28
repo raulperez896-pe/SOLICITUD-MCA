@@ -1,3 +1,4 @@
-Generador BBVA - Carta Poder con salida tipo "Imprimir > Guardar como PDF".
-Las Cartas Poder se renderizan a 180 DPI y se reconstruyen como PDF fijo para evitar errores de lectura de Adobe Acrobat asociados a formularios/anotaciones.
-Solicitud y DPS no se modifican.
+Generador BBVA
+Versión ZIP: v4.86.22
+
+La versión visible queda indicada al final de la página para facilitar la validación de la actualización.
