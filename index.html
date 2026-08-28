@@ -2239,6 +2239,53 @@ function textPngDataUrl(text, pxSize=18, bold=false){
   return c.toDataURL("image/png");
 }
 
+async function loadPDFJS(){
+  if(window.pdfjsLib?.getDocument) return window.pdfjsLib;
+  if(window.__pdfjsLoading) return window.__pdfjsLoading;
+  window.__pdfjsLoading=(async()=>{
+    const sources=[
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+      "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js",
+      "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"
+    ];
+    let lastErr=null;
+    for(const src of sources){
+      try{
+        await loadScript(src);
+        if(window.pdfjsLib?.getDocument) return window.pdfjsLib;
+      }catch(e){ lastErr=e; }
+    }
+    throw new Error("No se pudo cargar el motor de impresión PDF (PDF.js). Revisa Internet o si tu red bloquea CDN.");
+  })();
+  try{return await window.__pdfjsLoading}finally{delete window.__pdfjsLoading}
+}
+
+
+async function rasterizePDFPages(pdfBytes, targetDoc, dpi=180){
+  const pdfjs=await loadPDFJS();
+  const pdf=await pdfjs.getDocument({data:pdfBytes, disableWorker:true, useWorkerFetch:false, isEvalSupported:true}).promise;
+  const scale=Number(dpi)/72;
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const base=page.getViewport({scale:1});
+    const viewport=page.getViewport({scale});
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.ceil(viewport.width);
+    canvas.height=Math.ceil(viewport.height);
+    const ctx=canvas.getContext("2d",{alpha:false});
+    ctx.save();
+    ctx.fillStyle="#ffffff";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.restore();
+    await page.render({canvasContext:ctx,viewport,background:"#ffffff"}).promise;
+    const png=canvas.toDataURL("image/png");
+    const img=await targetDoc.embedPng(png);
+    const outPage=targetDoc.addPage([base.width,base.height]);
+    outPage.drawImage(img,{x:0,y:0,width:base.width,height:base.height});
+    canvas.width=1; canvas.height=1;
+  }
+}
+
 async function generateCartasPoder(){
  try{
   if(!isSubrogacion()) throw Error("Las Cartas Poder solo corresponden a SUBROGADO o SUBROGADO + RENOVADO.");
@@ -2440,14 +2487,14 @@ async function generateCartasPoder(){
 
 
 
-    // Make final game fixed and self-contained.
-    const bytes=await src.save({useObjectStreams:false});
-    const clean=await PDFLib.PDFDocument.load(bytes,{updateMetadata:false});
-    try{const ann=PDFLib.PDFName.of("Annots");clean.getPages().forEach(pg=>{try{pg.node.delete(ann)}catch(_){}})}catch(_){}
-    for(const sp of clean.getPages()){
-      const w=sp.getWidth(),h=sp.getHeight(),emb=await finalDoc.embedPage(sp);
-      const tp=finalDoc.addPage([w,h]);tp.drawPage(emb,{x:0,y:0,width:w,height:h});
-    }
+    // Simular "Imprimir > Guardar como PDF" para las Cartas Poder.
+    // En lugar de copiar la estructura interna del PDF/AcroForm, renderizamos
+    // cada página y la volvemos a construir como una página PDF fija.
+    // Esto elimina por completo formularios, anotaciones y objetos problemáticos
+    // que pueden provocar en Adobe Acrobat el error "Problema al leer el documento (18)".
+    const bytes=await src.save({useObjectStreams:false,addDefaultPage:false});
+    await rasterizePDFPages(bytes,finalDoc,180);
+
   }
 
   const out=await finalDoc.save({useObjectStreams:false,addDefaultPage:false});

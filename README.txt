@@ -1,13 +1,3 @@
-Generador Solicitud BBVA
-Base: v4.86.13
-
-Ajuste MGP solicitado:
-- En la segunda hoja de Carta Poder MGP, la primera fila de datos de la tabla
-  "NOMBRES Y APELLIDOS | DNI" queda prellenada y NO editable.
-- Nombre: PEDRO ARISTIDES CASTAÑEDA BERROCAL
-- DNI: 44202466
-- El dato se dibuja directamente sobre la fila de la plantilla y se usa una fuente
-  con soporte para Ñ.
-- Se elimina el redibujado dinámico anterior para evitar duplicaciones.
-- No se modifica ninguna otra parte de la aplicación.
-Versión: v4.86.14
+Generador BBVA - Carta Poder con salida tipo "Imprimir > Guardar como PDF".
+Las Cartas Poder se renderizan a 180 DPI y se reconstruyen como PDF fijo para evitar errores de lectura de Adobe Acrobat asociados a formularios/anotaciones.
+Solicitud y DPS no se modifican.
