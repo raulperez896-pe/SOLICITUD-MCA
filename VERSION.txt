@@ -1,1 +1,2 @@
-Versión v4.98 - Ajuste de posición del CELULAR únicamente en ESSALUD, hoja 3.
+VERSIÓN v4.99
+Ajuste específico ESSALUD hoja 3: campo CELULAR desplazado a la derecha y ligeramente ajustado en vertical para no cubrir “Teléfono (fijo/celular)”.
