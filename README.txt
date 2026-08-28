@@ -1,7 +1,4 @@
-Generador BBVA v4.86.29
-
-IMPORTANTE:
-- Subir TODO el contenido de este ZIP a GitHub Pages respetando la carpeta assets/cartas/.
-- Las Cartas Poder se preparan para impresión con rutas absolutas calculadas desde la ubicación real de index.html, evitando el error de carga en ventanas about:blank.
-- Solicitud, DPS y Carta de Compra de Deuda no se modifican.
-- Versión visible al final de la página: v4.86.29.
+Generador BBVA v4.86.30
+Las Cartas Poder usan páginas PNG embebidas en el HTML (Data URI) para evitar errores de carga en ventanas de impresión, rutas relativas, CORS y CDN.
+Solo Cartas Poder usan impresión del navegador. Solicitud, DPS y Carta de Compra de Deuda conservan la lógica existente.
+Versión visible al final de la página: v4.86.30
