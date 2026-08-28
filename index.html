@@ -108,7 +108,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .additional-questionnaire{margin-top:12px}.additional-panel{border:1px solid #d8e0ea;border-radius:7px;padding:10px;margin-bottom:10px;background:#fbfdff}.additional-panel .subsection{margin-top:0}.seguro-condicional-hidden{display:none!important}
 </style>
 <meta name="application-version" content="4.61">
-<meta name="build-version" content="v4.86.23">
+<meta name="build-version" content="v4.86.24">
 </head>
 <body>
 <header class="topbar">
@@ -345,7 +345,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · <strong>VERSIÓN ZIP v4.86.23</strong></footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · <strong>VERSIÓN ZIP v4.86.24</strong></footer>
 
 <script>
 const APP_VERSION = '4.86.23';
@@ -2331,26 +2331,26 @@ function clearAll(){
  applyToday();
  status(`Lista de convenios cargada: ${CONVENIOS.length} convenios.`,"ok");
 }
-$("convenio").addEventListener("change",conventionChange);$("generar").addEventListener("click",generate);$("generarDPS").addEventListener("click",generateDPS);$("generarCarta").addEventListener("click",generateCarta);$("generarCartasPoder").addEventListener("click",generateCartasPoder);$("limpiar").addEventListener("click",clearAll);
-  // Campos condicionales de DPS, PNP y FFAA: se actualizan inmediatamente.
-  document.addEventListener("change",e=>{
-    const field=e.target && e.target.dataset ? e.target.dataset.field : "";
-    if(field) updateConditionalFields();
-  });
-  document.addEventListener("input",e=>{
-    const field=e.target && e.target.dataset ? e.target.dataset.field : "";
-    if(field) updateConditionalFields();
-  });
-  updateConditionalFields();
-  $("tipoSeguro").addEventListener("change",updateSeguroUI);
-  $("tipoOperacion").addEventListener("change",toggleCompraDeuda);
-  updateSeguroUI();
-  initCompraDeudaUI();
-
-prepare();
+// Inicialización robusta: la página debe quedar operativa aunque alguna mejora opcional falle.
+(async()=>{
+  try{ await prepare(); }catch(e){ console.error("Error crítico de inicialización",e); status("Error al preparar la página: "+(e?.message||e),"error"); }
+  try{$("convenio").addEventListener("change",conventionChange);}catch(e){console.warn("convenio",e)}
+  try{$("generar").addEventListener("click",generate);}catch(e){console.warn("generar",e)}
+  try{$("generarDPS").addEventListener("click",generateDPS);}catch(e){console.warn("generarDPS",e)}
+  try{$("generarCarta").addEventListener("click",generateCarta);}catch(e){console.warn("generarCarta",e)}
+  try{$("generarCartasPoder").addEventListener("click",generateCartasPoder);}catch(e){console.warn("generarCartasPoder",e)}
+  try{$("limpiar").addEventListener("click",clearAll);}catch(e){console.warn("limpiar",e)}
+  document.addEventListener("change",e=>{const field=e.target?.dataset?.field||"";if(field){try{updateConditionalFields()}catch(err){console.warn("conditional change",err)}}});
+  document.addEventListener("input",e=>{const field=e.target?.dataset?.field||"";if(field){try{updateConditionalFields()}catch(err){console.warn("conditional input",err)}}});
+  try{updateConditionalFields();}catch(e){console.warn("updateConditionalFields",e)}
+  try{$("tipoSeguro").addEventListener("change",updateSeguroUI);}catch(e){console.warn("tipoSeguro",e)}
+  try{$("tipoOperacion").addEventListener("change",toggleCompraDeuda);}catch(e){console.warn("tipoOperacion",e)}
+  try{updateSeguroUI();}catch(e){console.warn("updateSeguroUI",e)}
+  try{initCompraDeudaUI();}catch(e){console.warn("initCompraDeudaUI",e)}
+})();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  VERSIÓN ZIP: <strong>v4.86.23</strong>
+  VERSIÓN ZIP: <strong>v4.86.24</strong>
 </div>
-<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN ZIP v4.86.23</div></body>
+<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN ZIP v4.86.24</div></body>
 </html>

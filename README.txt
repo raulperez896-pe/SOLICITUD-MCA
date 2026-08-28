@@ -1,3 +1,5 @@
-v4.86.23
-Cartas Poder: salida por vista de impresión sin PDF.js.
-PDFLib se carga bajo demanda solo para Solicitud/DPS/Carta de Compra de Deuda.
+Generador BBVA - versión v4.86.24
+
+Corrección: inicialización robusta para evitar que la interfaz quede en "Inicializando...". Las Cartas Poder continúan en vista de impresión sin PDF.js; Solicitud y DPS sin cambios.
+
+Versión visible al final de la página: v4.86.24
