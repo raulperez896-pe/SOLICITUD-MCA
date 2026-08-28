@@ -1,4 +1,2 @@
-VERSIÓN v4.96
-Actualización basada en las Cartas Poder proporcionadas por el usuario.
-ESSALUD: plantilla actual limpiada de valores preexistentes y convertida a PDF plano.
-Los demás documentos se mantienen sin modificación de contenido.
+Versión v4.97
+ESSALUD páginas 2 y 3: limpieza de datos preexistentes manteniendo líneas y etiquetas. Página 1 sin cambios.
