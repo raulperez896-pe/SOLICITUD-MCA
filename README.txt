@@ -1,13 +1,8 @@
-Generador Solicitud BBVA
-Base: v4.86.13
+ACTUALIZACION CARTAS PODER v4.88
 
-Ajuste MGP solicitado:
-- En la segunda hoja de Carta Poder MGP, la primera fila de datos de la tabla
-  "NOMBRES Y APELLIDOS | DNI" queda prellenada y NO editable.
-- Nombre: PEDRO ARISTIDES CASTAÑEDA BERROCAL
-- DNI: 44202466
-- El dato se dibuja directamente sobre la fila de la plantilla y se usa una fuente
-  con soporte para Ñ.
-- Se elimina el redibujado dinámico anterior para evitar duplicaciones.
-- No se modifica ninguna otra parte de la aplicación.
-Versión: v4.86.14
+Corrección de generación de Cartas Poder:
+- Se eliminan las anotaciones/widgets AcroForm de la copia de trabajo antes de dibujar datos.
+- Se limpian las áreas exactas de campos que contienen datos de muestra embebidos en las plantillas.
+- Se evita duplicar nombres, DNI, celulares, fechas y banco.
+- Solicitud y DPS no se modifican.
+- La página muestra la versión v4.88.
