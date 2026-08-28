@@ -1,8 +1,8 @@
-ACTUALIZACION CARTAS PODER v4.88
+ACTUALIZACION CARTAS PODER v4.89
 
-Corrección de generación de Cartas Poder:
-- Se eliminan las anotaciones/widgets AcroForm de la copia de trabajo antes de dibujar datos.
-- Se limpian las áreas exactas de campos que contienen datos de muestra embebidos en las plantillas.
-- Se evita duplicar nombres, DNI, celulares, fechas y banco.
-- Solicitud y DPS no se modifican.
-- La página muestra la versión v4.88.
+Corrección principal:
+- La generación de Cartas Poder ya no exige que el MONTO del préstamo esté informado.
+- Para la Carta Poder se exige la ENTIDAD FINANCIERA, que es el dato utilizado en el documento.
+- Las tarjetas siguen excluidas de esta generación.
+- Se mantiene la corrección de PDF plano y limpieza de datos sobrepuestos de la versión anterior.
+- La página muestra la versión v4.89.
