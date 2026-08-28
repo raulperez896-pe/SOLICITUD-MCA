@@ -1,4 +1,3 @@
-Generador BBVA
-Versión ZIP: v4.86.22
-
-La versión visible queda indicada al final de la página para facilitar la validación de la actualización.
+v4.86.23
+Cartas Poder: salida por vista de impresión sin PDF.js.
+PDFLib se carga bajo demanda solo para Solicitud/DPS/Carta de Compra de Deuda.
