@@ -1,2 +1,2 @@
-Versión v5.01
-Ajuste ESSALUD hoja 3: celular sobre la línea y plantilla base limpia sin datos de ejemplo.
+VERSIÓN v5.03
+Corrección Ejército: fecha/entidad página 2 y datos del cliente página 3.
