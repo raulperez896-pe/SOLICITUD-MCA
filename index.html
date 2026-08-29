@@ -108,7 +108,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .additional-questionnaire{margin-top:12px}.additional-panel{border:1px solid #d8e0ea;border-radius:7px;padding:10px;margin-bottom:10px;background:#fbfdff}.additional-panel .subsection{margin-top:0}.seguro-condicional-hidden{display:none!important}
 </style>
 <meta name="application-version" content="4.99">
-<meta name="build-version" content="v5.06">
+<meta name="build-version" content="v5.07">
 </head>
 <body>
 <header class="topbar">
@@ -345,7 +345,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v5.06</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v5.07</footer>
 
 <script>
 const APP_VERSION = '5.01';
@@ -579,7 +579,7 @@ async function generateCartasPoder(){
 };
   const pageImages=[...(CARTA_RASTER_PAGES[templateName]||CARTA_RASTER_PAGES.GENERAL)];
     for(let pi=0;pi<pageImages.length;pi++){
-      // v5.06: use clean raster page from current template.
+      // v5.07: use clean raster page from current template.
       const [w,h]=CARTA_RASTER_SIZES[templateName][pi];
       const page=finalDoc.addPage([w,h]);
       const bg=await finalDoc.embedPng(bytes64(pageImages[pi]));
@@ -646,7 +646,7 @@ async function generateCartasPoder(){
           return;
         }
         if(templateName==="ESSALUD" && pi===2 && (f==="NOMBRE Y APELLIDOS" || f==="DNI" || f==="CELULAR" || f==="DIRECCION1")) return;
-        // v5.06: printed line/background must remain visible.
+        // v5.07: printed line/background must remain visible.
         let max=7,min=4;if(/^NOMBRE/.test(f)){max=6.7;min=3.8}if(/^Entidad Financiera/.test(f)){max=6.0;min=3.8}if(/^DNI/.test(f)){max=5.7;min=4.0}draw(page,value,item,max,min,font);
       });
 
@@ -678,8 +678,21 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v5.06 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v5.07 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
+}
+async function prepare(){
+ try{
+  setupLogos();renderFields();setupPredictiveMasterFields();setupFuerzasIdentificacion();
+  $("convenioSearch")?.addEventListener("input",updateFuerzasIdentificacion);
+  $("convenio")?.addEventListener("change",()=>setTimeout(updateFuerzasIdentificacion,0));
+  populate();setupGeography();applyToday();status("Cargando motor PDF...");
+  pdfBytes=bytes64(PDF64);
+  await loadPDFLib();
+  const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
+  fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
+  status(`Generador actualizado v5.07 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+ }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function clearAll(){
  $("form").reset();
@@ -713,7 +726,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v5.06</strong>
+  Versión de la página: <strong>v5.07</strong>
 </div>
-<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.06</div></body>
+<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.07</div></body>
 </html>
