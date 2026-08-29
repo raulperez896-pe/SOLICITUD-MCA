@@ -1,2 +1,1 @@
-Versión de la página: v5.07
-Corrección: se restauró el inicializador de la página que faltaba en v5.06; se mantienen las plantillas y correcciones existentes.
+v5.08
