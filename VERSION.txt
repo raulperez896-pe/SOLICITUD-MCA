@@ -1,2 +1,2 @@
-VERSIÓN v4.99
-Ajuste específico ESSALUD hoja 3: campo CELULAR desplazado a la derecha y ligeramente ajustado en vertical para no cubrir “Teléfono (fijo/celular)”.
+Versión v5.01
+Ajuste ESSALUD hoja 3: celular sobre la línea y plantilla base limpia sin datos de ejemplo.
