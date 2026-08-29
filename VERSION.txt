@@ -1,3 +1,4 @@
-v4.94
-Corrección exclusiva de la fecha de ESSALUD para evitar líneas sobre el texto.
-Las demás Cartas Poder permanecen sin cambios.
+v5.09
+Ajuste de posicionamiento de fechas en ESSALUD y EJERCITO (hojas 1 y 2) sin borrar ni tapar las líneas del formato.
+Se añadió el llenado de Nombre, DNI, Celular y Domicilio en la hoja 3 de EJERCITO.
+Sin cambios en la impresión/diseño de las demás Cartas Poder.
