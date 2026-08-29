@@ -1,2 +1,1 @@
-Versión v5.04
-Corrección: se define CARTA_RASTER_SIZES para evitar el error JavaScript al generar Cartas Poder.
+v5.05
