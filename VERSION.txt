@@ -1,1 +1,2 @@
-v5.05
+VERSIÓN v5.06
+Corrección integral de Cartas Poder: raster actual sin widgets, preservación de líneas, ESSALUD hojas 2-3 limpias, PNP hoja 2 limpia, EJÉRCITO hoja 3 con datos y hoja 2 sin superposición.
