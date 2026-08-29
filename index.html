@@ -108,7 +108,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .additional-questionnaire{margin-top:12px}.additional-panel{border:1px solid #d8e0ea;border-radius:7px;padding:10px;margin-bottom:10px;background:#fbfdff}.additional-panel .subsection{margin-top:0}.seguro-condicional-hidden{display:none!important}
 </style>
 <meta name="application-version" content="4.99">
-<meta name="build-version" content="v5.03">
+<meta name="build-version" content="v5.04">
 </head>
 <body>
 <header class="topbar">
@@ -345,7 +345,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
-<footer>MasterCalculadora · Generador de solicitud por convenio · v5.03</footer>
+<footer>MasterCalculadora · Generador de solicitud por convenio · v5.04</footer>
 
 <script>
 const APP_VERSION = '5.01';
@@ -1213,7 +1213,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v5.03 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v5.04 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -2287,7 +2287,14 @@ async function generateCartasPoder(){
   const drawX=(page,r)=>{if(!r)return;page.drawLine({start:{x:r.x+2,y:r.y+2},end:{x:r.x+r.w-2,y:r.y+r.h-2},thickness:1.5,color:PDFLib.rgb(0,0,0)});page.drawLine({start:{x:r.x+r.w-2,y:r.y+2},end:{x:r.x+2,y:r.y+r.h-2},thickness:1.5,color:PDFLib.rgb(0,0,0)})};
 
   for(const loan of debtLoans){
-    const pageImages=[...(CARTA_RASTER_PAGES[templateName]||CARTA_RASTER_PAGES.GENERAL)];
+  const CARTA_RASTER_SIZES = {
+  GENERAL: [[595.32,841.92]],
+  ESSALUD: [[595.32,841.92],[596.0,842.0],[596.0,842.0],[595.32,841.92]],
+  MGP: [[595.32,841.92],[612.0,792.0]],
+  EJERCITO: [[595.32,841.92],[596.0,842.0],[596.0,842.0]],
+  PNP: [[595.32,841.92],[612.0,792.0]]
+};
+  const pageImages=[...(CARTA_RASTER_PAGES[templateName]||CARTA_RASTER_PAGES.GENERAL)];
     for(let pi=0;pi<pageImages.length;pi++){
       if(templateName==="ESSALUD" && pi===2) pageImages[2]=ESSALUD_CLEAN_P3_PNG;
       const [w,h]=CARTA_RASTER_SIZES[templateName][pi];
@@ -2391,7 +2398,7 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v5.03 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v5.04 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 function clearAll(){
@@ -2426,7 +2433,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v5.03</strong>
+  Versión de la página: <strong>v5.04</strong>
 </div>
-<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.03</div></body>
+<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.04</div></body>
 </html>

@@ -1,2 +1,2 @@
-VERSIÓN v5.03
-Corrección Ejército: fecha/entidad página 2 y datos del cliente página 3.
+Versión v5.04
+Corrección: se define CARTA_RASTER_SIZES para evitar el error JavaScript al generar Cartas Poder.
