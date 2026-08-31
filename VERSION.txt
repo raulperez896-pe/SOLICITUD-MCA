@@ -1,4 +1,3 @@
-v5.09
-Ajuste de posicionamiento de fechas en ESSALUD y EJERCITO (hojas 1 y 2) sin borrar ni tapar las líneas del formato.
-Se añadió el llenado de Nombre, DNI, Celular y Domicilio en la hoja 3 de EJERCITO.
-Sin cambios en la impresión/diseño de las demás Cartas Poder.
+VERSION 5.10
+Base exacta: BASE OK.zip
+Correcciones: ESSALUD/EJERCITO fecha y fondos limpios, EJERCITO hoja 3.
