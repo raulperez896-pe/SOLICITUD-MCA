@@ -1,3 +1,2 @@
-VERSION 5.10
-Base exacta: BASE OK.zip
-Correcciones: ESSALUD/EJERCITO fecha y fondos limpios, EJERCITO hoja 3.
+v5.11
+Base: v5.10 / ajustes de posicionamiento ESSALUD y EJERCITO, y llenado de hoja 3 de EJERCITO.
