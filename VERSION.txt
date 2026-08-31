@@ -1,3 +1,3 @@
-v5.14
-Base: ACTUALIZACION_CARTAS_v5.12 (1).rar
-Ajuste: solo posicionamiento de fechas ESSALUD hoja 1 y EJERCITO hoja 2.
+ACTUALIZACION_CARTAS_v5.15
+
+Ajuste de posicionamiento de fechas en ESSALUD hoja 1 y EJERCITO hoja 2, conservando las lineas de referencia.
