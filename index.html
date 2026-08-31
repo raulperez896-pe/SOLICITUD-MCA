@@ -110,7 +110,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 .dxp-card .section-title{margin-bottom:8px}.dxp-extra-note{grid-column:1/-1;padding:10px 12px;border-radius:7px;background:#eef6fb;color:#24537b;font-size:12px}
 </style>
 <meta name="application-version" content="4.61">
-<meta name="build-version" content="v5.21">
+<meta name="build-version" content="v5.22">
 </head>
 <body>
 <header class="topbar">
@@ -1237,7 +1237,7 @@ async function prepare(){
   await loadPDFLib();
   const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
   fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v5.21 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  status(`Generador actualizado v5.22 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -2414,25 +2414,25 @@ if(templateName==="ESSALUD" && pi===1){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v5.21 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v5.22 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 
-/* ========================= DXP INTEGRATION v5.21 ========================= */
+/* ========================= DXP INTEGRATION v5.22 ========================= */
 const DXP_DOCS = {
-  ESSALUD_NEW: 'DXP/DXP ESSALUD NUEVO AMPLIACION(3).pdf',
-  ESSALUD_BUY: 'DXP/DXP ESSALUD COMPRA DE DEUDA(3).pdf',
-  MARINA: 'DXP/DXP MARINA DE GUERRA(3).pdf',
-  MIDAGRI: 'DXP/DXP MIDAGRI(2).pdf',
-  MINISTERIO_PUBLICO: 'DXP/DXP MINISTERIO PUBLICO 2.pdf',
-  FAP: 'DXP/DXP FUERZA AREA DEL PERU(3).pdf',
-  SUB_CAFAE: 'DXP/DXP SUB CAFAE SUR(3).pdf',
-  GENERAL: 'DXP/DXP CONVENIOS GENERAL(3).pdf',
-  RENIEC: 'DXP/DXP RENIEC(3).pdf',
-  PODER_JUDICIAL: 'DXP/DXP PODER JUDICIAL(3).pdf',
-  HOSPITAL: 'DXP/DXP HOSPITAL SAN BARTOLOME(3).pdf',
-  EJERCITO: 'DXP/DXP EJERCITO DEL PERU(3).pdf',
-  PNP: 'DXP/DXP PNP(3).pdf'
+  ESSALUD_NEW: 'DXP/DXP_ESSALUD_NUEVO.pdf',
+  ESSALUD_BUY: 'DXP/DXP_ESSALUD_COMPRA_DEUDA.pdf',
+  MARINA: 'DXP/DXP_MARINA.pdf',
+  MIDAGRI: 'DXP/DXP_MIDAGRI.pdf',
+  MINISTERIO_PUBLICO: 'DXP/DXP_MINISTERIO_PUBLICO.pdf',
+  FAP: 'DXP/DXP_FAP.pdf',
+  SUB_CAFAE: 'DXP/DXP_SUB_CAFAE_SUR.pdf',
+  GENERAL: 'DXP/DXP_GENERAL.pdf',
+  RENIEC: 'DXP/DXP_RENIEC.pdf',
+  PODER_JUDICIAL: 'DXP/DXP_PODER_JUDICIAL.pdf',
+  HOSPITAL: 'DXP/DXP_HOSPITAL_SAN_BARTOLOME.pdf',
+  EJERCITO: 'DXP/DXP_EJERCITO.pdf',
+  PNP: 'DXP/DXP_PNP.pdf'
 };
 let DXP_SELECTED=null;
 function normText(s){return String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();}
@@ -2500,7 +2500,9 @@ function renderDXPExtras(){
 }
 async function fetchDxpBytes(key){
  const p=DXP_DOCS[key]; if(!p)throw Error('No existe una plantilla DXP para este convenio.');
- const res=await fetch(encodeURI(p),{cache:'no-store'}); if(!res.ok)throw Error(`No se pudo cargar el DXP (${res.status}). En GitHub Pages la carpeta DXP debe conservarse junto al index.html.`); return new Uint8Array(await res.arrayBuffer());
+ const base = location.pathname.endsWith('/') ? location.href : (location.pathname.endsWith('.html') ? location.href.replace(/[^\/]*$/, '') : location.href + '/');
+ const url = new URL(p.split('/').map(encodeURIComponent).join('/'), base).href;
+ const res=await fetch(url,{cache:'no-store'}); if(!res.ok)throw Error(`No se pudo cargar el DXP (${res.status}). Verifica que la carpeta DXP esté junto al index.html y que los archivos tengan los nombres de la versión v5.22.`); return new Uint8Array(await res.arrayBuffer());
 }
 function fillDxpFields(form,v,key){
  // Limpieza solo de campos de texto del DXP: elimina ejemplos editables sin alterar el diseño.
@@ -2560,7 +2562,7 @@ async function generateDXP(){
   const out=await doc.save({useObjectStreams:false,addDefaultPage:false});
   const c=selectedConvention()||{}; const safe=(c.convenio||key).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); const dni=(v.dni||'SIN_DNI').replace(/\D/g,'');
   const blob=new Blob([out],{type:'application/pdf'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`DXP_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`DXP v5.21 generado: ${key}.`,'ok');
+  status(`DXP v5.22 generado: ${key}.`,'ok');
  }catch(e){console.error(e);status(e.message||'No se pudo generar el DXP.','error');}
 }
 function initDXPUI(){
@@ -2603,7 +2605,7 @@ initDXPUI();
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v5.21</strong>
+  Versión de la página: <strong>v5.22</strong>
 </div>
-<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.21</div></body>
+<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.22</div></body>
 </html>
