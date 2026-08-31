@@ -1,5 +1,7 @@
-# Actualización Cartas Poder v5.23 — GitHub Pages
+# Cartas y DXP v5.24
 
-Esta versión incorpora las plantillas DXP dentro de `index.html` como respaldo embebido en Base64. La carpeta `DXP/` se mantiene como copia física, pero la aplicación ya no depende de que GitHub Pages pueda resolver esas rutas para generar el DXP.
+Subir TODO el contenido de este paquete a GitHub manteniendo `index.html` en la raíz y la carpeta `DXP/` junto a él.
 
-Subir el contenido completo del paquete conservando `index.html` en la raíz y la carpeta `DXP/`.
+Los DXP también están embebidos en `index.html` como respaldo para GitHub Pages.
+
+Correcciones incluidas: ESSALUD, Marina, Ejército, FAP, PNP y Ministerio Público según las reglas indicadas.
