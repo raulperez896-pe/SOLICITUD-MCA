@@ -2349,22 +2349,25 @@ async function generateCartasPoder(){
         const lc=PDFLib.rgb(0,0,0);
         for(const seg of cfg.lines) page.drawLine({start:{x:seg.x1,y:cfg.lineY},end:{x:seg.x2,y:cfg.lineY},thickness:0.8,color:lc});
       };
-      // Date block calibrated to the same visual format for ESSALUD page 1
-      // and EJERCITO page 2: LIMA, 31 de AGOSTO del 2026.
-      // The day sits just after the comma and all underline segments are redrawn
-      // separately so they never cross the text.
       if(templateName==="ESSALUD" && pi===0){
         drawDateBlock(page,{
-          clear:{x:215,y:744,w:290,h:34}, fs:9.2, y:758, lineY:749,
-          city:{x:230}, comma:{x:268}, day:{x:275}, de1:{x:307}, month:{x:350}, del:{x:418}, year:{x:454},
-          lines:[{x1:218,x2:264},{x1:272,x2:293},{x1:343,x2:412},{x1:450,x2:489}]
+          clear:{x:258,y:744,w:310,h:34}, fs:9.2, y:758, lineY:753,
+          city:{x:276}, comma:{x:332}, day:{x:346}, de1:{x:372}, month:{x:404}, del:{x:464}, year:{x:487},
+          lines:[{x1:270,x2:326},{x1:340,x2:354},{x1:386,x2:452},{x1:478,x2:505}]
+        });
+      }
+if(templateName==="ESSALUD" && pi===1){
+        drawDateBlock(page,{
+          clear:{x:292,y:612,w:270,h:34}, fs:9.2, y:626, lineY:621,
+          city:{x:306}, comma:{x:363}, day:{x:377}, de1:{x:405}, month:{x:438}, del:{x:497}, year:{x:520},
+          lines:[{x1:300,x2:356},{x1:371,x2:387},{x1:420,x2:487},{x1:511,x2:548}]
         });
       }
       if(templateName==="EJERCITO" && pi===1){
         drawDateBlock(page,{
-          clear:{x:215,y:612,w:290,h:34}, fs:9.2, y:626, lineY:617,
-          city:{x:230}, comma:{x:268}, day:{x:275}, de1:{x:307}, month:{x:350}, del:{x:418}, year:{x:454},
-          lines:[{x1:218,x2:264},{x1:272,x2:293},{x1:343,x2:412},{x1:450,x2:489}]
+          clear:{x:266,y:612,w:285,h:34}, fs:9.2, y:626, lineY:621,
+          city:{x:282}, comma:{x:328}, day:{x:348}, de1:{x:374}, month:{x:406}, del:{x:464}, year:{x:487},
+          lines:[{x1:276,x2:322},{x1:342,x2:356},{x1:388,x2:454},{x1:478,x2:505}]
         });
       }
 
@@ -2396,7 +2399,7 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v5.18 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v5.20 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 function clearAll(){
@@ -2431,7 +2434,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v5.18</strong>
+  Versión de la página: <strong>v5.20</strong>
 </div>
-<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.18</div></body>
+<div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.20</div></body>
 </html>
