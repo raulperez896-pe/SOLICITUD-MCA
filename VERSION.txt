@@ -1,2 +1,4 @@
-v5.11
-Base: v5.10 / ajustes de posicionamiento ESSALUD y EJERCITO, y llenado de hoja 3 de EJERCITO.
+v5.12
+Base: BASE OK.zip
+ESSALUD: reemplazada por la plantilla actual CARTA_PODER_ESSALUD64(2).pdf.
+Ajustes de posicion: ESSALUD fecha hojas 1-2; EJERCITO fecha hoja 2; EJERCITO llenado hoja 3.
