@@ -2330,7 +2330,7 @@ async function generateCartasPoder(){
         if(templateName==="ESSALUD" && pi===0 && (f==="CIUDAD" || f==="DIA" || f==="MES")){
           const special={
             CIUDAD:{x:286.0,y:762.8,w:52.0,h:11.0},
-            DIA:{x:346.0,y:762.8,w:22.0,h:11.0},
+            DIA:{x:370.0,y:762.8,w:22.0,h:11.0},
             MES:{x:404.0,y:762.8,w:58.0,h:11.0}
           };
           draw(page,value,special[f],6.0,4.8,font);
@@ -2339,7 +2339,7 @@ async function generateCartasPoder(){
         if(templateName==="EJERCITO" && pi===1 && (f==="CIUDAD" || f==="DIA" || f==="MES")){
           const special={
             CIUDAD:{x:292.0,y:629.2,w:48.0,h:11.0},
-            DIA:{x:350.0,y:629.2,w:22.0,h:11.0},
+            DIA:{x:374.0,y:629.2,w:22.0,h:11.0},
             MES:{x:410.0,y:629.2,w:58.0,h:11.0}
           };
           draw(page,value,special[f],6.0,4.8,font);
@@ -2376,7 +2376,7 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v5.15 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v5.16 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 function clearAll(){
@@ -2411,7 +2411,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v5.15</strong>
+  Versión de la página: <strong>v5.16</strong>
 </div>
 <div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.15</div></body>
 </html>
