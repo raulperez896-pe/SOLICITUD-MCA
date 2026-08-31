@@ -2327,26 +2327,42 @@ async function generateCartasPoder(){
         // No cubrir ni borrar las lineas/textos del formato.
         // En estas plantillas el fondo raster ya viene limpio, por lo que
         // los datos solo se dibujan dentro del espacio de referencia.
-        if(templateName==="ESSALUD" && pi===0 && (f==="CIUDAD" || f==="DIA" || f==="MES")){
-          const special={
-            CIUDAD:{x:286.0,y:762.8,w:52.0,h:11.0},
-            DIA:{x:370.0,y:762.8,w:22.0,h:11.0},
-            MES:{x:404.0,y:762.8,w:58.0,h:11.0}
-          };
-          draw(page,value,special[f],6.0,4.8,font);
-          return;
-        }
-        if(templateName==="EJERCITO" && pi===1 && (f==="CIUDAD" || f==="DIA" || f==="MES")){
-          const special={
-            CIUDAD:{x:292.0,y:629.2,w:48.0,h:11.0},
-            DIA:{x:374.0,y:629.2,w:22.0,h:11.0},
-            MES:{x:410.0,y:629.2,w:58.0,h:11.0}
-          };
-          draw(page,value,special[f],6.0,4.8,font);
-          return;
-        }
+        if((templateName==="ESSALUD" && pi===0) && (f==="CIUDAD" || f==="DIA" || f==="MES")) return;
+        if((templateName==="EJERCITO" && pi===1) && (f==="CIUDAD" || f==="DIA" || f==="MES")) return;
         let max=7,min=4;if(/^NOMBRE/.test(f)){max=6.7;min=3.8}if(/^Entidad Financiera/.test(f)){max=6.0;min=3.8}if(/^DNI/.test(f)){max=5.7;min=4.0}draw(page,value,item,max,min,font);
       });
+
+      // Fecha: redibujar completamente el bloque para evitar que las referencias originales
+      // tapen el texto. Se conserva el formato visual: CIUDAD, DIA, MES y anio con lineas
+      // independientes. Solo se interviene en ESSALUD hoja 1 y EJERCITO hoja 2.
+      const drawDateBlock=(page, cfg)=>{
+        const white=PDFLib.rgb(1,1,1);
+        page.drawRectangle({x:cfg.clear.x,y:cfg.clear.y,width:cfg.clear.w,height:cfg.clear.h,color:white,borderWidth:0});
+        const fs=cfg.fs||9.5;
+        page.drawText(ciudad||"LIMA",{x:cfg.city.x,y:cfg.y,size:fs,font,color:PDFLib.rgb(0,0,0)});
+        page.drawText(",",{x:cfg.comma.x,y:cfg.y,size:fs,font,color:PDFLib.rgb(0,0,0)});
+        page.drawText(dd,{x:cfg.day.x,y:cfg.y,size:fs,font,color:PDFLib.rgb(0,0,0)});
+        page.drawText("de",{x:cfg.de1.x,y:cfg.y,size:fs,font,color:PDFLib.rgb(0,0,0)});
+        page.drawText(monthName,{x:cfg.month.x,y:cfg.y,size:fs,font,color:PDFLib.rgb(0,0,0)});
+        page.drawText("del",{x:cfg.del.x,y:cfg.y,size:fs,font,color:PDFLib.rgb(0,0,0)});
+        page.drawText(String(new Date().getFullYear()),{x:cfg.year.x,y:cfg.y,size:fs,font,color:PDFLib.rgb(0,0,0)});
+        const lc=PDFLib.rgb(0,0,0);
+        for(const seg of cfg.lines) page.drawLine({start:{x:seg.x1,y:cfg.lineY},end:{x:seg.x2,y:cfg.lineY},thickness:0.8,color:lc});
+      };
+      if(templateName==="ESSALUD" && pi===0){
+        drawDateBlock(page,{
+          clear:{x:258,y:744,w:310,h:34}, fs:9.2, y:758, lineY:753,
+          city:{x:276}, comma:{x:332}, day:{x:346}, de1:{x:372}, month:{x:404}, del:{x:464}, year:{x:487},
+          lines:[{x1:270,x2:326},{x1:340,x2:354},{x1:386,x2:452},{x1:478,x2:505}]
+        });
+      }
+      if(templateName==="EJERCITO" && pi===1){
+        drawDateBlock(page,{
+          clear:{x:266,y:612,w:285,h:34}, fs:9.2, y:626, lineY:621,
+          city:{x:282}, comma:{x:328}, day:{x:342}, de1:{x:368}, month:{x:400}, del:{x:458}, year:{x:481},
+          lines:[{x1:276,x2:322},{x1:336,x2:350},{x1:382,x2:448},{x1:472,x2:499}]
+        });
+      }
 
       (CHECK_MAPS[templateName]||[]).forEach((group,gi)=>{
         if(gi!==pi)return;
@@ -2376,7 +2392,7 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v5.16 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v5.17 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 function clearAll(){
@@ -2411,7 +2427,7 @@ $("convenio").addEventListener("change",conventionChange);$("generar").addEventL
 prepare();
 </script>
 <div id="app-version-footer" style="text-align:center;width:100%;margin:28px 0 12px;padding:8px 0;color:#6b7280;font-size:12px;">
-  Versión de la página: <strong>v5.16</strong>
+  Versión de la página: <strong>v5.17</strong>
 </div>
 <div id="build-version-visible" style="position:fixed;right:12px;bottom:10px;z-index:9999;background:#0b4f8a;color:#fff;padding:5px 9px;border-radius:5px;font-size:11px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)">VERSIÓN v5.15</div></body>
 </html>
