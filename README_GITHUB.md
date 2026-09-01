@@ -1,7 +1,5 @@
-Actualización v5.55
+ACTUALIZACION v5.56
 
-Cambio puntual solicitado: en la Carta Poder de EJÉRCITO DEL PERÚ, únicamente la hoja 2 de la Carta Poder ahora elimina completamente la fecha original y dibuja manualmente la fecha (ciudad, día, mes y año) para evitar duplicaciones o restos del formato anterior.
+Corrección exclusiva: Carta Poder EJÉRCITO DEL PERÚ, hoja 1. Se reduce la franja de limpieza de fecha para no cubrir el título de la plantilla. No se modifican las demás hojas ni convenios.
 
-No se modifican las demás hojas ni los demás convenios.
-
-Mantener el index.html en la raíz de GitHub Pages.
+Subir index.html a GitHub Pages.
