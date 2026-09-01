@@ -1,5 +1,5 @@
-# Actualización v5.53 — Single Index
+Actualización v5.54
 
-Ajuste puntual de la Carta Poder de EJÉRCITO DEL PERÚ: se amplía la limpieza de la franja de fecha de la hoja 1 para que el año **2026** aparezca completo y no quede ningún fragmento del año original a la derecha.
+Corrección puntual de la Carta Poder EJÉRCITO DEL PERÚ: limpieza completa de la franja de fecha de la hoja 1 para eliminar cualquier fragmento del año original y evitar el año duplicado.
 
-La aplicación sigue siendo autocontenida en `index.html` y no requiere la carpeta `DXP`.
+Mantener el index.html en la raíz de GitHub Pages.
