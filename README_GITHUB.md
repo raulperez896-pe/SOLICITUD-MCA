@@ -1,5 +1,7 @@
-# MasterCalculadora v5.36 — GitHub Pages (Single File)
+# Cartas Poder + DXP — v5.39
 
-Sube **solo `index.html`** a la raíz del repositorio de GitHub Pages.
+Versión basada directamente en v5.37. Se modifica únicamente la generación de la **Carta de Compra de Deuda / Carta de Subrogación** para evitar duplicación de datos de la plantilla (nombres de supervisor/promotor y DNI del supervisor). Los campos del formulario se aplanan primero y luego se limpia únicamente la zona comercial antes de dibujar una sola vez los datos correctos.
 
-Todos los DXP y las plantillas necesarias para Cartas Poder están integrados dentro del propio `index.html`; no se requiere la carpeta `DXP` ni otros archivos para que la aplicación cargue los documentos.
+Todo el contenido está integrado dentro de `index.html`; no se requiere carpeta DXP ni archivos PDF adicionales.
+
+Para GitHub Pages, subir `index.html`, `VERSION.txt` y este README a la raíz del repositorio.
