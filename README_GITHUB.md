@@ -1,15 +1,14 @@
-# MasterCalculadora — v5.51
+# MasterCalculadora — Cartas Poder + DXP
 
-Paquete Single Index para GitHub Pages.
+## Versión v5.52
 
-## Cambios de esta versión
-- ESSALUD DXP Nuevo/Ampliación: se elimina la duplicación de "de" en la fecha de la hoja 1. La fecha se redibuja una sola vez en la franja inferior, incluyendo departamento, día, mes y año.
-- ESSALUD DXP Compra de Deuda: las fechas de hoja 1 y hoja 2 se redibujan una sola vez, sin duplicaciones y con el mes completo.
-- Los DXP de ESSALUD utilizados por la aplicación están embebidos dentro de `index.html`.
-- Se mantiene todo lo demás de la versión anterior sin cambios intencionales.
+Actualización enfocada en la calibración de fechas de las Cartas Poder.
 
-## Publicación
-Subir `index.html` a la raíz del repositorio de GitHub Pages. No se necesita una carpeta DXP externa.
+### Cambios
+- Se normaliza la fecha en todas las páginas que tienen campos de ciudad/día/mes de las plantillas de Carta Poder (GENERAL, PNP, MARINA, EJÉRCITO y ESSALUD).
+- Se evita que el texto de la fecha se dibuje encima de los campos de la plantilla.
+- Se centra el texto dentro de las líneas de referencia y se mantiene una separación uniforme entre ciudad, día, “de”, mes y “del 2026”.
+- Se mantiene intacta la lógica de los DXP y la estructura Single Index.
 
-## Versión
-v5.51
+### GitHub Pages
+Subir `index.html` y `VERSION.txt` a la raíz del repositorio.
