@@ -1,5 +1,14 @@
-# Generador v5.26
+# Actualización Cartas Poder + DXP v5.28
 
-Paquete para GitHub Pages. Mantener `index.html` y la carpeta `DXP/` en el mismo nivel.
+Para GitHub Pages, subir todo el contenido de esta carpeta a la raíz del repositorio.
 
-Corrección v5.26: ESSALUD ahora coloca PRESTAMO sobre la línea correcta y evita duplicar nombre, DNI y supervisor en la hoja 2; la fecha de la hoja 2 se carga mediante su campo.
+Estructura requerida:
+
+- `index.html`
+- `VERSION.txt`
+- `CARTA_PODER_GENERAL64.pdf`
+- `CARTA_PODER_MGP64.pdf`
+- `CARTA_PODER_PNP64.pdf`
+- `DXP/` con las plantillas DXP.
+
+La carpeta `DXP` debe permanecer en el mismo nivel que `index.html`. No renombrar ni mover sus archivos.
