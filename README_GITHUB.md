@@ -1,14 +1,8 @@
-# Actualización Cartas / DXP v5.49
+# MasterCalculadora – v5.50 (Single Index)
 
-Paquete Single Index para GitHub Pages.
+Paquete autocontenido para GitHub Pages. Subir `index.html` a la raíz del repositorio.
 
-## Archivos
-- `index.html` — aplicación completa con Cartas Poder y DXP integrados.
-- `VERSION.txt` — versión de la publicación.
-
-## Publicación
-Subir únicamente estos archivos a la raíz del repositorio de GitHub Pages.
-No se requiere una carpeta DXP externa: las plantillas están embebidas en `index.html`.
-
-## Corrección principal
-Se restauraron las funciones `fetchDxpBytes()` y `renderDXPExtras()` que se habían perdido/corrompido, causando el error `fetchDxpBytes is not defined` y evitando que aparecieran los campos adicionales DXP.
+Corrección puntual de ESSALUD:
+- DXP ESSALUD Nuevo: fecha inferior sin duplicación de mes; el departamento seleccionado se usa como lugar.
+- DXP ESSALUD Compra de Deuda: fechas de hoja 1 y hoja 2 se dibujan una sola vez sobre la zona punteada, evitando duplicaciones y recortes.
+- Se mantienen los DXP embebidos dentro del mismo `index.html`.
