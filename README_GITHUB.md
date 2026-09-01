@@ -1,8 +1,9 @@
-# Cartas Poder + DXP — v5.44
+# Cartas y DXP — v5.45
 
-Un único `index.html` autocontenido para GitHub Pages.
+Versión autocontenida para GitHub Pages. Todos los DXP y las plantillas están embebidos dentro de `index.html`; no se requiere carpeta `DXP`.
 
-Correcciones:
-- Carta de Compra de Deuda/Subrogación: supervisor y promotor usan los campos originales del formato; no se eliminan recuadros, separadores ni línea de firma.
-- El bloque inferior de firma conserva la línea y evita sobreescrituras.
-- ESSALUD Compra de Deuda, hoja 2: fecha bajada y colocada directamente sobre la línea punteada original.
+Correcciones principales de esta versión:
+- ESSALUD Compra de Deuda: fecha de hoja 2 usando únicamente los campos originales de la plantilla, sin segunda fecha dibujada.
+- ESSALUD: mes y ciudad alineados dentro de los campos originales.
+- Geolocalización DXP: distrito / provincia / departamento tomada de los selectores del formulario y escrita también en campos combinados cuando existen.
+- Versión visible: v5.45.
