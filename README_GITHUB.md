@@ -1,8 +1,15 @@
-# MasterCalculadora – v5.50 (Single Index)
+# MasterCalculadora — v5.51
 
-Paquete autocontenido para GitHub Pages. Subir `index.html` a la raíz del repositorio.
+Paquete Single Index para GitHub Pages.
 
-Corrección puntual de ESSALUD:
-- DXP ESSALUD Nuevo: fecha inferior sin duplicación de mes; el departamento seleccionado se usa como lugar.
-- DXP ESSALUD Compra de Deuda: fechas de hoja 1 y hoja 2 se dibujan una sola vez sobre la zona punteada, evitando duplicaciones y recortes.
-- Se mantienen los DXP embebidos dentro del mismo `index.html`.
+## Cambios de esta versión
+- ESSALUD DXP Nuevo/Ampliación: se elimina la duplicación de "de" en la fecha de la hoja 1. La fecha se redibuja una sola vez en la franja inferior, incluyendo departamento, día, mes y año.
+- ESSALUD DXP Compra de Deuda: las fechas de hoja 1 y hoja 2 se redibujan una sola vez, sin duplicaciones y con el mes completo.
+- Los DXP de ESSALUD utilizados por la aplicación están embebidos dentro de `index.html`.
+- Se mantiene todo lo demás de la versión anterior sin cambios intencionales.
+
+## Publicación
+Subir `index.html` a la raíz del repositorio de GitHub Pages. No se necesita una carpeta DXP externa.
+
+## Versión
+v5.51
