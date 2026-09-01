@@ -1,2 +1,1 @@
-v5.25
-ESSALUD Compra de Deuda: campos adicionales, PRESTAMO automático, tabla de instituciones/montos y supervisor/DNI en hoja 2.
+v5.26

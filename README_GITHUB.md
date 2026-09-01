@@ -1,9 +1,5 @@
-# Cartas y DXP v5.25
+# Generador v5.26
 
-Subir TODO el contenido de este paquete a GitHub manteniendo `index.html` en la raíz y la carpeta `DXP/` junto a él.
+Paquete para GitHub Pages. Mantener `index.html` y la carpeta `DXP/` en el mismo nivel.
 
-Los DXP también están embebidos en `index.html` como respaldo para GitHub Pages.
-
-Correcciones incluidas: ESSALUD, Marina, Ejército, FAP, PNP y Ministerio Público según las reglas indicadas.
-
-ESSALUD Compra de Deuda: campos visibles para Código de planilla y Área ESSALUD; Bien o servicio = PRESTAMO; tabla automática de institución/monto; supervisor y DNI reemplazados automáticamente.
+Corrección v5.26: ESSALUD ahora coloca PRESTAMO sobre la línea correcta y evita duplicar nombre, DNI y supervisor en la hoja 2; la fecha de la hoja 2 se carga mediante su campo.
