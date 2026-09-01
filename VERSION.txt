@@ -1,1 +1,2 @@
-v5.48
+v5.49
+Corrección DXP: restauración de fetchDxpBytes y renderDXPExtras para mostrar campos condicionales y cargar las plantillas embebidas.

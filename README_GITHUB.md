@@ -1,10 +1,14 @@
-# ACTUALIZACION CARTAS v5.48
+# Actualización Cartas / DXP v5.49
 
-Versión Single Index para GitHub Pages.
+Paquete Single Index para GitHub Pages.
 
-## Correcciones de esta versión
-- ESSALUD DXP Nuevo/Ampliación: la fecha se renderiza una sola vez por página, sin duplicación del mes.
-- ESSALUD DXP Compra de Deuda: la fecha se renderiza una sola vez en cada página y los campos repetidos entre páginas se limpian antes de dibujar los datos en la posición específica de cada hoja.
-- Los campos compartidos del formulario no se usan para ESSALUD cuando generan apariciones duplicadas; se dibujan directamente dentro de sus posiciones reales y con ajuste automático de tamaño.
-- Se conservan las líneas y el formato original de las plantillas.
-- Todo el contenido sigue embebido en un único `index.html`.
+## Archivos
+- `index.html` — aplicación completa con Cartas Poder y DXP integrados.
+- `VERSION.txt` — versión de la publicación.
+
+## Publicación
+Subir únicamente estos archivos a la raíz del repositorio de GitHub Pages.
+No se requiere una carpeta DXP externa: las plantillas están embebidas en `index.html`.
+
+## Corrección principal
+Se restauraron las funciones `fetchDxpBytes()` y `renderDXPExtras()` que se habían perdido/corrompido, causando el error `fetchDxpBytes is not defined` y evitando que aparecieran los campos adicionales DXP.
