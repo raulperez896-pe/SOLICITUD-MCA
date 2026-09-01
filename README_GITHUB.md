@@ -1,4 +1,7 @@
-VERSION 5.31
+# Actualización Cartas/DXP v5.32
 
-Paquete GitHub Pages con las 5 Cartas Poder actualizadas y los 13 DXP en la carpeta DXP.
-Las Cartas Poder físicas del paquete coinciden con las plantillas embebidas en index.html.
+Correcciones de ESSALUD:
+- PRESTAMO en el renglón correcto de Bien o Servicio.
+- Fecha de Compra de Deuda con mes completo y sin recorte.
+
+Estructura compatible con GitHub Pages: `index.html` y la carpeta `DXP/` deben permanecer en la raíz.
