@@ -1,4 +1,4 @@
-# MasterCalculadora v5.35 — GitHub Pages (Single File)
+# MasterCalculadora v5.36 — GitHub Pages (Single File)
 
 Sube **solo `index.html`** a la raíz del repositorio de GitHub Pages.
 
