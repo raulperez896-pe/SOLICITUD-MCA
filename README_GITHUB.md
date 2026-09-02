@@ -1,10 +1,15 @@
-# MCA Cartas – DXP v5.71
+# MCA Cartas – DXP v5.72
 
 Versión integral corregida para generación de DXP de Marina, Ejército y PNP.
 
-**Versión de entrega: v5.71.**
+**Versión de entrega: v5.72.**
 
 ## Correcciones de esta versión
+
+### v5.72 – ajustes finales de Marina
+- Hoja 5: dirección con tipografía uniforme y autoajuste.
+- Hoja 6: fecha completa en la línea de LUGAR Y FECHA.
+- Hoja 7: se eliminan duplicidades de campos AcroForm antes del aplanado; cada dato se dibuja una sola vez en su línea original. PRESTAMO POR CONVENIO queda en la línea inmediatamente posterior al concepto de descuentos, sin cubrir texto.
 
 ### Marina de Guerra del Perú
 - **Hoja 1:** el nombre de la entidad financiera de compra de deuda se genera como texto PDF dentro de la celda original, con autoajuste proporcional; además se trasladan las deudas de BOLETA.
