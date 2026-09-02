@@ -1,15 +1,17 @@
-# MCA Cartas – DXP v5.70
+# MCA Cartas – DXP v5.71
 
 Versión integral corregida para generación de DXP de Marina, Ejército y PNP.
+
+**Versión de entrega: v5.71.**
 
 ## Correcciones de esta versión
 
 ### Marina de Guerra del Perú
-- **Hoja 1:** el nombre de la entidad financiera de compra de deuda se ajusta automáticamente al ancho real del campo; no se recorta.
-- **Hoja 2:** los datos utilizan los campos originales de la plantilla; no se generan imágenes ni se colocan fondos blancos sobre el documento.
-- **Hoja 7:** el nombre, cargo, instituto, CIP y DNI se escriben mediante los campos originales del PDF.
+- **Hoja 1:** el nombre de la entidad financiera de compra de deuda se genera como texto PDF dentro de la celda original, con autoajuste proporcional; además se trasladan las deudas de BOLETA.
+- **Hojas 1, 2, 3, 5, 6 y 7:** los datos se generan como texto PDF con ajuste proporcional dentro de las líneas originales; no se generan imágenes ni se colocan fondos blancos.
+- **Hoja 7:** nombre, cargo, instituto, CIP y DNI se generan como texto PDF dentro de sus espacios originales, sin recortes ni tamaños desproporcionados.
 - **CIP hoja 7:** el campo correcto es `Text2`; ahora recibe exclusivamente el número de CIP ingresado en la plantilla. Ya no se muestra `ACTIVIDAD` en el lugar del CIP.
-- **Texto PRESTAMO POR CONVENIO:** se eliminó la inserción adicional que aparecía en medio de la línea de la hoja 7.
+- **Texto PRESTAMO POR CONVENIO:** se coloca exactamente sobre la línea posterior a “Autorizo al BANCO BBVA PERÚ, a efectuar descuentos por el concepto de”, sin cubrir el documento.
 - Se incorporó **autoajuste de tipografía por ancho real del campo**, reduciendo el tamaño únicamente cuando el texto es largo.
 - No se utilizan rectángulos blancos, imágenes ni coberturas para corregir los datos de Marina.
 
