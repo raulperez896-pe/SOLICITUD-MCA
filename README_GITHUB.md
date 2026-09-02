@@ -1,19 +1,15 @@
-# MasterCalculadora v5.67 — Single Index
+# MCA Cartas – DXP v5.69
 
-Actualización sobre v5.66.
+Versión corregida para generación de DXP de Marina, Ejército y PNP.
 
-## PNP
-- Hoja 1: Ciudad y Fecha usa el campo correcto; no se coloca BBVA en ese campo.
-- Hoja 2: nombre, DNI, CIP y CODOFIN ajustados a sus líneas originales; fecha reubicada en la línea correcta.
-- Hoja 3: nombre, DNI, CIP y CODOFIN ajustados para evitar recortes.
-- Hoja 4: Grado = Cargo, fecha completa, banco con convenio = BBVA, dirección y promotor ajustados.
-- Hoja 5: Text2 corresponde al CIP y recibe el número de la plantilla, no “ACTIVIDAD”.
-- Hoja 6: CIP colocado sobre la línea estática en la posición correcta y MES reforzado para evitar recortes.
-- Hoja 7: nombre/DNI/CIP conservados sin recortes y se elimina el texto adicional “PRESTAMO POR CONVENIO”.
+## Correcciones principales
+- Ejército: el campo que visualiza el CIP (`Text2`) toma exclusivamente el número ingresado en la plantilla; no se escribe "ACTIVIDAD" en ese campo.
+- PNP: se eliminaron los rectángulos blancos de corrección. Los datos se escriben sobre las líneas originales con ajuste automático de tamaño según la longitud.
+- PNP hoja 2: nombre, DNI, CIP, CODOFIN y fecha ajustados.
+- PNP hoja 3: identificación, fecha y firma ajustadas proporcionalmente.
+- PNP hoja 5: CIP, nombre, DNI, fecha y demás datos ajustados sin tapar líneas.
+- PNP hoja 6: nombre, CIP, fecha y firma ajustados sin recortes.
+- PNP hoja 7: no se agrega el texto "PRESTAMO POR CONVENIO"; se conserva la plantilla original.
+- Marina: se conserva la corrección estructural de la v5.68.
 
-## Global
-- Se conserva la lógica previa de ESSALUD, Marina, Ejército, FAP y Ministerio Público.
-- Single Index: todo permanece dentro de `index.html`.
-- Versión visible y metadatos sincronizados a v5.67.
-
-Subir `index.html` a la raíz del repositorio de GitHub Pages.
+Subir `index.html` y los PDF incluidos al repositorio de GitHub Pages.
