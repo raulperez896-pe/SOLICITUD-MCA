@@ -1,20 +1,18 @@
-# Actualización v5.60
+# MasterCalculadora v5.63 — Single Index
 
-Paquete Single Index para GitHub Pages.
+Actualización sobre v5.62.
 
-## Cambios PNP
-- Se mantienen todas las correcciones PNP de la versión anterior.
+## PNP
+- Hoja 1: Ciudad y Fecha usa el campo correcto; no se coloca BBVA en ese campo.
+- Hoja 2: nombres/DNI/CIP/CODOFIN/Dirección ajustados para evitar recortes. Fecha redibujada en la línea inferior de la plantilla.
+- Hoja 3: identificación y dirección ajustadas; fecha completa.
+- Hoja 4: Grado = Cargo, fecha completa, banco con convenio = BBVA, dirección y promotor ajustados.
+- Hoja 6: CIP colocado sobre la línea estática; grado y mes ajustados para evitar recortes.
+- Hoja 7: nombre/DNI/CIP reducidos y centrados; PRESTAMO POR CONVENIO sobre la línea.
 
-## Cambios MARINA
-- CIP/TIN se manejan como el mismo dato.
-- Grado = Cargo.
-- Instituto y Dependencia = MARINA DE GUERRA DEL PERÚ.
-- MAF se alimenta desde el monto del crédito en el campo MONTO de la plantilla.
-- Las dos líneas de FECHA DE PRIMER DESCUENTO / FECHA DE PRIMER PAGO quedan en blanco.
-- La fecha de la Hoja 4 se conserva en su campo específico.
-- El nombre y DNI del supervisor se toman de la solicitud.
-- Se mantiene PRESTAMO POR CONVENIO en la hoja correspondiente.
+## Global
+- Se conserva la lógica previa de ESSALUD, Marina, Ejército, FAP y Ministerio Público.
+- Single Index: todo permanece dentro de `index.html`.
+- Versión visible y metadatos sincronizados a v5.63.
 
-## GitHub Pages
-Subir `index.html`, `VERSION.txt` y `README_GITHUB.md` a la raíz del repositorio.
-
+Subir `index.html` a la raíz del repositorio de GitHub Pages.
