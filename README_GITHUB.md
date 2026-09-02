@@ -1,12 +1,12 @@
-# MCA Cartas – DXP v5.72
+# MCA Cartas – DXP v5.73
 
 Versión integral corregida para generación de DXP de Marina, Ejército y PNP.
 
-**Versión de entrega: v5.72.**
+**Versión de entrega: v5.73.**
 
 ## Correcciones de esta versión
 
-### v5.72 – ajustes finales de Marina
+### v5.73 – ajustes finales de Marina
 - Hoja 5: dirección con tipografía uniforme y autoajuste.
 - Hoja 6: fecha completa en la línea de LUGAR Y FECHA.
 - Hoja 7: se eliminan duplicidades de campos AcroForm antes del aplanado; cada dato se dibuja una sola vez en su línea original. PRESTAMO POR CONVENIO queda en la línea inmediatamente posterior al concepto de descuentos, sin cubrir texto.
