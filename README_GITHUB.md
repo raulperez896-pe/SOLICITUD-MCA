@@ -1,15 +1,23 @@
-# MCA Cartas – DXP v5.69
+# MCA Cartas – DXP v5.70
 
-Versión corregida para generación de DXP de Marina, Ejército y PNP.
+Versión integral corregida para generación de DXP de Marina, Ejército y PNP.
 
-## Correcciones principales
-- Ejército: el campo que visualiza el CIP (`Text2`) toma exclusivamente el número ingresado en la plantilla; no se escribe "ACTIVIDAD" en ese campo.
-- PNP: se eliminaron los rectángulos blancos de corrección. Los datos se escriben sobre las líneas originales con ajuste automático de tamaño según la longitud.
-- PNP hoja 2: nombre, DNI, CIP, CODOFIN y fecha ajustados.
-- PNP hoja 3: identificación, fecha y firma ajustadas proporcionalmente.
-- PNP hoja 5: CIP, nombre, DNI, fecha y demás datos ajustados sin tapar líneas.
-- PNP hoja 6: nombre, CIP, fecha y firma ajustados sin recortes.
-- PNP hoja 7: no se agrega el texto "PRESTAMO POR CONVENIO"; se conserva la plantilla original.
-- Marina: se conserva la corrección estructural de la v5.68.
+## Correcciones de esta versión
 
+### Marina de Guerra del Perú
+- **Hoja 1:** el nombre de la entidad financiera de compra de deuda se ajusta automáticamente al ancho real del campo; no se recorta.
+- **Hoja 2:** los datos utilizan los campos originales de la plantilla; no se generan imágenes ni se colocan fondos blancos sobre el documento.
+- **Hoja 7:** el nombre, cargo, instituto, CIP y DNI se escriben mediante los campos originales del PDF.
+- **CIP hoja 7:** el campo correcto es `Text2`; ahora recibe exclusivamente el número de CIP ingresado en la plantilla. Ya no se muestra `ACTIVIDAD` en el lugar del CIP.
+- **Texto PRESTAMO POR CONVENIO:** se eliminó la inserción adicional que aparecía en medio de la línea de la hoja 7.
+- Se incorporó **autoajuste de tipografía por ancho real del campo**, reduciendo el tamaño únicamente cuando el texto es largo.
+- No se utilizan rectángulos blancos, imágenes ni coberturas para corregir los datos de Marina.
+
+### Ejército
+- Se mantiene la corrección del CIP para que el campo `Text2` tome el número ingresado en la plantilla.
+
+### PNP
+- Se mantiene la lógica de ajuste automático de tamaño para textos largos y las correcciones realizadas en la v5.69.
+
+## Publicación
 Subir `index.html` y los PDF incluidos al repositorio de GitHub Pages.
