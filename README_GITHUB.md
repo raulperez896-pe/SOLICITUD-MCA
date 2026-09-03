@@ -1,30 +1,39 @@
-# MCA Cartas – DXP v5.80
+# MasterCalculadora v5.91 — instalación en GitHub Pages
 
-Versión integral corregida para generación de DXP de Marina, Ejército y PNP.
+## IMPORTANTE
+Sube **TODO EL CONTENIDO de esta carpeta**, no solo `index.html`.
 
-**Versión de entrega: v5.80.**
+La aplicación usa plantillas externas para evitar que `index.html` sea demasiado pesado. Debe quedar exactamente así:
 
-## Correcciones de esta versión
+```text
+index.html
+EJERCITO.pdf
+MARINA.pdf
+PNP.pdf
+assets/
+  pdf/
+  dxp/
+  img/
+  data/
+```
 
-### v5.80 – ajustes finales de Marina
-- Hoja 5: dirección con tipografía uniforme y autoajuste.
-- Hoja 6: fecha completa en la línea de LUGAR Y FECHA.
-- Hoja 7: se eliminan duplicidades de campos AcroForm antes del aplanado; cada dato se dibuja una sola vez en su línea original. PRESTAMO POR CONVENIO queda en la línea inmediatamente posterior al concepto de descuentos, sin cubrir texto.
+En especial, la carpeta `assets/dxp/` debe contener todas las plantillas DXP:
+- ESSALUD_NEW.pdf
+- ESSALUD_BUY.pdf
+- MARINA.pdf
+- MIDAGRI.pdf
+- MINISTERIO_PUBLICO.pdf
+- FAP.pdf
+- SUB_CAFAE.pdf
+- GENERAL.pdf
+- RENIEC.pdf
+- PODER_JUDICIAL.pdf
+- HOSPITAL.pdf
+- EJERCITO.pdf
+- PNP.pdf
 
-### Marina de Guerra del Perú
-- **Hoja 1:** el nombre de la entidad financiera de compra de deuda se genera como texto PDF dentro de la celda original, con autoajuste proporcional; además se trasladan las deudas de BOLETA.
-- **Hojas 1, 2, 3, 5, 6 y 7:** los datos se generan como texto PDF con ajuste proporcional dentro de las líneas originales; no se generan imágenes ni se colocan fondos blancos.
-- **Hoja 7:** nombre, cargo, instituto, CIP y DNI se generan como texto PDF dentro de sus espacios originales, sin recortes ni tamaños desproporcionados.
-- **CIP hoja 7:** el campo correcto es `Text2`; ahora recibe exclusivamente el número de CIP ingresado en la plantilla. Ya no se muestra `ACTIVIDAD` en el lugar del CIP.
-- **Texto PRESTAMO POR CONVENIO:** se coloca exactamente sobre la línea posterior a “Autorizo al BANCO BBVA PERÚ, a efectuar descuentos por el concepto de”, sin cubrir el documento.
-- Se incorporó **autoajuste de tipografía por ancho real del campo**, reduciendo el tamaño únicamente cuando el texto es largo.
-- No se utilizan rectángulos blancos, imágenes ni coberturas para corregir los datos de Marina.
+### Corrección v5.91
+Las plantillas DXP ahora se cargan **bajo demanda**. Una plantilla DXP faltante ya no bloquea la carga inicial de toda la página. Si se intenta generar un DXP cuyo archivo no está en GitHub, el mensaje indicará la ruta exacta que falta.
 
-### Ejército
-- Se mantiene la corrección del CIP para que el campo `Text2` tome el número ingresado en la plantilla.
-
-### PNP
-- Se mantiene la lógica de ajuste automático de tamaño para textos largos y las correcciones realizadas en la v5.80.
-
-## Publicación
-Subir `index.html` y los PDF incluidos al repositorio de GitHub Pages.
+### GitHub Pages
+En el repositorio, `index.html` debe estar en la raíz y `assets` debe estar también en la raíz. Respeta mayúsculas/minúsculas en nombres y carpetas.
