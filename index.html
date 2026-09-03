@@ -361,7 +361,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
 <script>
-const APP_VERSION = '6.00';
+const APP_VERSION = '6.02';
 /* Todo está embebido en este único HTML: convenios, logos y PDF. */
 const GEO=[
   {
@@ -13110,15 +13110,51 @@ async function loadExternalAssets(requestedKeys=null){
     }
     return [key,value];
   }));
-  loaded.forEach(([key,value])=>window[key]=value);
+  loaded.forEach(([key,value])=>{
+    // Estas variables fueron declaradas con `let`, por lo que asignar a
+    // window[key] NO actualiza la variable léxica que usan los generadores.
+    // Asignamos explícitamente cada recurso para que Solicitud, DPS,
+    // Subrogación y Cartas Poder funcionen también después de la carga diferida.
+    switch(key){
+      case 'PDF64': PDF64=value; break;
+      case 'PDF64_SIN_SEGURO': PDF64_SIN_SEGURO=value; break;
+      case 'DPS64': DPS64=value; break;
+      case 'FFAA_DPS64': FFAA_DPS64=value; break;
+      case 'PNP_DPS64': PNP_DPS64=value; break;
+      case 'CARTA_SUBROGACION64': CARTA_SUBROGACION64=value; break;
+      case 'CARTA_PODER_ESSALUD64': CARTA_PODER_ESSALUD64=value; break;
+      case 'CARTA_PODER_MGP64': CARTA_PODER_MGP64=value; break;
+      case 'CARTA_PODER_EJERCITO64': CARTA_PODER_EJERCITO64=value; break;
+      case 'CARTA_PODER_GENERAL64': CARTA_PODER_GENERAL64=value; break;
+      case 'CARTA_PODER_PNP64': CARTA_PODER_PNP64=value; break;
+    }
+  });
   // CARTA_RASTER_PAGES se carga bajo demanda para no bloquear la preparación inicial de la página.
 
 }
+function getExternalAssetValue(key){
+  switch(key){
+    case 'PDF64': return PDF64;
+    case 'PDF64_SIN_SEGURO': return PDF64_SIN_SEGURO;
+    case 'DPS64': return DPS64;
+    case 'FFAA_DPS64': return FFAA_DPS64;
+    case 'PNP_DPS64': return PNP_DPS64;
+    case 'CARTA_SUBROGACION64': return CARTA_SUBROGACION64;
+    case 'CARTA_PODER_ESSALUD64': return CARTA_PODER_ESSALUD64;
+    case 'CARTA_PODER_MGP64': return CARTA_PODER_MGP64;
+    case 'CARTA_PODER_EJERCITO64': return CARTA_PODER_EJERCITO64;
+    case 'CARTA_PODER_GENERAL64': return CARTA_PODER_GENERAL64;
+    case 'CARTA_PODER_PNP64': return CARTA_PODER_PNP64;
+    default: return null;
+  }
+}
 async function ensureExternalAsset(key){
-  if(window[key] && ((window[key] instanceof Uint8Array) || window[key] instanceof ArrayBuffer)) return window[key];
+  const current=getExternalAssetValue(key);
+  if(current && ((current instanceof Uint8Array) || (typeof ArrayBuffer!=='undefined' && current instanceof ArrayBuffer))) return current;
   await loadExternalAssets([key]);
-  if(!window[key]) throw new Error("No se pudo cargar el recurso "+key+".");
-  return window[key];
+  const value=getExternalAssetValue(key);
+  if(!value) throw new Error("No se pudo cargar el recurso "+key+".");
+  return value;
 }
 
 async function ensureCartaRasterPages(){
@@ -14632,8 +14668,9 @@ function fillDxpFields(form,v,key,doc){
    setDxpTextField(form,['Text1'],v.cargo,8); setDxpTextField(form,['Text2'],String(getFieldValue('CIP')||'').trim(),8); setDxpTextField(form,['CIP'],String(getFieldValue('CIP')||'').trim(),8);
    setDxpTextField(form,['DIRECCION1'],v.addr,7.6); setDxpTextField(form,['DISTRITO'],v.dist,7.8); setDxpTextField(form,['PROVINCIA'],v.prov,7.8); setDxpTextField(form,['DEPARTAMENTO','DPTO','DEPARTAMENTO1'],v.dep,7.8); setDxpTextField(form,['EMAIL'],v.email,7.5); setDxpTextField(form,['CELULAR'],v.cel,8); setDxpTextField(form,['DIA'],v.day,8); setDxpTextField(form,['MES'],v.month,8);
  } else if(key==='FAP'){
-   setDxpTextField(form,['Text4'],'FUERZA AÉREA DEL PERÚ',7.6); setDxpTextField(form,['INSTITUTO'],'FUERZA AÉREA DEL PERÚ',7.6); setDxpTextField(form,['Text1'],v.cargo,8); setDxpTextField(form,['Text2'],'ACTIVIDAD',8); setDxpTextField(form,['CIP'],getFieldValue('CIP'),8);
-   setDxpTextField(form,['NOMBRE Y APELLIDOS'],v.full,8); setDxpTextField(form,['DIRECCION1'],v.addr,7.6); setDxpTextField(form,['DISTRITO'],v.dist,7.8); setDxpTextField(form,['PROVINCIA'],v.prov,7.8); setDxpTextField(form,['DEPARTAMENTO','DPTO','DEPARTAMENTO1'],v.dep,7.8); setDxpTextField(form,['EMAIL'],v.email,7.5); setDxpTextField(form,['CELULAR'],v.cel,8); setDxpTextField(form,['DIA'],v.day,8); setDxpTextField(form,['MES'],v.month,8); setDxpTextField(form,['LUGAR Y FECHA'],v.date,8);
+   const fapCip=String(getFieldValue('CIP')||'').trim();
+   setDxpTextField(form,['Text4'],'FUERZA AÉREA DEL PERÚ',7.6); setDxpTextField(form,['INSTITUTO'],'FUERZA AÉREA DEL PERÚ',7.6); setDxpTextField(form,['Text1'],v.cargo,8); setDxpTextField(form,['Text2'],fapCip,8); setDxpTextField(form,['CIP'],fapCip,8);
+   setDxpTextField(form,['NOMBRE Y APELLIDOS'],v.full,8); setDxpTextField(form,['DIRECCION1'],v.addr,7.6); setDxpTextField(form,['DISTRITO'],v.dist,7.8); setDxpTextField(form,['PROVINCIA'],v.prov,7.8); setDxpTextField(form,['DEPARTAMENTO','DPTO','DEPARTAMENTO1'],v.dep,7.8); setDxpTextField(form,['EMAIL'],v.email,7.5); setDxpTextField(form,['CELULAR'],v.cel,8); setDxpTextField(form,['DIA'],v.day,8); setDxpTextField(form,['MES'],v.month,8); setDxpTextField(form,['LUGAR Y FECHA'],`Lima, ${v.day} de ${v.month} del ${v.year}`,8);
   } else if(key==='PNP'){
    // ================= PNP / FONBIEPOL =================
    // Para PNP, CIP es el identificador usado en los DXP. Se acepta CIP y, como
@@ -14766,6 +14803,42 @@ function fillDxpFields(form,v,key,doc){
 function drawMpSupervisorStamp(page,helvB){
  const x=405,y=80; const color=PDFLib.rgb(0.15,0.15,0.15); page.drawRectangle({x:x-8,y:y-8,width:145,height:62,borderWidth:0.7,borderColor:color,color:PDFLib.rgb(1,1,1),opacity:0.96});
  page.drawText('SUPERVISOR DE CONVENIOS',{x:x+3,y:y+34,size:8.5,font:helvB,color}); page.drawText('MASTER CENTER AMERICAS',{x:x+3,y:y+22,size:8.5,font:helvB,color}); page.drawText('Sello y firma',{x:x+34,y:y+8,size:8.2,font:helvB,color});
+}
+function clearFapTargetFields(form){
+  // FAP: NOMBRE Y APELLIDOS y LUGAR Y FECHA tienen apariencias pequeñas
+  // heredadas de la plantilla. Se limpian únicamente esos campos y se
+  // redibujan en sus líneas originales después del aplanado.
+  for(const n of ['NOMBRE Y APELLIDOS','LUGAR Y FECHA','Text2']){
+    try{form.getTextField(n).setText('');}catch(_){ }
+  }
+}
+function drawFapFit(page,text,x,y,w,h,size=8,minSize=5.5,align='center',font){
+  const str=String(text??'').trim(); if(!str||!font)return;
+  let fs=size;
+  while(fs>minSize && font.widthOfTextAtSize(str,fs)>Math.max(2,w-2))fs-=0.1;
+  const tw=font.widthOfTextAtSize(str,fs);
+  let tx=x;
+  if(align==='center')tx=x+Math.max(0,(w-tw)/2);
+  else if(align==='right')tx=x+Math.max(0,w-tw);
+  const ty=y+Math.max(1.2,(h-fs)/2)+0.35;
+  page.drawText(str,{x:tx,y:ty,size:fs,font,color:PDFLib.rgb(0,0,0)});
+}
+function applyFapFinalFixes(doc,v){
+  if(currentDxpKey()!=='FAP')return;
+  const font=doc.__dxpHelvetica||null;
+  if(!font)return;
+  const p2=doc.getPage(1), p3=doc.getPage(2);
+  const full=String(v.full||'').trim();
+  const cip=String(getFieldValue('CIP')||'').trim();
+  const dateFull=`Lima, ${v.day} de ${v.month} del ${v.year}`;
+
+  // HOJA 1 del DXP FAP (página 2 del PDF): nombre más visible y ciudad + fecha.
+  drawFapFit(p2,full,33.5092,336.364,414.3498,15.485,8.5,6.2,'center',font);
+  drawFapFit(p2,dateFull,34.44,203.724,389.218,15.95,8.2,5.8,'center',font);
+
+  // HOJA 2 del DXP FAP (página 3 del PDF): nombre más visible y CIP real.
+  drawFapFit(p3,full,123.34,717.194,382.548,13.957,8.5,6.2,'center',font);
+  drawFapFit(p3,cip,327.645,688.21,120.214,14.088,8.0,5.8,'center',font);
 }
 function clearMarinaOverlayFields(form){
   // Marina: shared AcroForm fields have widgets on several pages with very
@@ -15072,6 +15145,7 @@ async function generateDXP(){
   fillDxpFields(form,v,key,doc);
   if(key==='PNP') clearPnpOverlayFields(form);
   if(key==='MARINA') clearMarinaOverlayFields(form);
+  if(key==='FAP') clearFapTargetFields(form);
   if(key==='MINISTERIO_PUBLICO'){
     const f=doc.__dxpHelvetica, fb=doc.__dxpHelveticaBold;
     // Página 2: completar campos que son líneas estáticas del formato.
@@ -15089,6 +15163,7 @@ async function generateDXP(){
   // estáticas/estrechas que no son fiables como AcroForm para textos largos.
   applyMarinaFinalFixes(doc,v);
   applyPnpFinalFixes(doc,v);
+  applyFapFinalFixes(doc,v);
   const out=await doc.save({useObjectStreams:false,addDefaultPage:false});
   const c=selectedConvention()||{}; const safe=(c.convenio||key).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); const dni=(v.dni||'SIN_DNI').replace(/\D/g,'');
   const blob=new Blob([out],{type:'application/pdf'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`DXP_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
@@ -15219,8 +15294,8 @@ initDXPUI();
 prepare();
 if (typeof APP_VERSION !== 'undefined') { const vn = document.getElementById('version-number'); if (vn) vn.textContent = 'v' + APP_VERSION; const tv=document.title; if(!tv.includes('v'+APP_VERSION)) document.title='MCA Cartas Poder y DXP · v'+APP_VERSION; }
 </script>
-<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v6.00">
-  MasterCalculadora · Generador de solicitud por convenio · <strong>v6.00</strong>
+<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v6.02">
+  MasterCalculadora · Generador de solicitud por convenio · <strong>v6.02</strong>
 </footer>
 
 </body>
