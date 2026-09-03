@@ -361,7 +361,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
 <script>
-const APP_VERSION = '5.97';
+const APP_VERSION = '5.98';
 /* Todo está embebido en este único HTML: convenios, logos y PDF. */
 const GEO=[
   {
@@ -14675,12 +14675,11 @@ function fillDxpFields(form,v,key,doc){
    const f1=doc.getPage(0);
    setDxpTextField(form,['Text32++26+5+6'],dateFull,7.2,'center');
 
-   // HOJA 2: la fecha debe ir sobre la línea original "Lima, .... del 2026",
-   // no en el pie inferior de la página.
+   // HOJA 2: la fecha se deja en el campo original de la línea
+   // "Lima, ________ del 2026". El día y mes se colocan después de
+   // "Lima,"; no se tapa la plantilla con rectángulos.
    const f2=doc.getPage(1);
-   try{form.getTextField('FECHA').setText('')}catch(_){ }
-   f2.drawRectangle({x:360,y:278,width:225,height:34,color:PDFLib.rgb(1,1,1)});
-   f2.drawText(dateFull,{x:372,y:286,size:7.0,font});
+   setDxpTextField(form,['658494'],`${v.day} de ${v.month}`,6.8,'center');
    // Promotor al pie, conservando el campo original.
    setDxpTextField(form,['PROMOTOR'],promoter,6.2,'center');
 
@@ -14894,7 +14893,7 @@ function clearPnpOverlayFields(form){
     'NOMBRE Y APELLIDOS','DNI','CIP','CODOFIN','CARGO','Text1',
     'CONDICION','ACTIVO','DIRECCION1','DIS','DISTRITO','PROVINCIA',
     'DEPARTAMENTO','DPTO','DEPARTAMENTO1','CELULAR','EMAIL','INSTITUTO',
-    'Text32++26+5+6','Text28','EMPRESA','PRESTAMO POR CONVENII','PROMOTOR',
+    'Text32++26+5+6','Text28','658494','EMPRESA','PRESTAMO POR CONVENII','PROMOTOR',
     'FECHA','DIA','MES','CIUDAD','Text2','Text345456'
   ];
   const seen=new Set();
@@ -14920,62 +14919,68 @@ function applyPnpFinalFixes(doc,v){
   const full=String(v.full||'').trim();
   const dni=String(v.dni||'').trim();
   const geo=[v.dist,v.prov,v.dep].filter(Boolean).join(' / ');
+  const convention=String(v.c?.convenio||'FONBIEPOL - PNP').trim();
   const dateFull=`Lima, ${v.day} de ${v.month} del ${v.year}`;
-  const fit=(p,text,x,y,w,size=8,min=4.5)=>{
-    if(text===undefined||text===null||String(text)==='')return;
-    let s=size, str=String(text);
-    while(s>min && font.widthOfTextAtSize(str,s)>w)s-=0.1;
-    p.drawText(str,{x,y,size:s,font,color:black});
-  };
-  const fitCenter=(p,text,x,y,w,size=8,min=4.5)=>{
-    if(text===undefined||text===null||String(text)==='')return;
-    let s=size, str=String(text);
-    while(s>min && font.widthOfTextAtSize(str,s)>w)s-=0.1;
-    const tw=font.widthOfTextAtSize(str,s);
-    p.drawText(str,{x:x+(w-tw)/2,y,size:s,font,color:black});
+  const day=String(v.day||'').trim();
+  const month=String(v.month||'').trim();
+
+  // PNP: los campos AcroForm están duplicados en varias hojas. Después de
+  // aplanarlos vacíos, cada dato se vuelve a dibujar UNA sola vez y tomando
+  // como referencia las coordenadas exactas de su widget original.
+  const fitRect=(page,text,x,y,w,h,size=8,min=4.5,align='center')=>{
+    if(text===undefined||text===null||String(text).trim()==='')return;
+    let str=String(text).trim();
+    let fs=size;
+    while(fs>min && font.widthOfTextAtSize(str,fs)>Math.max(2,w-2))fs-=0.1;
+    const tw=font.widthOfTextAtSize(str,fs);
+    let tx=x;
+    if(align==='center')tx=x+Math.max(0,(w-tw)/2);
+    else if(align==='right')tx=x+Math.max(0,w-tw);
+    const ty=y+Math.max(1.2,(h-fs)/2)+0.35;
+    page.drawText(str,{x:tx,y:ty,size:fs,font,color:black});
   };
 
-  // IMPORTANTE: estas páginas contienen muchas líneas impresas, no campos blancos.
-  // No se usan rectángulos de cobertura. Solo se escribe sobre las líneas vacías
-  // con ajuste automático de tamaño para que el documento original permanezca visible.
-
-  // HOJA 1 - AUTORIZACION PNP / FONBIEPOL
-  // Se redibuja una sola vez después de limpiar los AcroForm dinámicos.
+  // HOJA 1 — AUTORIZACIÓN PNP / FONBIEPOL.
+  // La fecha se eleva dentro de su campo para quedar SOBRE la línea punteada.
   {
     const p=doc.getPage(0);
-    fitCenter(p,full,182.65,263.0,262.3,8.0,5.0);
-    fitCenter(p,dni,84.8,243.5,150.0,8.0,5.0);
-    fitCenter(p,dateFull,120.2,196.0,324.7,7.2,5.0);
-    fitCenter(p,'FONBIEPOL',163.5,216.5,280.9,7.0,5.0);
+    fitRect(p,full,182.65,259.0,262.3,16.0,8.0,5.0,'center');
+    fitRect(p,dni,84.8,240.4,150.0,15.5,6.8,5.0,'center');
+    fitRect(p,dateFull,120.2,207.0,324.7,8.5,7.2,5.0,'center');
+    fitRect(p,'FONBIEPOL',163.5,213.8,280.9,17.4,7.0,5.0,'center');
   }
 
-  // HOJA 2 - AUTORIZACION DE DESCUENTOS
+  // HOJA 2 — AUTORIZACIÓN DE DESCUENTOS.
+  // Cada valor queda exactamente en la línea/celda de su widget original.
   {
     const p=doc.getPage(1);
-    fit(p,full,92,594,205,8.0,5.0);
-    fit(p,dni,94,576,67,7.2,5.0);
-    fitCenter(p,cip,202,576,73,7.2,5.0);
-    fitCenter(p,codofin,300,576,72,7.0,5.0);
-    fitCenter(p,geo,430,576,150,6.6,4.6);
-    // Fecha exactamente sobre la línea impresa de "Lima, ______ del 2026."
-    fit(p,dateFull,374,286,208,7.3,5.2);
+    fitRect(p,full,111.4,589.2,139.2,19.2,7.2,5.0,'center');
+    // Text4 ya pertenece a la plantilla y contiene ACTIVIDAD; no se duplica.
+    fitRect(p,dni,92.3,577.6,68.9,13.6,6.8,5.0,'center');
+    fitRect(p,cip,203.2,577.6,73.1,13.6,6.8,5.0,'center');
+    fitRect(p,codofin,360.6,578.1,77.4,13.6,6.8,5.0,'center');
+    fitRect(p,v.addr,92.3,564.7,240.4,14.0,6.2,4.8,'center');
+    fitRect(p,geo,444.0,564.1,88.1,14.1,5.8,4.5,'center');
+    fitRect(p,v.cel,187.8,552.0,80.1,11.8,6.4,4.8,'center');
+    fitRect(p,v.email,314.0,552.5,136.1,11.7,6.0,4.5,'center');
+    fitRect(p,`${day} de ${month}`,403.6,285.1,82.3,13.6,6.7,4.8,'center');
   }
 
-  // HOJA 3 - CAJA DE PENSIONES MILITAR POLICIAL
+  // HOJA 3 — CAJA DE PENSIONES MILITAR POLICIAL.
   {
     const p=doc.getPage(2);
-    fit(p,full,93,588,230,7.5,5.0);
-    fit(p,v.cargo,344,588,85,6.8,4.8);
-    fit(p,dni,157,572,58,7.0,5.0);
-    fit(p,cip,255,572,65,7.0,5.0);
-    fit(p,codofin,366,572,70,7.0,5.0);
-    fit(p,geo,330,556,155,6.0,4.5);
-    fit(p,v.cel,395,540,80,6.6,4.8);
-    fit(p,v.email,300,540,185,6.0,4.5);
-    // Firma: mismo cuerpo proporcional al documento y sin recorte.
-    fitCenter(p,full,300,365,160,7.2,5.0);
-    fitCenter(p,dni,345,344,85,6.8,5.0);
-    fit(p,dateFull,306,392,180,7.0,5.0);
+    fitRect(p,full,109.3,585.8,214.5,15.9,7.0,5.0,'center');
+    fitRect(p,v.cargo,355.0,585.8,65.7,18.8,6.6,4.8,'center');
+    fitRect(p,dni,152.8,569.5,68.9,13.6,6.6,4.8,'center');
+    fitRect(p,cip,257.0,569.0,52.5,13.6,6.6,4.8,'center');
+    fitRect(p,codofin,385.5,570.7,61.7,13.2,6.4,4.8,'center');
+    fitRect(p,v.addr,92.3,553.8,188.6,12.8,6.0,4.6,'center');
+    fitRect(p,geo,378.0,552.6,88.1,14.1,5.6,4.4,'center');
+    fitRect(p,v.cel,186.9,537.5,78.0,11.8,6.0,4.6,'center');
+    fitRect(p,v.email,350.2,538.4,171.4,10.9,5.8,4.4,'center');
+    fitRect(p,dateFull,341.8,395.8,116.4,11.9,6.7,4.8,'center');
+    fitRect(p,full,299.1,352.3,157.3,12.5,6.8,4.8,'center');
+    fitRect(p,dni,368.9,341.6,87.5,11.1,6.5,4.8,'center');
   }
 
   // HOJA 4 - autorización / datos del convenio.
@@ -14998,56 +15003,55 @@ function applyPnpFinalFixes(doc,v){
     fitCenter(p,v.dep||'LIMA',265.3,675.5,65.3,6.8,4.8);
   }
 
-  // HOJA 5 - formato con líneas estáticas.
+  // HOJA 5 — FORMATO DE SOLICITUD DE AUTORIZACIÓN.
+  // Se usan las posiciones reales de los widgets; no se escriben valores en
+  // las etiquetas ni sobre las líneas de otras filas.
   {
     const p=doc.getPage(4);
-    fit(p,full,125,744,415,10.0,5.5);
-    fit(p,v.cargo,104,675,140,9.0,5.0);
-    fit(p,v.c?.convenio||'FONBIEPOL - PNP',285,725,160,8.2,5.0);
-    fit(p,cip,90,707,105,8.4,5.0);
-    fit(p,dni,385,707,105,8.4,5.0);
-    fit(p,v.addr,150,690,335,7.8,4.8);
-    fit(p,v.dist,110,672,150,7.5,4.8);
-    fit(p,v.prov,285,672,150,7.5,4.8);
-    fit(p,v.cel,340,654,100,7.5,4.8);
-    fit(p,v.email,385,636,190,7.0,4.6);
-    fit(p,v.day,334,380,34,7.0,4.8);
-    fit(p,v.month,388,380,98,7.0,4.8);
-    fitCenter(p,full,110,145,210,7.5,5.0);
-    fitCenter(p,dni,110,129,110,7.0,5.0);
+    fitRect(p,full,123.3,717.2,382.6,14.0,7.8,5.2,'center');
+    fitRect(p,v.cargo,259.2,702.2,163.1,14.1,7.0,4.8,'center');
+    fitRect(p,convention,83.1,689.4,156.3,14.1,6.4,4.8,'center');
+    fitRect(p,cip,327.6,688.2,120.3,14.1,6.8,4.8,'center');
+    fitRect(p,v.addr,83.2,662.1,404.8,12.0,6.8,4.8,'left');
+    fitRect(p,v.dist,116.8,649.0,149.4,12.3,6.6,4.8,'center');
+    fitRect(p,v.prov,335.0,649.5,150.9,11.9,6.6,4.8,'center');
+    fitRect(p,v.cel,354.8,634.6,119.8,14.4,6.6,4.8,'center');
+    fitRect(p,v.email,134.6,621.6,194.7,10.7,6.2,4.6,'center');
+    fitRect(p,dni,82.8,675.2,118.4,12.2,6.6,4.8,'center');
+    fitRect(p,day,111.0,302.7,30.1,17.2,6.6,4.8,'center');
+    fitRect(p,month,158.0,303.2,125.7,16.9,6.6,4.8,'center');
+    fitRect(p,dni,146.1,182.3,88.1,16.9,6.6,4.8,'center');
   }
 
-  // HOJA 6 - misma regla: no tapar líneas ni campos; reducir tipografía cuando sea necesario.
+  // HOJA 6 — FORMATO DE AUTORIZACIÓN A LA CAJA DE PENSIONES.
   {
     const p=doc.getPage(5);
-    fit(p,full,92,695,420,9.2,5.2);
-    fit(p,v.cargo,92,678,125,8.0,5.0);
-    fit(p,v.c?.convenio||'FONBIEPOL - PNP',230,678,220,7.5,4.8);
-    fit(p,dni,92,661,145,7.8,5.0);
-    fit(p,cip,92,644,195,7.8,5.0);
-    fit(p,v.addr,105,627,350,7.4,4.8);
-    fit(p,v.dist,345,627,115,7.0,4.6);
-    fit(p,v.prov,145,610,150,7.0,4.6);
-    fit(p,v.cel,165,592,95,7.0,4.6);
-    fit(p,v.email,330,592,190,6.8,4.5);
-    // Fecha en la línea impresa, no en la parte superior ni inferior.
-    fit(p,dateFull,276,234,245,7.4,5.0);
-    // Nombre y DNI de la firma, dentro de sus líneas y con ajuste proporcional.
-    fitCenter(p,full,88,118,145,7.2,5.0);
-    fitCenter(p,dni,88,102,95,6.8,5.0);
+    fitRect(p,full,107.6,705.6,382.6,14.0,7.8,5.2,'center');
+    fitRect(p,v.cargo,122.3,690.0,99.9,14.1,6.8,4.8,'center');
+    fitRect(p,convention,268.5,689.9,143.7,15.4,6.5,4.6,'center');
+    fitRect(p,cip,116.8,673.6,160.8,16.5,6.8,4.8,'center');
+    fitRect(p,dni,324.6,675.3,174.4,12.9,6.8,4.8,'center');
+    fitRect(p,v.addr,167.4,660.4,156.7,14.2,6.5,4.8,'center');
+    fitRect(p,v.dist,383.4,658.9,114.1,13.7,6.2,4.6,'center');
+    fitRect(p,v.prov,155.6,645.3,89.3,13.8,6.2,4.6,'center');
+    fitRect(p,v.cel,127.2,630.1,119.8,14.4,6.2,4.6,'center');
+    fitRect(p,v.email,346.9,630.1,168.8,13.1,6.0,4.5,'center');
+    fitRect(p,day,326.9,278.5,30.5,16.4,6.6,4.8,'center');
+    fitRect(p,month,372.8,279.6,71.2,16.7,6.6,4.8,'center');
+    fitRect(p,dni,129.1,144.2,92.4,15.0,6.6,4.8,'center');
   }
 
-  // HOJA 7 - no agregar el rótulo "PRESTAMO POR CONVENIO".
-  // Se conserva exactamente el texto base de la plantilla.
+  // HOJA 7 — FORMATO N.º 03: SOLICITUD DE DESISTIMIENTO.
   {
     const p=doc.getPage(6);
-    fit(p,full,98,704,360,10.2,5.5);
-    fit(p,v.cargo,176,686,125,8.8,5.0);
-    fit(p,v.c?.convenio||'FONBIEPOL - PNP',305,686,190,8.0,4.8);
-    fit(p,dni,245,668,90,8.2,5.0);
-    fit(p,cip,375,668,110,8.2,5.0);
-    fit(p,v.addr,180,650,340,7.8,4.8);
-    fit(p,geo,300,632,220,7.0,4.6);
+    fitRect(p,v.cargo,198.9,574.5,114.2,13.2,6.8,4.8,'center');
+    fitRect(p,full,106.4,554.3,412.3,15.7,7.6,5.0,'center');
+    fitRect(p,dni,227.5,535.0,131.0,14.4,6.8,4.8,'center');
+    fitRect(p,cip,394.4,535.8,124.3,13.6,6.8,4.8,'center');
+    fitRect(p,v.addr,214.8,516.5,303.9,11.5,6.5,4.8,'center');
+    fitRect(p,geo,283.4,497.1,234.9,11.5,6.2,4.6,'center');
+    fitRect(p,day,357.5,303.5,28.5,12.3,6.6,4.8,'center');
+    fitRect(p,month,412.1,303.2,68.0,12.8,6.6,4.8,'center');
   }
 }
 
@@ -15081,7 +15085,7 @@ async function generateDXP(){
   const out=await doc.save({useObjectStreams:false,addDefaultPage:false});
   const c=selectedConvention()||{}; const safe=(c.convenio||key).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); const dni=(v.dni||'SIN_DNI').replace(/\D/g,'');
   const blob=new Blob([out],{type:'application/pdf'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`DXP_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`DXP v5.97 generado: ${key}.`,'ok');
+  status(`DXP v${APP_VERSION} generado: ${key}.`,'ok');
  }catch(e){console.error(e);status(e.message||'No se pudo generar el DXP.','error');}
 }
 function cargarDatosPrueba(){
@@ -15208,8 +15212,8 @@ initDXPUI();
 prepare();
 if (typeof APP_VERSION !== 'undefined') { const vn = document.getElementById('version-number'); if (vn) vn.textContent = 'v' + APP_VERSION; const tv=document.title; if(!tv.includes('v'+APP_VERSION)) document.title='MCA Cartas Poder y DXP · v'+APP_VERSION; }
 </script>
-<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.97">
-  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.97</strong>
+<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.98">
+  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.98</strong>
 </footer>
 
 </body>
