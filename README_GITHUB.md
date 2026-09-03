@@ -1,39 +1,12 @@
-# MasterCalculadora v5.91 — instalación en GitHub Pages
+# MCA Cartas Poder y DXP — v5.89
 
-## IMPORTANTE
-Sube **TODO EL CONTENIDO de esta carpeta**, no solo `index.html`.
+Versión actualizada del generador DXP y Cartas Poder.
 
-La aplicación usa plantillas externas para evitar que `index.html` sea demasiado pesado. Debe quedar exactamente así:
+Incluye las plantillas PDF de Ejército, Marina y PNP, con correcciones de posicionamiento específicas para DXP Marina y actualización de la versión del sistema.
 
-```text
-index.html
-EJERCITO.pdf
-MARINA.pdf
-PNP.pdf
-assets/
-  pdf/
-  dxp/
-  img/
-  data/
-```
+**Versión:** v5.89
 
-En especial, la carpeta `assets/dxp/` debe contener todas las plantillas DXP:
-- ESSALUD_NEW.pdf
-- ESSALUD_BUY.pdf
-- MARINA.pdf
-- MIDAGRI.pdf
-- MINISTERIO_PUBLICO.pdf
-- FAP.pdf
-- SUB_CAFAE.pdf
-- GENERAL.pdf
-- RENIEC.pdf
-- PODER_JUDICIAL.pdf
-- HOSPITAL.pdf
-- EJERCITO.pdf
-- PNP.pdf
 
-### Corrección v5.91
-Las plantillas DXP ahora se cargan **bajo demanda**. Una plantilla DXP faltante ya no bloquea la carga inicial de toda la página. Si se intenta generar un DXP cuyo archivo no está en GitHub, el mensaje indicará la ruta exacta que falta.
+## v5.89 – Optimización de GitHub Pages
 
-### GitHub Pages
-En el repositorio, `index.html` debe estar en la raíz y `assets` debe estar también en la raíz. Respeta mayúsculas/minúsculas en nombres y carpetas.
+El index.html fue aligerado: los PDF, logos y recursos rasterizados ahora se cargan desde `assets/` mediante rutas relativas. Esto evita incrustar decenas de MB dentro del HTML y facilita la publicación en GitHub Pages.
