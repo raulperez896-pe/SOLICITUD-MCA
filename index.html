@@ -109,9 +109,9 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 .dxp-card .section-title{margin-bottom:8px}.dxp-extra-note{grid-column:1/-1;padding:10px 12px;border-radius:7px;background:#eef6fb;color:#24537b;font-size:12px}
 </style>
-<meta name="build-version" content="v5.98">
-<meta name="application-version" content="v5.98">
-<meta name="build-id" content="v5.98-20260902">
+<meta name="build-version" content="v5.99">
+<meta name="application-version" content="v5.99">
+<meta name="build-id" content="v5.99-20260902">
 </head>
 <body>
 <header class="topbar">
@@ -13081,27 +13081,51 @@ async function loadPDFLib(){
  PDFLibLoaded=false;
  throw new Error("No se pudo cargar la librería PDF desde los servidores disponibles. Revisa Internet o si tu red bloquea CDN.");
 }
-async function loadExternalAssets(){
-  const base="assets/";
-  const files={
-    PDF64:"pdf/PDF_CON_SEGURO.pdf",
-    PDF64_SIN_SEGURO:"pdf/PDF_SIN_SEGURO.pdf",
-    DPS64:"pdf/DPS.pdf",
-    FFAA_DPS64:"pdf/FFAA_DPS.pdf",
-    PNP_DPS64:"pdf/PNP_DPS.pdf",
-    CARTA_SUBROGACION64:"pdf/CARTA_SUBROGACION.pdf",
-    CARTA_PODER_ESSALUD64:"pdf/CARTA_PODER_ESSALUD.pdf",
-    CARTA_PODER_MGP64:"pdf/CARTA_PODER_MGP.pdf",
-    CARTA_PODER_EJERCITO64:"pdf/CARTA_PODER_EJERCITO.pdf",
-    CARTA_PODER_GENERAL64:"pdf/CARTA_PODER_GENERAL.pdf",
-    CARTA_PODER_PNP64:"pdf/CARTA_PODER_PNP.pdf"
-  };
-  const entries=Object.entries(files);
-  const loaded=await Promise.all(entries.map(async([key,path])=>[key,new Uint8Array(await (await fetch(base+path,{cache:"no-store"})).arrayBuffer())]));
-  loaded.forEach(([key,value])=>window[key]=value);
-  // CARTA_RASTER_PAGES se carga bajo demanda para no bloquear la preparación inicial de la página.
-
+async function loadAssetBytes(path, label){
+  const url=new URL('assets/'+path, document.baseURI).href;
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok) throw new Error('No se pudo cargar '+label+' (HTTP '+r.status+'). Ruta: '+url);
+  const bytes=new Uint8Array(await r.arrayBuffer());
+  const header=new TextDecoder().decode(bytes.slice(0,8));
+  if(!header.startsWith('%PDF-')){
+    const preview=new TextDecoder().decode(bytes.slice(0,80)).replace(/\s+/g,' ').slice(0,80);
+    throw new Error(label+' no es un PDF válido. La respuesta no contiene cabecera %PDF-. Respuesta inicial: '+preview);
+  }
+  return bytes;
 }
+async function ensureCorePdfAssets(){
+  if(!PDF64) PDF64=await loadAssetBytes('pdf/PDF_CON_SEGURO.pdf','PDF_CON_SEGURO');
+  if(!PDF64_SIN_SEGURO) PDF64_SIN_SEGURO=await loadAssetBytes('pdf/PDF_SIN_SEGURO.pdf','PDF_SIN_SEGURO');
+  return {PDF64,PDF64_SIN_SEGURO};
+}
+async function ensureDpsAsset(type){
+  const map={PNP:['PNP_DPS64','pdf/PNP_DPS.pdf','plantilla DPS PNP'],FFAA:['FFAA_DPS64','pdf/FFAA_DPS.pdf','plantilla DPS FFAA'],GENERAL:['DPS64','pdf/DPS.pdf','plantilla DPS']};
+  const cfg=map[type]||map.GENERAL;
+  const key=cfg[0];
+  if(key==='PNP_DPS64' && !PNP_DPS64) PNP_DPS64=await loadAssetBytes(cfg[1],cfg[2]);
+  else if(key==='FFAA_DPS64' && !FFAA_DPS64) FFAA_DPS64=await loadAssetBytes(cfg[1],cfg[2]);
+  else if(key==='DPS64' && !DPS64) DPS64=await loadAssetBytes(cfg[1],cfg[2]);
+  return key==='PNP_DPS64'?PNP_DPS64:(key==='FFAA_DPS64'?FFAA_DPS64:DPS64);
+}
+async function ensureCartaAsset(key){
+  const map={
+    CARTA_SUBROGACION64:'pdf/CARTA_SUBROGACION.pdf',
+    CARTA_PODER_ESSALUD64:'pdf/CARTA_PODER_ESSALUD.pdf',
+    CARTA_PODER_MGP64:'pdf/CARTA_PODER_MGP.pdf',
+    CARTA_PODER_EJERCITO64:'pdf/CARTA_PODER_EJERCITO.pdf',
+    CARTA_PODER_GENERAL64:'pdf/CARTA_PODER_GENERAL.pdf',
+    CARTA_PODER_PNP64:'pdf/CARTA_PODER_PNP.pdf'
+  };
+  if(!map[key]) throw new Error('No existe recurso PDF configurado: '+key);
+  if(key==='CARTA_SUBROGACION64' && !CARTA_SUBROGACION64) CARTA_SUBROGACION64=await loadAssetBytes(map[key],key);
+  else if(key==='CARTA_PODER_ESSALUD64' && !CARTA_PODER_ESSALUD64) CARTA_PODER_ESSALUD64=await loadAssetBytes(map[key],key);
+  else if(key==='CARTA_PODER_MGP64' && !CARTA_PODER_MGP64) CARTA_PODER_MGP64=await loadAssetBytes(map[key],key);
+  else if(key==='CARTA_PODER_EJERCITO64' && !CARTA_PODER_EJERCITO64) CARTA_PODER_EJERCITO64=await loadAssetBytes(map[key],key);
+  else if(key==='CARTA_PODER_GENERAL64' && !CARTA_PODER_GENERAL64) CARTA_PODER_GENERAL64=await loadAssetBytes(map[key],key);
+  else if(key==='CARTA_PODER_PNP64' && !CARTA_PODER_PNP64) CARTA_PODER_PNP64=await loadAssetBytes(map[key],key);
+  return ({CARTA_SUBROGACION64,CARTA_PODER_ESSALUD64,CARTA_PODER_MGP64,CARTA_PODER_EJERCITO64,CARTA_PODER_GENERAL64,CARTA_PODER_PNP64})[key];
+}
+
 async function ensureCartaRasterPages(){
  if(CARTA_RASTER_PAGES && Object.keys(CARTA_RASTER_PAGES).length) return CARTA_RASTER_PAGES;
  const r=await fetch("assets/data/carta-raster-pages.json",{cache:"no-store"});
@@ -13114,16 +13138,13 @@ async function ensureCartaRasterPages(){
 
 async function prepare(){
  try{
-  await loadExternalAssets();
+  // Preparación ligera: NO descarga ni parsea PDFs al abrir la página.
+  // Cada recurso PDF se carga y valida únicamente cuando el usuario lo necesita.
   setupLogos();renderFields();setupPredictiveMasterFields();setupFuerzasIdentificacion();
   $("convenioSearch")?.addEventListener("input",updateFuerzasIdentificacion);
   $("convenio")?.addEventListener("change",()=>setTimeout(updateFuerzasIdentificacion,0));
-  populate();setupGeography();applyToday();status("Cargando motor PDF...");
-  pdfBytes=bytes64(PDF64);
-  await loadPDFLib();
-  const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
-  fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v5.98 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  populate();setupGeography();applyToday();
+  status(`Generador actualizado v5.99 · ${CONVENIOS.length} convenios · PDFs bajo demanda.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -13378,7 +13399,9 @@ async function generateDPS(){
   if(i==="")throw Error("Selecciona un convenio.");
   if($("tipoSeguro").value!=="CON SEGURO")throw Error("El DPS solo corresponde a operaciones CON SEGURO.");
   if(!$("modalidad").value)throw Error("Selecciona la modalidad del seguro.");
-  if(!PDFLibLoaded)throw Error("La librería PDF todavía no está disponible.");
+  await loadPDFLib();
+  const selectedDpsType = /PNP|FONBIEPOL/i.test(String((selectedConvention()||{}).convenio||'')) ? 'PNP' : (/MARINA|EJERCITO|FUERZA AEREA|FAP/i.test(String((selectedConvention()||{}).convenio||'')) ? 'FFAA' : 'GENERAL');
+  await ensureDpsAsset(selectedDpsType);
 
   applyToday();
   const now=new Date();
@@ -13649,7 +13672,8 @@ async function generateDPS(){
 async function generateCarta(){
  try{
   if(!isSubrogacion())throw Error("La Carta de Compra de Deuda solo corresponde a SUBROGADO o SUBROGADO + RENOVADO.");
-  if(!PDFLibLoaded)throw Error("La librería PDF todavía no está disponible.");
+  await loadPDFLib();
+  await ensureCartaAsset('CARTA_SUBROGACION64');
   const v=values();
   const loans=debtRows("loan"),cards=debtRows("card");
   const anyDebt=loans.length||cards.length;
@@ -13786,8 +13810,9 @@ async function generate(){
   if(!$("tipoOperacion").value)throw Error("Selecciona Tipo de operación.");
   if(!$("tipoSeguro").value)throw Error("Selecciona si es CON SEGURO o SIN SEGURO.");
   if($("tipoSeguro").value==="CON SEGURO" && !$("modalidad").value)throw Error("Selecciona la modalidad del seguro.");
-  if(!PDFLibLoaded)throw Error("La librería PDF todavía no está disponible.");
-  applyToday();
+  await loadPDFLib();
+  await ensureCorePdfAssets();
+  pdfBytes=PDF64;
   const now2=new Date();
   AUTO_VALUES["FECHA"]=String(now2.getDate()).padStart(2,"0")+String(now2.getMonth()+1).padStart(2,"0")+String(now2.getFullYear());
   AUTO_VALUES["DIA"]=String(now2.getDate()).padStart(2,"0");
@@ -14097,7 +14122,7 @@ function textPngDataUrl(text, pxSize=18, bold=false){
 async function generateCartasPoder(){
  try{
   if(!isSubrogacion()) throw Error("Las Cartas Poder solo corresponden a SUBROGADO o SUBROGADO + RENOVADO.");
-  if(!PDFLibLoaded) throw Error("La librería PDF todavía no está disponible.");
+  await loadPDFLib();
   const v=values();
   const loans=debtRows("loan");
   if(!loans.length) throw Error("Registra al menos un préstamo en Compra de Deuda.");
@@ -14294,11 +14319,11 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v5.98 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v5.99 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 
-/* ========================= DXP INTEGRATION v5.98 ========================= */
+/* ========================= DXP INTEGRATION v5.99 ========================= */
 const DXP_DOCS = {
   ESSALUD_NEW: 'DXP/DXP_ESSALUD_NUEVO.pdf',
   ESSALUD_BUY: 'DXP/DXP_ESSALUD_COMPRA_DEUDA.pdf',
@@ -15055,7 +15080,7 @@ async function generateDXP(){
   const out=await doc.save({useObjectStreams:false,addDefaultPage:false});
   const c=selectedConvention()||{}; const safe=(c.convenio||key).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); const dni=(v.dni||'SIN_DNI').replace(/\D/g,'');
   const blob=new Blob([out],{type:'application/pdf'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`DXP_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`DXP v5.98 generado: ${key}.`,'ok');
+  status(`DXP v5.99 generado: ${key}.`,'ok');
  }catch(e){console.error(e);status(e.message||'No se pudo generar el DXP.','error');}
 }
 function cargarDatosPrueba(){
@@ -15182,8 +15207,8 @@ initDXPUI();
 prepare();
 if (typeof APP_VERSION !== 'undefined') { const vn = document.getElementById('version-number'); if (vn) vn.textContent = 'v' + APP_VERSION; const tv=document.title; if(!tv.includes('v'+APP_VERSION)) document.title='MCA Cartas Poder y DXP · v'+APP_VERSION; }
 </script>
-<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.98">
-  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.98</strong>
+<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.99">
+  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.99</strong>
 </footer>
 
 </body>
