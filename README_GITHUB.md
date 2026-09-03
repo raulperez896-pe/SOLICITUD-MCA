@@ -1,4 +1,4 @@
-# MasterCalculadora v5.91 — instalación en GitHub Pages
+# MasterCalculadora v6.03 — instalación en GitHub Pages
 
 ## IMPORTANTE
 Sube **TODO EL CONTENIDO de esta carpeta**, no solo `index.html`.
@@ -32,7 +32,7 @@ En especial, la carpeta `assets/dxp/` debe contener todas las plantillas DXP:
 - EJERCITO.pdf
 - PNP.pdf
 
-### Corrección v5.91
+### Información v6.03
 Las plantillas DXP ahora se cargan **bajo demanda**. Una plantilla DXP faltante ya no bloquea la carga inicial de toda la página. Si se intenta generar un DXP cuyo archivo no está en GitHub, el mensaje indicará la ruta exacta que falta.
 
 ### GitHub Pages
