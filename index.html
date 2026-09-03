@@ -109,9 +109,9 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 .dxp-card .section-title{margin-bottom:8px}.dxp-extra-note{grid-column:1/-1;padding:10px 12px;border-radius:7px;background:#eef6fb;color:#24537b;font-size:12px}
 </style>
-<meta name="build-version" content="v6.00">
-<meta name="application-version" content="v6.00">
-<meta name="build-id" content="v6.00-20260902">
+<meta name="build-version" content="v6.01">
+<meta name="application-version" content="v6.01">
+<meta name="build-id" content="v6.01-20260903">
 </head>
 <body>
 <header class="topbar">
@@ -361,7 +361,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
 <script>
-const APP_VERSION = '6.00';
+const APP_VERSION = '6.01';
 /* Todo está embebido en este único HTML: convenios, logos y PDF. */
 const GEO=[
   {
@@ -13144,7 +13144,7 @@ async function prepare(){
   $("convenioSearch")?.addEventListener("input",updateFuerzasIdentificacion);
   $("convenio")?.addEventListener("change",()=>setTimeout(updateFuerzasIdentificacion,0));
   populate();setupGeography();applyToday();
-  status(`Generador actualizado v6.00 · ${CONVENIOS.length} convenios · PDFs bajo demanda.`,"ok");
+  status(`Generador actualizado v6.01 · ${CONVENIOS.length} convenios · PDFs bajo demanda.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -14319,11 +14319,11 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v6.00 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v6.01 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 
-/* ========================= DXP INTEGRATION v6.00 ========================= */
+/* ========================= DXP INTEGRATION v6.01 ========================= */
 const DXP_DOCS = {
   ESSALUD_NEW: 'DXP/DXP_ESSALUD_NUEVO.pdf',
   ESSALUD_BUY: 'DXP/DXP_ESSALUD_COMPRA_DEUDA.pdf',
@@ -14340,7 +14340,7 @@ const DXP_DOCS = {
   PNP: 'DXP/DXP_PNP.pdf'
 };
 const DXP_EMBEDDED = {};
-const DXP_EXTERNAL_PATHS = {"ESSALUD_NEW":"assets/dxp/ESSALUD_NEW.pdf","ESSALUD_BUY":"assets/dxp/ESSALUD_BUY.pdf","MARINA":"assets/dxp/MARINA.pdf","MIDAGRI":"assets/dxp/MIDAGRI.pdf","MINISTERIO_PUBLICO":"assets/dxp/MINISTERIO_PUBLICO.pdf","FAP":"assets/dxp/FAP.pdf","SUB_CAFAE":"assets/dxp/SUB_CAFAE.pdf","GENERAL":"assets/dxp/GENERAL.pdf","RENIEC":"assets/dxp/RENIEC.pdf","PODER_JUDICIAL":"assets/dxp/PODER_JUDICIAL.pdf","HOSPITAL":"assets/dxp/HOSPITAL.pdf","EJERCITO":"assets/dxp/EJERCITO.pdf","PNP":"PNP.pdf"};
+const DXP_EXTERNAL_PATHS = {"ESSALUD_NEW":"DXP_ESSALUD_NEW.pdf","ESSALUD_BUY":"DXP_ESSALUD_BUY.pdf","MARINA":"DXP_MARINA.pdf","MIDAGRI":"DXP_MIDAGRI.pdf","MINISTERIO_PUBLICO":"DXP_MINISTERIO_PUBLICO.pdf","FAP":"DXP_FAP.pdf","SUB_CAFAE":"DXP_SUB_CAFAE.pdf","GENERAL":"DXP_GENERAL.pdf","RENIEC":"DXP_RENIEC.pdf","PODER_JUDICIAL":"DXP_PODER_JUDICIAL.pdf","HOSPITAL":"DXP_HOSPITAL.pdf","EJERCITO":"DXP_EJERCITO.pdf","PNP":"DXP_PNP.pdf"};
 async function loadExternalDXPAssets(key){
   if(!key) throw new Error('No se especificó la plantilla DXP.');
   if(DXP_EMBEDDED[key]) return DXP_EMBEDDED[key];
@@ -15080,7 +15080,7 @@ async function generateDXP(){
   const out=await doc.save({useObjectStreams:false,addDefaultPage:false});
   const c=selectedConvention()||{}; const safe=(c.convenio||key).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); const dni=(v.dni||'SIN_DNI').replace(/\D/g,'');
   const blob=new Blob([out],{type:'application/pdf'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`DXP_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`DXP v6.00 generado: ${key}.`,'ok');
+  status(`DXP v6.01 generado: ${key}.`,'ok');
  }catch(e){console.error(e);status(e.message||'No se pudo generar el DXP.','error');}
 }
 function cargarDatosPrueba(){
@@ -15207,8 +15207,8 @@ initDXPUI();
 prepare();
 if (typeof APP_VERSION !== 'undefined') { const vn = document.getElementById('version-number'); if (vn) vn.textContent = 'v' + APP_VERSION; const tv=document.title; if(!tv.includes('v'+APP_VERSION)) document.title='MCA Cartas Poder y DXP · v'+APP_VERSION; }
 </script>
-<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v6.00">
-  MasterCalculadora · Generador de solicitud por convenio · <strong>v6.00</strong>
+<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v6.01">
+  MasterCalculadora · Generador de solicitud por convenio · <strong>v6.01</strong>
 </footer>
 
 </body>
