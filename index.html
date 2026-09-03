@@ -361,7 +361,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
 <script>
-const APP_VERSION = '5.95';
+const APP_VERSION = '5.96';
 /* Todo está embebido en este único HTML: convenios, logos y PDF. */
 const GEO=[
   {
@@ -14845,9 +14845,10 @@ function applyMarinaFinalFixes(doc,v){
   draw(p5,v.cel,271.4,500.0,105.1,14.0,7.6,5.4,'center');
   // No se coloca correo en hoja 5.
   // Fecha: respeta los tres espacios originales: LIMA, DÍA y MES.
-  draw(p5,'LIMA',260.64,370.0,61.2,14.0,7.8,5.8,'center');
-  draw(p5,v.day,331.76,370.0,40.50,14.0,7.8,5.8,'center');
-  draw(p5,v.month,383.83,370.0,100.60,14.0,7.8,5.4,'center');
+  // FECHA HOJA 5: bajar el bloque hasta la línea de fecha original.
+  draw(p5,'LIMA',260.64,315.0,61.2,14.0,7.8,5.8,'center');
+  draw(p5,v.day,331.76,315.0,40.50,14.0,7.8,5.8,'center');
+  draw(p5,v.month,383.83,315.0,100.60,14.0,7.8,5.4,'center');
   // DNI debajo de la firma.
   draw(p5,dni,380.2,232.0,95.0,14.0,7.8,5.4,'center');
 
@@ -14857,7 +14858,8 @@ function applyMarinaFinalFixes(doc,v){
   // Lugar y fecha dentro de la zona original de (LUGAR Y FECHA).
   const marinaPlace='LIMA';
   const marinaDate=`${marinaPlace}, ${v.day} de ${v.month} del ${v.year}`;
-  draw(p6,marinaDate,340.0,346.5,205.0,14.0,8.0,5.2,'center');
+  // FECHA HOJA 6: elevar ligeramente el texto para separarlo de la línea impresa.
+  draw(p6,marinaDate,340.0,358.0,205.0,14.0,8.0,5.2,'center');
   draw(p6,full,103.7,668.0,383.8,16.0,8.4,5.6,'center');
   draw(p6,cip,216.5,625.0,143.7,14.0,8.2,5.6,'center');
   draw(p6,dni,419.8,625.0,114.2,14.0,8.2,5.6,'center');
@@ -14872,10 +14874,12 @@ function applyMarinaFinalFixes(doc,v){
   draw(p7,v.dist,116.8,648.0,149.4,12.0,7.0,5.0,'center');
   draw(p7,v.prov,335.0,648.0,150.9,12.0,7.0,5.0,'center');
   // Contacto ligeramente por encima de las líneas originales.
-  draw(p7,v.cel,354.8,652.5,119.8,12.0,7.0,5.0,'center');
-  draw(p7,v.email,134.6,642.5,194.7,12.0,6.6,4.8,'center');
+  // CONTACTO HOJA 7: bajar teléfono y correo hasta las líneas impresas.
+  draw(p7,v.cel,354.8,634.0,119.8,12.0,7.0,5.0,'center');
+  draw(p7,v.email,134.6,621.0,194.7,12.0,6.6,4.8,'center');
   // El concepto queda ligeramente encima de la línea posterior a "por el concepto de".
-  draw(p7,'PRESTAMO POR CONVENIO',85.1,592.0,257.3,13.5,7.8,5.2,'center');
+  // CONCEPTO HOJA 7: segunda línea, debajo de 'por el concepto de', evitando superposición.
+  draw(p7,'PRESTAMO POR CONVENIO',85.1,578.0,257.3,13.5,7.8,5.2,'center');
   // Fecha sobre los dos espacios de la línea "Lima, ____ de ________ del 2026."
   draw(p7,v.day,111.0,306.0,30.1,13.5,8.0,5.8,'center');
   draw(p7,v.month,158.0,306.0,125.7,13.5,8.0,5.4,'center');
@@ -15149,8 +15153,8 @@ initDXPUI();
 prepare();
 if (typeof APP_VERSION !== 'undefined') { const vn = document.getElementById('version-number'); if (vn) vn.textContent = 'v' + APP_VERSION; const tv=document.title; if(!tv.includes('v'+APP_VERSION)) document.title='MCA Cartas Poder y DXP · v'+APP_VERSION; }
 </script>
-<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.95">
-  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.95</strong>
+<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.96">
+  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.96</strong>
 </footer>
 
 </body>
