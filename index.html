@@ -109,9 +109,9 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 
 .dxp-card .section-title{margin-bottom:8px}.dxp-extra-note{grid-column:1/-1;padding:10px 12px;border-radius:7px;background:#eef6fb;color:#24537b;font-size:12px}
 </style>
-<meta name="build-version" content="v5.91">
-<meta name="application-version" content="v5.91">
-<meta name="build-id" content="v5.91-20260902">
+<meta name="build-version" content="v5.93">
+<meta name="application-version" content="v5.93">
+<meta name="build-id" content="v5.93-20260902">
 </head>
 <body>
 <header class="topbar">
@@ -361,7 +361,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
 <script>
-const APP_VERSION = '5.91';
+const APP_VERSION = '5.92';
 /* Todo está embebido en este único HTML: convenios, logos y PDF. */
 const GEO=[
   {
@@ -13097,7 +13097,18 @@ async function loadExternalAssets(){
     CARTA_PODER_PNP64:"pdf/CARTA_PODER_PNP.pdf"
   };
   const entries=Object.entries(files);
-  const loaded=await Promise.all(entries.map(async([key,path])=>[key,new Uint8Array(await (await fetch(base+path,{cache:"no-store"})).arrayBuffer())]));
+  const loaded=await Promise.all(entries.map(async([key,path])=>{
+    const url=new URL(base+path,document.baseURI).href;
+    const r=await fetch(url,{cache:"no-store"});
+    if(!r.ok) throw new Error("No se pudo cargar "+key+" (HTTP "+r.status+"). Ruta: "+url);
+    const value=new Uint8Array(await r.arrayBuffer());
+    const header=new TextDecoder().decode(value.slice(0,8));
+    if(!header.startsWith("%PDF-")){
+      const preview=new TextDecoder().decode(value.slice(0,80)).replace(/\s+/g," ").trim();
+      throw new Error("El archivo "+key+" no es un PDF válido. Ruta: "+url+". Cabecera recibida: "+preview);
+    }
+    return [key,value];
+  }));
   loaded.forEach(([key,value])=>window[key]=value);
   // CARTA_RASTER_PAGES se carga bajo demanda para no bloquear la preparación inicial de la página.
 
@@ -13121,9 +13132,11 @@ async function prepare(){
   populate();setupGeography();applyToday();status("Cargando motor PDF...");
   pdfBytes=bytes64(PDF64);
   await loadPDFLib();
-  const d=await PDFLib.PDFDocument.load(pdfBytes),f=d.getForm();fieldNames=new Set(f.getFields().map(x=>x.getName()));
-  fieldMap=new Map(f.getFields().map(x=>[String(x.getName()).trim().toUpperCase(),x.getName()]));
-  status(`Generador actualizado v5.91 · ${CONVENIOS.length} convenios · ${fieldNames.size} campos del PDF disponibles.`,"ok");
+  // No se abre/parsing la plantilla principal durante el arranque. Esto evita que
+  // un problema puntual de PDF-lib bloquee toda la aplicación y, especialmente,
+  // permite generar DXP sin depender de que el PDF principal se pueda parsear al iniciar.
+  fieldNames=new Set(); fieldMap=new Map();
+  status(`Generador actualizado v5.93 · ${CONVENIOS.length} convenios · Plantillas PDF listas.`,"ok");
  }catch(e){console.error(e);status("Error al preparar la página: "+e.message,"error")}
 }
 function checkbox(f,n,on){if(!fieldNames.has(n))return;try{on?f.getCheckBox(n).check():f.getCheckBox(n).uncheck()}catch(e){}}
@@ -13794,6 +13807,8 @@ async function generate(){
   AUTO_VALUES["MES"]=String(now2.getMonth()+1).padStart(2,"0");
   const c=CONVENIOS[Number(i)];
   const seguroCon=$("tipoSeguro").value==="CON SEGURO";
+  if(seguroCon && !pdfBytes) throw Error("No está disponible la plantilla PDF_CON_SEGURO.");
+  if(!seguroCon && !PDF64_SIN_SEGURO) throw Error("No está disponible la plantilla PDF_SIN_SEGURO.");
   const templateBytes=seguroCon?pdfBytes:bytes64(PDF64_SIN_SEGURO);
   const d=await PDFLib.PDFDocument.load(templateBytes,{updateMetadata:false}),f=d.getForm();
   // MUY IMPORTANTE: cada plantilla tiene sus propios nombres de campos.
@@ -14294,11 +14309,11 @@ async function generateCartasPoder(){
   const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"}));
   const a=document.createElement("a");a.href=url;a.download=`Cartas_Poder_${safeConv||"CONVENIO"}_${safeDni}.pdf`;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`Cartas Poder v5.91 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
+  status(`Cartas Poder v5.93 generadas desde plantillas rasterizadas: ${debtLoans.length} juego(s) para ${templateName}.`,'ok');
  }catch(e){console.error(e);status(e.message||"No se pudieron generar las Cartas Poder.","error");}
 }
 
-/* ========================= DXP INTEGRATION v5.91 ========================= */
+/* ========================= DXP INTEGRATION v5.93 ========================= */
 const DXP_DOCS = {
   ESSALUD_NEW: 'DXP/DXP_ESSALUD_NUEVO.pdf',
   ESSALUD_BUY: 'DXP/DXP_ESSALUD_COMPRA_DEUDA.pdf',
@@ -14317,16 +14332,23 @@ const DXP_DOCS = {
 const DXP_EMBEDDED = {};
 const DXP_EXTERNAL_PATHS = {"ESSALUD_NEW":"assets/dxp/ESSALUD_NEW.pdf","ESSALUD_BUY":"assets/dxp/ESSALUD_BUY.pdf","MARINA":"assets/dxp/MARINA.pdf","MIDAGRI":"assets/dxp/MIDAGRI.pdf","MINISTERIO_PUBLICO":"assets/dxp/MINISTERIO_PUBLICO.pdf","FAP":"assets/dxp/FAP.pdf","SUB_CAFAE":"assets/dxp/SUB_CAFAE.pdf","GENERAL":"assets/dxp/GENERAL.pdf","RENIEC":"assets/dxp/RENIEC.pdf","PODER_JUDICIAL":"assets/dxp/PODER_JUDICIAL.pdf","HOSPITAL":"assets/dxp/HOSPITAL.pdf","EJERCITO":"assets/dxp/EJERCITO.pdf","PNP":"assets/dxp/PNP.pdf"};
 async function loadExternalDXPAssets(key){
-  // Carga bajo demanda: solo se solicita la plantilla DXP que realmente se va a generar.
-  // Esto evita que una plantilla faltante bloquee toda la aplicación al iniciar.
+  // Carga bajo demanda y valida que el recurso recibido sea realmente un PDF.
   if(key && DXP_EMBEDDED[key]) return DXP_EMBEDDED[key];
   const path=DXP_EXTERNAL_PATHS[key];
   if(!path) throw new Error("No existe una ruta configurada para la plantilla DXP "+key+".");
-  const r=await fetch(path,{cache:"no-store"});
+  const url=new URL(path, document.baseURI).href;
+  let r;
+  try { r=await fetch(url,{cache:"no-store"}); }
+  catch(e){ throw new Error("No se pudo acceder a la plantilla DXP "+key+". Ruta: "+url); }
   if(!r.ok){
-    throw new Error("No se pudo cargar la plantilla DXP "+key+" (HTTP "+r.status+"). Debes subir al repositorio la carpeta assets/dxp completa, incluyendo "+path+".");
+    throw new Error("No se pudo cargar la plantilla DXP "+key+" (HTTP "+r.status+"). Verifica que exista "+path+" dentro del repositorio.");
   }
   const bytes=new Uint8Array(await r.arrayBuffer());
+  const header=new TextDecoder().decode(bytes.slice(0,8));
+  if(!header.startsWith("%PDF-")){
+    const preview=new TextDecoder().decode(bytes.slice(0,100)).replace(/\s+/g," ").trim();
+    throw new Error("La plantilla DXP "+key+" no devolvió un PDF válido. Ruta: "+url+". Cabecera recibida: "+preview+". Sube la carpeta assets/dxp completa junto a index.html.");
+  }
   DXP_EMBEDDED[key]=bytes;
   return bytes;
 }
@@ -15006,7 +15028,7 @@ async function generateDXP(){
   const out=await doc.save({useObjectStreams:false,addDefaultPage:false});
   const c=selectedConvention()||{}; const safe=(c.convenio||key).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); const dni=(v.dni||'SIN_DNI').replace(/\D/g,'');
   const blob=new Blob([out],{type:'application/pdf'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`DXP_${safe}_${dni}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
-  status(`DXP v5.91 generado: ${key}.`,'ok');
+  status(`DXP v5.93 generado: ${key}.`,'ok');
  }catch(e){console.error(e);status(e.message||'No se pudo generar el DXP.','error');}
 }
 function cargarDatosPrueba(){
@@ -15133,8 +15155,8 @@ initDXPUI();
 prepare();
 if (typeof APP_VERSION !== 'undefined') { const vn = document.getElementById('version-number'); if (vn) vn.textContent = 'v' + APP_VERSION; const tv=document.title; if(!tv.includes('v'+APP_VERSION)) document.title='MCA Cartas Poder y DXP · v'+APP_VERSION; }
 </script>
-<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.91">
-  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.91</strong>
+<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.93">
+  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.93</strong>
 </footer>
 
 </body>
