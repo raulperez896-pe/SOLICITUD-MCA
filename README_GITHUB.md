@@ -1,12 +1,12 @@
-# MCA Cartas Poder y DXP — v5.88
+# MCA Cartas Poder y DXP — v5.89
 
 Versión actualizada del generador DXP y Cartas Poder.
 
 Incluye las plantillas PDF de Ejército, Marina y PNP, con correcciones de posicionamiento específicas para DXP Marina y actualización de la versión del sistema.
 
-**Versión:** v5.88
+**Versión:** v5.89
 
 
-## v5.88 – Optimización de GitHub Pages
+## v5.89 – Optimización de GitHub Pages
 
 El index.html fue aligerado: los PDF, logos y recursos rasterizados ahora se cargan desde `assets/` mediante rutas relativas. Esto evita incrustar decenas de MB dentro del HTML y facilita la publicación en GitHub Pages.
