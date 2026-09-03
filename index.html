@@ -361,7 +361,7 @@ input[readonly]{background:#f4f7f9;font-weight:700;color:#334e68}
 <section class="card"><div class="section-title">Estado</div><div id="status" class="status">Inicializando...</div></section>
 </main>
 <script>
-const APP_VERSION = '5.99';
+const APP_VERSION = '6.00';
 /* Todo está embebido en este único HTML: convenios, logos y PDF. */
 const GEO=[
   {
@@ -14949,7 +14949,7 @@ function applyPnpFinalFixes(doc,v){
     const p=doc.getPage(0);
     fitRect(p,full,182.65,259.0,262.3,16.0,8.0,5.0,'center');
     fitRect(p,dni,84.8,240.4,150.0,15.5,6.8,5.0,'center');
-    fitRect(p,dateFull,120.2,208.8,324.7,6.5,6.9,5.0,'center');
+    fitRect(p,dateFull,120.2,197.2,324.7,6.5,6.9,5.0,'center');
     fitRect(p,'FONBIEPOL',163.5,213.8,280.9,17.4,7.0,5.0,'center');
   }
 
@@ -14967,6 +14967,10 @@ function applyPnpFinalFixes(doc,v){
     fitRect(p,v.cel,187.8,552.0,80.1,11.8,6.4,4.8,'center');
     fitRect(p,v.email,314.0,552.5,136.1,11.7,6.0,4.5,'center');
     fitRect(p,`${day} de ${month}`,403.6,285.1,82.3,13.6,6.7,4.8,'center');
+    // Firma del titular: estos campos comparten nombre con los campos superiores,
+    // por lo que se vuelven a dibujar únicamente aquí después de limpiar duplicados.
+    fitRect(p,full,395.6,197.8,123.9,14.4,6.4,4.8,'center');
+    fitRect(p,dni,442.3,185.2,77.3,13.2,6.4,4.8,'center');
   }
 
   // HOJA 3 — CAJA DE PENSIONES MILITAR POLICIAL.
@@ -15215,8 +15219,8 @@ initDXPUI();
 prepare();
 if (typeof APP_VERSION !== 'undefined') { const vn = document.getElementById('version-number'); if (vn) vn.textContent = 'v' + APP_VERSION; const tv=document.title; if(!tv.includes('v'+APP_VERSION)) document.title='MCA Cartas Poder y DXP · v'+APP_VERSION; }
 </script>
-<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v5.99">
-  MasterCalculadora · Generador de solicitud por convenio · <strong>v5.99</strong>
+<footer id="app-version-footer" class="version-footer" aria-label="Versión de la aplicación" data-build="v6.00">
+  MasterCalculadora · Generador de solicitud por convenio · <strong>v6.00</strong>
 </footer>
 
 </body>
